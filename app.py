@@ -21,6 +21,8 @@ import bcrypt
 import jwt
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+from cryptography.hazmat.primitives import hashes
 from dotenv import load_dotenv
 from flask import (
     Flask, Response, abort, jsonify, make_response,
@@ -30,47 +32,88 @@ from flask import (
 load_dotenv()
 
 # ---------------------------------------------------------------------------
-# Encryption for stored emails
+# Password-derived encryption for stored emails
 # ---------------------------------------------------------------------------
-_ENCRYPTION_KEY: bytes = None
+# Each user has a random Data Encryption Key (DEK). The DEK is encrypted by a
+# key derived from the user's password (PBKDF2) and stored in the DB. After
+# login the decrypted DEK lives only in server memory (USER_DEKS). When the
+# server restarts, users must log in again to unlock their data.
+USER_DEKS: dict[int, bytes] = {}
 
 
-def _get_encryption_key() -> bytes:
-    global _ENCRYPTION_KEY
-    if _ENCRYPTION_KEY is None:
-        key_b64 = os.environ.get('ENCRYPTION_KEY')
-        if key_b64:
-            _ENCRYPTION_KEY = base64.urlsafe_b64decode(key_b64)
-        else:
-            # For development: generate and warn. In production ENCRYPTION_KEY must be set.
-            _ENCRYPTION_KEY = AESGCM.generate_key(bit_length=256)
-            print("=" * 60)
-            print("WARNING: ENCRYPTION_KEY not set. Generated a random key.")
-            print("Set this in .env to keep data readable across restarts:")
-            print("ENCRYPTION_KEY=" + base64.urlsafe_b64encode(_ENCRYPTION_KEY).decode())
-            print("=" * 60)
-        if len(_ENCRYPTION_KEY) != 32:
-            raise RuntimeError('ENCRYPTION_KEY must be 32 bytes (256 bits) after base64 decode')
-    return _ENCRYPTION_KEY
+def _derive_key(password: str, salt: bytes) -> bytes:
+    kdf = PBKDF2HMAC(
+        algorithm=hashes.SHA256(),
+        length=32,
+        salt=salt,
+        iterations=600_000,
+    )
+    return kdf.derive(password.encode('utf-8'))
 
 
-def encrypt_email_field(value: str | None) -> str | None:
+def _encrypt_dek(dek: bytes, password: str, salt: bytes) -> str:
+    key = _derive_key(password, salt)
+    aes = AESGCM(key)
+    nonce = secrets.token_bytes(12)
+    ct = aes.encrypt(nonce, dek, None)
+    return base64.urlsafe_b64encode(nonce + ct).decode().rstrip('=')
+
+
+def _decrypt_dek(ciphertext: str, password: str, salt: bytes) -> bytes:
+    key = _derive_key(password, salt)
+    aes = AESGCM(key)
+    pad = 4 - (len(ciphertext) % 4)
+    if pad != 4:
+        ciphertext += '=' * pad
+    data = base64.urlsafe_b64decode(ciphertext.encode())
+    nonce = data[:12]
+    ct = data[12:]
+    return aes.decrypt(nonce, ct, None)
+
+
+def _get_user_dek(user_id: int) -> bytes | None:
+    return USER_DEKS.get(user_id)
+
+
+def _set_user_dek(user_id: int, dek: bytes):
+    USER_DEKS[user_id] = dek
+
+
+def _clear_user_dek(user_id: int):
+    USER_DEKS.pop(user_id, None)
+
+
+def encrypt_email_field(value: str | None, user_id: int | None = None) -> str | None:
     if value is None:
         return None
-    key = _get_encryption_key()
-    aes = AESGCM(key)
+    dek = _get_user_dek(user_id) if user_id else None
+    if dek is None:
+        raise RuntimeError('Encryption key not available. User must log in.')
+    aes = AESGCM(dek)
     nonce = secrets.token_bytes(12)
     ct = aes.encrypt(nonce, value.encode('utf-8'), None)
     return base64.urlsafe_b64encode(nonce + ct).decode().rstrip('=')
 
 
-def decrypt_email_field(token: str | None) -> str | None:
+def _current_user_id() -> Optional[int]:
+    """Return current user id from session or CF Access. Does not create response side effects."""
+    user = current_user()
+    if user:
+        return user['id']
+    if CF_ACCESS_ENABLED:
+        user_id = _auto_login_from_cf_access()
+        if user_id:
+            return user_id
+    return None
+
+def decrypt_email_field(token: str | None, user_id: int | None = None) -> str | None:
     if token is None:
         return None
-    key = _get_encryption_key()
-    aes = AESGCM(key)
+    dek = _get_user_dek(user_id) if user_id else None
+    if dek is None:
+        return token
+    aes = AESGCM(dek)
     try:
-        # restore padding
         pad = 4 - (len(token) % 4)
         if pad != 4:
             token += '=' * pad
@@ -79,7 +122,6 @@ def decrypt_email_field(token: str | None) -> str | None:
         ct = data[12:]
         return aes.decrypt(nonce, ct, None).decode('utf-8')
     except Exception:
-        # If decryption fails, return original value (backwards compat)
         return token
 
 
@@ -215,6 +257,8 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT UNIQUE NOT NULL,
             password_hash TEXT NOT NULL,
+            dek_salt TEXT,
+            encrypted_dek TEXT,
             created_at TEXT DEFAULT CURRENT_TIMESTAMP
         );
 
@@ -311,29 +355,43 @@ def has_users() -> bool:
 
 
 def create_user(username: str, password: str) -> int:
+    """Create a new user and return the user id. Generates a random DEK encrypted by password."""
     pw_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+    dek = AESGCM.generate_key(bit_length=256)
+    salt = secrets.token_bytes(16)
+    encrypted_dek = _encrypt_dek(dek, password, salt)
     conn = get_db()
     cur = conn.execute(
-        "INSERT INTO users (username, password_hash) VALUES (?, ?)",
-        (username, pw_hash.decode('utf-8'))
+        "INSERT INTO users (username, password_hash, dek_salt, encrypted_dek) VALUES (?, ?, ?, ?)",
+        (username, pw_hash.decode('utf-8'), base64.urlsafe_b64encode(salt).decode(), encrypted_dek)
     )
     conn.commit()
     user_id = cur.lastrowid
     conn.close()
+    _set_user_dek(user_id, dek)
     return user_id
 
 
 def verify_user(username: str, password: str) -> Optional[int]:
+    """Verify username/password, decrypt DEK into memory, and return user_id or None."""
     conn = get_db()
     row = conn.execute(
-        "SELECT id, password_hash FROM users WHERE username = ?",
+        "SELECT id, password_hash, dek_salt, encrypted_dek FROM users WHERE username = ?",
         (username,)
     ).fetchone()
     conn.close()
     if not row:
         return None
     if bcrypt.checkpw(password.encode('utf-8'), row['password_hash'].encode('utf-8')):
-        return row['id']
+        user_id = row['id']
+        try:
+            salt = base64.urlsafe_b64decode(row['dek_salt'].encode())
+            dek = _decrypt_dek(row['encrypted_dek'], password, salt)
+            _set_user_dek(user_id, dek)
+        except Exception as e:
+            app.logger.error(f'Failed to decrypt DEK for user {user_id}: {e}')
+            return None
+        return user_id
     return None
 
 
@@ -589,6 +647,9 @@ def login_page():
 def logout():
     sid = request.cookies.get('session_id')
     if sid:
+        session = get_session(sid)
+        if session:
+            _clear_user_dek(session['user_id'])
         delete_session(sid)
     resp = make_response(redirect(url_for('login_page')))
     resp.delete_cookie('session_id')
@@ -684,14 +745,15 @@ def list_emails():
     params.extend([limit, offset])
     rows = conn.execute(sql, params).fetchall()
     conn.close()
+    user_id = _current_user_id()
     result = []
     for row in rows:
         d = dict(row)
-        d['sender_name'] = decrypt_email_field(d.get('sender_name'))
-        d['sender_email'] = decrypt_email_field(d.get('sender_email'))
-        d['recipient'] = decrypt_email_field(d.get('recipient'))
-        d['subject'] = decrypt_email_field(d.get('subject'))
-        d['preview'] = decrypt_email_field(d.get('preview'))
+        d['sender_name'] = decrypt_email_field(d.get('sender_name'), user_id)
+        d['sender_email'] = decrypt_email_field(d.get('sender_email'), user_id)
+        d['recipient'] = decrypt_email_field(d.get('recipient'), user_id)
+        d['subject'] = decrypt_email_field(d.get('subject'), user_id)
+        d['preview'] = decrypt_email_field(d.get('preview'), user_id)
         result.append(d)
     return jsonify(result)
 
@@ -707,14 +769,15 @@ def get_email(email_id):
     conn.close()
     if row is None:
         return jsonify({"error": "Email not found"}), 404
+    user_id = _current_user_id()
     d = dict(row)
-    d['sender_name'] = decrypt_email_field(d.get('sender_name'))
-    d['sender_email'] = decrypt_email_field(d.get('sender_email'))
-    d['recipient'] = decrypt_email_field(d.get('recipient'))
-    d['subject'] = decrypt_email_field(d.get('subject'))
-    d['preview'] = decrypt_email_field(d.get('preview'))
-    d['body_text'] = decrypt_email_field(d.get('body_text'))
-    d['body_html'] = decrypt_email_field(d.get('body_html'))
+    d['sender_name'] = decrypt_email_field(d.get('sender_name'), user_id)
+    d['sender_email'] = decrypt_email_field(d.get('sender_email'), user_id)
+    d['recipient'] = decrypt_email_field(d.get('recipient'), user_id)
+    d['subject'] = decrypt_email_field(d.get('subject'), user_id)
+    d['preview'] = decrypt_email_field(d.get('preview'), user_id)
+    d['body_text'] = decrypt_email_field(d.get('body_text'), user_id)
+    d['body_html'] = decrypt_email_field(d.get('body_html'), user_id)
     return jsonify(d)
 
 
@@ -768,6 +831,7 @@ def send_email():
         }
         result = resend.Emails.send(params)
         conn = get_db()
+        user_id = _current_user_id() or 1
         preview = (body or "")[:300]
         conn.execute(
             """INSERT INTO emails
@@ -778,12 +842,12 @@ def send_email():
                 result.get("id"),
                 "outbound",
                 "sent",
-                encrypt_email_field(FROM_NAME),
-                encrypt_email_field(FROM_EMAIL),
-                encrypt_email_field(to),
-                encrypt_email_field(subject),
-                encrypt_email_field(preview),
-                encrypt_email_field(body),
+                encrypt_email_field(FROM_NAME, user_id),
+                encrypt_email_field(FROM_EMAIL, user_id),
+                encrypt_email_field(to, user_id),
+                encrypt_email_field(subject, user_id),
+                encrypt_email_field(preview, user_id),
+                encrypt_email_field(body, user_id),
                 None,
                 now_iso(),
             ),
@@ -824,6 +888,7 @@ def inbound_webhook():
     spam = is_spam(parsed["subject"], body_text, parsed["sender_email"] or "")
     folder = "spam" if spam else "inbox"
 
+    user_id = _current_user_id() or 1
     preview = (body_text or "")[:300]
     conn.execute(
         """INSERT INTO emails
@@ -834,13 +899,13 @@ def inbound_webhook():
             parsed["resend_id"],
             parsed["direction"],
             folder,
-            encrypt_email_field(parsed["sender_name"]),
-            encrypt_email_field(parsed["sender_email"]),
-            encrypt_email_field(parsed["recipient"]),
-            encrypt_email_field(parsed["subject"]),
-            encrypt_email_field(preview),
-            encrypt_email_field(body_text or None),
-            encrypt_email_field(body_html or None),
+            encrypt_email_field(parsed["sender_name"], user_id),
+            encrypt_email_field(parsed["sender_email"], user_id),
+            encrypt_email_field(parsed["recipient"], user_id),
+            encrypt_email_field(parsed["subject"], user_id),
+            encrypt_email_field(preview, user_id),
+            encrypt_email_field(body_text or None, user_id),
+            encrypt_email_field(body_html or None, user_id),
             1 if spam else 0,
             parsed["created_at"],
         ),
@@ -1018,6 +1083,7 @@ def delete_contact(contact_id):
 @login_required
 def change_password():
     user = current_user()
+    user_id = user['id']
     data = request.json or {}
     current_pw = data.get("current_password") or ""
     new_pw = data.get("new_password") or ""
@@ -1025,11 +1091,27 @@ def change_password():
         return jsonify({"error": "Nové heslo musí mít alespoň 6 znaků"}), 400
     if not verify_user(user['username'], current_pw):
         return jsonify({"error": "Současné heslo je nesprávné"}), 401
+    # Re-encrypt DEK with new password
+    conn = get_db()
+    row = conn.execute("SELECT dek_salt, encrypted_dek FROM users WHERE id = ?", (user_id,)).fetchone()
+    conn.close()
+    try:
+        salt = base64.urlsafe_b64decode(row['dek_salt'].encode())
+        dek = _decrypt_dek(row['encrypted_dek'], current_pw, salt)
+        new_salt = secrets.token_bytes(16)
+        new_encrypted_dek = _encrypt_dek(dek, new_pw, new_salt)
+    except Exception as e:
+        app.logger.error(f'Failed to re-encrypt DEK during password change: {e}')
+        return jsonify({"error": "Chyba při změně šifrovacího klíče"}), 500
     new_hash = bcrypt.hashpw(new_pw.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
     conn = get_db()
-    conn.execute("UPDATE users SET password_hash = ? WHERE id = ?", (new_hash, user['id']))
+    conn.execute(
+        "UPDATE users SET password_hash = ?, dek_salt = ?, encrypted_dek = ? WHERE id = ?",
+        (new_hash, base64.urlsafe_b64encode(new_salt).decode(), new_encrypted_dek, user_id)
+    )
     conn.commit()
     conn.close()
+    _set_user_dek(user_id, dek)
     return jsonify({"status": "changed"})
 
 
