@@ -7,10 +7,9 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Adamec.pro Mail</title>
-  <link rel="stylesheet" href="/static/liquid-glass.css">
+  <link rel="stylesheet" href="/static/liquid-glass.css?v=1784145302">
 </head>
 <body>
-  <!-- Floating warm orbs for atmospheric depth -->
   <div class="bg-orb orb-1"></div>
   <div class="bg-orb orb-2"></div>
   <div class="bg-orb orb-3"></div>
@@ -23,18 +22,77 @@
         <h1 id="headerTitle">Inbox</h1>
         <div class="subtitle" id="headerSubtitle">Synchronizace…</div>
       </div>
+      <div class="header-actions">
+        <button class="menu-toggle" onclick="toggleMenu()">
+          <span class="icon">☰</span>
+        </button>
+      </div>
     </div>
 
-    <!-- Email List -->
+    <!-- Content -->
     <div class="content" id="content">
       <div id="emailList"></div>
     </div>
 
-    <!-- Floating Tab Bar — "Midnight Forge" style -->
+    <!-- Side menu drawer -->
+    <div class="menu-drawer" id="menuDrawer" onclick="if(event.target.id==='menuDrawer')closeMenu()">
+      <div class="menu-panel">
+        <div class="menu-header">
+          <div class="menu-user" id="menuUser">@</div>
+          <div>
+            <div class="menu-username" id="menuUsername">dominik</div>
+            <div class="menu-sub">Přihlášen</div>
+          </div>
+          <button class="menu-close" onclick="closeMenu()">×</button>
+        </div>
+
+        <div class="menu-section">
+          <div class="menu-section-title">Složky</div>
+          <button class="menu-item" data-folder="inbox" onclick="setFolder('inbox');closeMenu()">
+            <span class="icon">📥</span><span>Inbox</span><span class="badge" id="menuBadgeInbox">0</span>
+          </button>
+          <button class="menu-item" data-folder="starred" onclick="setFolder('starred');closeMenu()">
+            <span class="icon">⭐</span><span>Hvězdy</span><span class="badge" id="menuBadgeStarred">0</span>
+          </button>
+          <button class="menu-item" data-folder="sent" onclick="setFolder('sent');closeMenu()">
+            <span class="icon">📤</span><span>Odeslané</span>
+          </button>
+          <button class="menu-item" data-folder="spam" onclick="setFolder('spam');closeMenu()">
+            <span class="icon">🚫</span><span>Spam</span><span class="badge" id="menuBadgeSpam">0</span>
+          </button>
+          <button class="menu-item" data-folder="trash" onclick="setFolder('trash');closeMenu()">
+            <span class="icon">🗑️</span><span>Koš</span><span class="badge" id="menuBadgeTrash">0</span>
+          </button>
+          <div id="customFoldersList"></div>
+          <button class="menu-item-add" onclick="showNewFolder()">
+            <span class="icon">+</span><span>Nová složka</span>
+          </button>
+        </div>
+
+        <div class="menu-section">
+          <div class="menu-section-title">Adresář</div>
+          <button class="menu-item" onclick="openContacts()">
+            <span class="icon">👤</span><span>Kontakty</span>
+          </button>
+        </div>
+
+        <div class="menu-section">
+          <div class="menu-section-title">Účet</div>
+          <button class="menu-item" onclick="openSettings()">
+            <span class="icon">⚙️</span><span>Nastavení</span>
+          </button>
+          <button class="menu-item" onclick="document.getElementById('logoutForm').submit()">
+            <span class="icon">🚪</span><span>Odhlásit se</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <form id="logoutForm" method="post" action="/logout" style="display:none"></form>
+
+    <!-- Floating Tab Bar -->
     <div class="tab-bar-wrap">
       <nav class="tab-bar" id="tabBar">
         <div class="bar-fill"></div>
-        <div class="active-glow" id="activeGlow"></div>
         <button class="tab" data-folder="inbox" onclick="setFolder('inbox')">
           <span class="icon">📥</span>
           <span class="count" id="tabInboxCount"></span>
@@ -45,8 +103,8 @@
         <button class="tab compose" onclick="openComposer()">
           <span class="icon">✏️</span>
         </button>
-        <button class="tab" data-folder="sent" onclick="setFolder('sent')">
-          <span class="icon">📤</span>
+        <button class="tab" data-folder="spam" onclick="setFolder('spam')">
+          <span class="icon">🚫</span>
         </button>
         <button class="tab" onclick="syncEmails()">
           <span class="icon">🔄</span>
@@ -60,6 +118,7 @@
         <button onclick="closeReader()">←</button>
         <div class="spacer"></div>
         <button class="star-btn" id="readerStarBtn" onclick="toggleStarFromReader()">☆</button>
+        <button onclick="moveToTrash()">🗑️</button>
       </div>
       <div class="reader-scroll">
         <h2 id="rSubject"></h2>
@@ -68,7 +127,7 @@
       </div>
     </div>
 
-    <!-- Composer -->
+    <!-- Composer with autocomplete -->
     <div class="composer" id="composer">
       <div class="composer-top">
         <button onclick="closeComposer()">Zrušit</button>
@@ -76,9 +135,10 @@
         <button class="send-btn" onclick="sendEmail()">Odeslat</button>
       </div>
       <div class="form">
-        <div class="field">
+        <div class="field" style="position: relative;">
           <span class="prefix">Komu</span>
-          <input type="email" id="toField" placeholder="email@example.com" autocomplete="email">
+          <input type="email" id="toField" placeholder="email@example.com" autocomplete="email" oninput="onToInput()">
+          <div class="autocomplete" id="autocompleteList"></div>
         </div>
         <div class="field">
           <span class="prefix">Předmět</span>
@@ -88,8 +148,62 @@
       </div>
     </div>
 
+    <!-- Settings panel -->
+    <div class="side-panel" id="settingsPanel">
+      <div class="side-panel-content">
+        <div class="panel-top">
+          <button onclick="closeSettings()">←</button>
+          <h2>Nastavení</h2>
+          <div class="spacer"></div>
+        </div>
+        <div class="panel-body">
+          <h3>Účet</h3>
+          <div class="info-row"><span>Uživatel</span><span id="settingsUsername">-</span></div>
+
+          <h3>Změnit heslo</h3>
+          <div class="field">
+            <label>Současné heslo</label>
+            <input type="password" id="currentPassword" autocomplete="current-password">
+          </div>
+          <div class="field">
+            <label>Nové heslo (min 6 znaků)</label>
+            <input type="password" id="newPassword" autocomplete="new-password">
+          </div>
+          <button class="primary-btn" onclick="changePassword()">Změnit heslo</button>
+
+          <h3>Session</h3>
+          <p class="info-text">Budeš automaticky odhlášen po 15 minutách neaktivity.</p>
+
+          <button class="secondary-btn" onclick="document.getElementById('logoutForm').submit()">Odhlásit se</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contacts panel -->
+    <div class="side-panel" id="contactsPanel">
+      <div class="side-panel-content">
+        <div class="panel-top">
+          <button onclick="closeContacts()">←</button>
+          <h2>Kontakty</h2>
+          <div class="spacer"></div>
+        </div>
+        <div class="panel-body">
+          <button class="primary-btn" onclick="showNewContact()">+ Přidat kontakt</button>
+          <div class="search-box">
+            <input type="text" id="contactSearch" placeholder="Hledat..." oninput="loadContacts()">
+          </div>
+          <div id="contactsList"></div>
+        </div>
+      </div>
+    </div>
+
     <!-- Toast -->
     <div class="toast" id="toast"></div>
+
+    <!-- Modals for new contact, new folder, etc. -->
+    <div class="modal" id="modal">
+      <div class="modal-content" id="modalContent"></div>
+    </div>
   </div>
 
   <script>
@@ -98,6 +212,7 @@
     let currentEmailId = null;
     let currentEmails = [];
     let currentEmailData = null;
+    let customFolders = [];
     const FROM_EMAIL = '{{ from_email }}';
 
     // ---- DOM refs ----
@@ -106,9 +221,9 @@
     const composerEl = document.getElementById('composer');
     const toastEl = document.getElementById('toast');
     const tabBar = document.getElementById('tabBar');
-    const activeGlow = document.getElementById('activeGlow');
+    
 
-    // ---- Avatar colors (warm theme) ----
+    // ---- Avatar colors ----
     const AVATAR_COLORS = [
       'linear-gradient(135deg, #ff6b35, #c8431f)',
       'linear-gradient(135deg, #ff9558, #ff6b35)',
@@ -129,19 +244,33 @@
       const c = text.replace(/[^a-zA-Z0-9]/g, '');
       return (c[0] || text[0] || '?').toUpperCase();
     }
-
-    // ---- SSE ----
-    function connectSSE() {
-      const evt = new EventSource('/api/events');
-      evt.addEventListener('new_email', (e) => {
-        try {
-          const data = JSON.parse(e.data);
-          showToast('📬 ' + (data.subject || 'Nový e-mail'));
-          loadEmails();
-          loadStats();
-        } catch {}
-      });
-      evt.onerror = () => setTimeout(connectSSE, 3000);
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+    function stripHtml(html) {
+      if (!html) return '';
+      const tmp = document.createElement('div');
+      tmp.innerHTML = html;
+      return tmp.textContent || tmp.innerText || '';
+    }
+    function formatDate(dateStr) {
+      if (!dateStr) return '';
+      const d = new Date(dateStr);
+      if (isNaN(d)) return dateStr;
+      const now = new Date();
+      const diff = now - d;
+      if (diff < 86400000) return d.toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' });
+      if (diff < 604800000) return d.toLocaleDateString('cs-CZ', { weekday: 'short' });
+      return d.toLocaleDateString('cs-CZ', { day: '2-digit', month: '2-digit' });
+    }
+    function formatFullDate(dateStr) {
+      if (!dateStr) return '';
+      const d = new Date(dateStr);
+      if (isNaN(d)) return dateStr;
+      return d.toLocaleString('cs-CZ', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
     }
 
     // ---- Toast ----
@@ -153,26 +282,300 @@
       toastTimer = setTimeout(() => toastEl.className = 'toast', 2500);
     }
 
-    // ---- Active tab glow positioning ----
-    function positionActiveGlow(activeTab) {
-      if (!activeTab || !activeGlow) return;
-      const tabBarRect = tabBar.getBoundingClientRect();
-      const tabRect = activeTab.getBoundingClientRect();
-      const x = tabRect.left - tabBarRect.left + (tabRect.width - 52) / 2;
-      activeGlow.style.transform = `translateX(${x}px)`;
+    // ---- SSE ----
+    function connectSSE() {
+      const evt = new EventSource('/api/events');
+      evt.addEventListener('new_email', (e) => {
+        try {
+          const data = JSON.parse(e.data);
+          if (data.is_spam) {
+            showToast('🚫 Spam: ' + (data.subject || 'Nový'));
+          } else {
+            showToast('📬 ' + (data.subject || 'Nový e-mail'));
+          }
+          loadEmails();
+          loadStats();
+        } catch {}
+      });
+      evt.onerror = () => setTimeout(connectSSE, 3000);
+    }
+
+    // ---- Menu ----
+    function toggleMenu() {
+      document.getElementById('menuDrawer').classList.add('open');
+    }
+    function closeMenu() {
+      document.getElementById('menuDrawer').classList.remove('open');
+    }
+
+    // ---- Settings ----
+    function openSettings() {
+      closeMenu();
+      document.getElementById('settingsPanel').classList.add('open');
+    }
+    function closeSettings() {
+      document.getElementById('settingsPanel').classList.remove('open');
+    }
+    async function loadMe() {
+      try {
+        const res = await fetch('/api/me');
+        if (res.status === 401) {
+          window.location.href = '/login';
+          return;
+        }
+        const user = await res.json();
+        document.getElementById('menuUsername').textContent = '@' + user.username;
+        document.getElementById('menuUser').textContent = user.username[0].toUpperCase();
+        document.getElementById('settingsUsername').textContent = user.username;
+      } catch (e) {}
+    }
+    async function changePassword() {
+      const current_pw = document.getElementById('currentPassword').value;
+      const new_pw = document.getElementById('newPassword').value;
+      if (!current_pw || !new_pw) {
+        showToast('Vyplň obě hesla', 'error');
+        return;
+      }
+      try {
+        const res = await fetch('/api/change_password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ current_password: current_pw, new_password: new_pw })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Chyba');
+        showToast('✓ Heslo změněno');
+        document.getElementById('currentPassword').value = '';
+        document.getElementById('newPassword').value = '';
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    // ---- Contacts ----
+    function openContacts() {
+      closeMenu();
+      document.getElementById('contactsPanel').classList.add('open');
+      loadContacts();
+    }
+    function closeContacts() {
+      document.getElementById('contactsPanel').classList.remove('open');
+    }
+    async function loadContacts() {
+      const q = document.getElementById('contactSearch')?.value || '';
+      try {
+        const res = await fetch('/api/contacts?q=' + encodeURIComponent(q));
+        const contacts = await res.json();
+        if (!res.ok) throw new Error(contacts.error || 'Chyba');
+        const list = document.getElementById('contactsList');
+        if (contacts.length === 0) {
+          list.innerHTML = '<div class="empty">Žádné kontakty</div>';
+          return;
+        }
+        list.innerHTML = contacts.map(c => `
+          <div class="contact-item">
+            <div class="avatar" style="background: ${avatarColor(c.email)}">${escapeHtml(initial(c.name))}</div>
+            <div class="contact-info">
+              <div class="contact-name">${escapeHtml(c.name)}</div>
+              <div class="contact-email">${escapeHtml(c.email)}</div>
+            </div>
+            <button class="contact-action" onclick="deleteContact(${c.id})">🗑️</button>
+          </div>
+        `).join('');
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+    function showNewContact() {
+      showModal(`
+        <h2>Nový kontakt</h2>
+        <div class="field"><label>Jméno</label><input type="text" id="newContactName" autofocus></div>
+        <div class="field"><label>E-mail</label><input type="email" id="newContactEmail"></div>
+        <div class="field"><label>Poznámka (volitelně)</label><input type="text" id="newContactNotes"></div>
+        <div class="modal-actions">
+          <button class="cancel-btn" onclick="closeModal()">Zrušit</button>
+          <button class="primary-btn" onclick="createContact()">Uložit</button>
+        </div>
+      `);
+    }
+    async function createContact() {
+      const name = document.getElementById('newContactName').value;
+      const email = document.getElementById('newContactEmail').value;
+      const notes = document.getElementById('newContactNotes').value;
+      if (!name || !email) {
+        showToast('Vyplň jméno a e-mail', 'error');
+        return;
+      }
+      try {
+        const res = await fetch('/api/contacts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, notes })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Chyba');
+        showToast('✓ Kontakt uložen');
+        closeModal();
+        loadContacts();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+    async function deleteContact(id) {
+      if (!confirm('Smazat kontakt?')) return;
+      try {
+        await fetch('/api/contacts/' + id, { method: 'DELETE' });
+        loadContacts();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    // ---- Autocomplete in composer ----
+    let acTimer = null;
+    let acSelectedIdx = -1;
+    let acResults = [];
+    function onToInput() {
+      clearTimeout(acTimer);
+      const val = document.getElementById('toField').value;
+      if (val.length < 1) {
+        document.getElementById('autocompleteList').innerHTML = '';
+        return;
+      }
+      acTimer = setTimeout(() => fetchAutocomplete(val), 150);
+    }
+    async function fetchAutocomplete(q) {
+      try {
+        const res = await fetch('/api/contacts?q=' + encodeURIComponent(q));
+        acResults = await res.json();
+        renderAutocomplete();
+      } catch {}
+    }
+    function renderAutocomplete() {
+      const list = document.getElementById('autocompleteList');
+      if (acResults.length === 0) {
+        list.innerHTML = '';
+        return;
+      }
+      list.innerHTML = acResults.map((c, i) => `
+        <div class="ac-item" data-idx="${i}" onclick="selectContact(${i})">
+          <div class="ac-avatar" style="background: ${avatarColor(c.email)}">${escapeHtml(initial(c.name))}</div>
+          <div>
+            <div class="ac-name">${escapeHtml(c.name)}</div>
+            <div class="ac-email">${escapeHtml(c.email)}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+    function selectContact(i) {
+      const c = acResults[i];
+      if (!c) return;
+      document.getElementById('toField').value = c.email;
+      document.getElementById('autocompleteList').innerHTML = '';
+    }
+    // Keyboard nav for autocomplete
+    document.addEventListener('keydown', (e) => {
+      const list = document.getElementById('autocompleteList');
+      const items = list.querySelectorAll('.ac-item');
+      if (items.length === 0) return;
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        acSelectedIdx = Math.min(acSelectedIdx + 1, items.length - 1);
+        items.forEach((el, i) => el.classList.toggle('active', i === acSelectedIdx));
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        acSelectedIdx = Math.max(acSelectedIdx - 1, 0);
+        items.forEach((el, i) => el.classList.toggle('active', i === acSelectedIdx));
+      } else if (e.key === 'Enter' && acSelectedIdx >= 0) {
+        e.preventDefault();
+        selectContact(acSelectedIdx);
+        acSelectedIdx = -1;
+      } else if (e.key === 'Escape') {
+        list.innerHTML = '';
+        acSelectedIdx = -1;
+      }
+    });
+
+    // ---- Folders ----
+    async function loadFolders() {
+      try {
+        const res = await fetch('/api/folders');
+        const data = await res.json();
+        customFolders = data.custom || [];
+        const list = document.getElementById('customFoldersList');
+        list.innerHTML = customFolders.map(f => `
+          <button class="menu-item" data-custom-folder="${f.id}" onclick="setFolder('custom', ${f.id});closeMenu()">
+            <span class="icon" style="color:${f.color}">${f.icon}</span><span>${escapeHtml(f.name)}</span>
+            <span class="menu-delete" onclick="event.stopPropagation();deleteFolder(${f.id})">×</span>
+          </button>
+        `).join('');
+      } catch {}
+    }
+    function showNewFolder() {
+      showModal(`
+        <h2>Nová složka</h2>
+        <div class="field"><label>Název</label><input type="text" id="newFolderName" autofocus></div>
+        <div class="field"><label>Barva</label><input type="color" id="newFolderColor" value="#ff6b35"></div>
+        <div class="field"><label>Ikona</label>
+          <select id="newFolderIcon" style="width:100%;padding:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;color:#fff;">
+            <option>📁</option><option>📂</option><option>⭐</option><option>🔥</option><option>💼</option><option>🏠</option><option>📚</option><option>🎯</option>
+          </select>
+        </div>
+        <div class="modal-actions">
+          <button class="cancel-btn" onclick="closeModal()">Zrušit</button>
+          <button class="primary-btn" onclick="createFolder()">Vytvořit</button>
+        </div>
+      `);
+    }
+    async function createFolder() {
+      const name = document.getElementById('newFolderName').value;
+      const color = document.getElementById('newFolderColor').value;
+      const icon = document.getElementById('newFolderIcon').value;
+      if (!name) {
+        showToast('Zadej název', 'error');
+        return;
+      }
+      try {
+        const res = await fetch('/api/custom_folders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, color, icon })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Chyba');
+        showToast('✓ Složka vytvořena');
+        closeModal();
+        loadFolders();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+    async function deleteFolder(id) {
+      if (!confirm('Smazat složku?')) return;
+      try {
+        await fetch('/api/custom_folders/' + id, { method: 'DELETE' });
+        loadFolders();
+        if (currentCustomFolderId === id) setFolder('inbox');
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
     }
 
     // ---- Navigation ----
-    function setFolder(folder) {
+    let currentCustomFolderId = null;
+    function setFolder(folder, customFolderId) {
       currentFolder = folder;
+      currentCustomFolderId = customFolderId || null;
+      // Update tab bar
       document.querySelectorAll('.tab-bar .tab').forEach(el => el.classList.remove('active'));
       const active = document.querySelector(`.tab-bar .tab[data-folder="${folder}"]`);
       if (active) {
         active.classList.add('active');
-        positionActiveGlow(active);
       }
-      const titles = { inbox: 'Inbox', sent: 'Odeslané', starred: 'Hvězdy' };
-      document.getElementById('headerTitle').textContent = titles[folder] || folder;
+      const titles = { inbox: 'Inbox', sent: 'Odeslané', starred: 'Hvězdy', spam: 'Spam', trash: 'Koš', custom: 'Složka' };
+      const customName = customFolders.find(f => f.id === customFolderId)?.name;
+      const title = titles[folder] || customName || folder;
+      document.getElementById('headerTitle').textContent = title;
       loadEmails();
     }
 
@@ -181,7 +584,11 @@
       currentEmailId = null;
       currentEmailData = null;
     }
-    function openComposer() { composerEl.classList.add('open'); }
+    function openComposer() {
+      composerEl.classList.add('open');
+      document.getElementById('autocompleteList').innerHTML = '';
+      setTimeout(() => document.getElementById('toField').focus(), 100);
+    }
     function closeComposer() {
       composerEl.classList.remove('open');
       document.getElementById('toField').value = '';
@@ -189,17 +596,33 @@
       document.getElementById('bodyField').value = '';
     }
 
+    // ---- Modal ----
+    function showModal(html) {
+      document.getElementById('modalContent').innerHTML = html;
+      document.getElementById('modal').classList.add('open');
+    }
+    function closeModal() {
+      document.getElementById('modal').classList.remove('open');
+    }
+
     // ---- Load emails ----
     async function loadEmails() {
       let url;
       if (currentFolder === 'starred') {
-        url = '/api/emails?starred=1&direction=inbound';
+        url = '/api/emails?starred=1&direction=inbound&is_trash=0';
+      } else if (currentFolder === 'spam') {
+        url = '/api/emails?direction=inbound&is_spam=1&is_trash=0';
+      } else if (currentFolder === 'trash') {
+        url = '/api/emails?direction=inbound&is_trash=1';
+      } else if (currentFolder === 'custom' && currentCustomFolderId) {
+        url = `/api/emails?direction=inbound&is_trash=0&custom_folder_id=${currentCustomFolderId}`;
       } else {
-        url = `/api/emails?folder=${currentFolder}&direction=${currentFolder === 'sent' ? 'outbound' : 'inbound'}`;
+        url = `/api/emails?folder=${currentFolder}&direction=${currentFolder === 'sent' ? 'outbound' : 'inbound'}&is_trash=0&is_spam=0`;
       }
       listEl.innerHTML = '<div class="loading"><div class="spinner"></div>Načítání</div>';
       try {
         const res = await fetch(url);
+        if (res.status === 401) { window.location.href = '/login'; return; }
         const emails = await res.json();
         if (!res.ok) throw new Error(emails.error || 'Chyba');
         currentEmails = emails;
@@ -212,10 +635,11 @@
           const identifier = isSent ? (e.recipient || '') : (e.sender_email || e.sender_name || '?');
           const fromLabel = isSent ? (e.recipient || 'Neznámý') : (e.sender_name || e.sender_email || 'Neznámý');
           return `
-            <div class="email-card ${e.is_read ? '' : 'unread'} ${e.is_starred ? 'starred' : ''}" style="animation-delay: ${i * 0.04}s" onclick="openEmail(${e.id})">
+            <div class="email-card ${e.is_read ? '' : 'unread'} ${e.is_starred ? 'starred' : ''} ${e.is_spam ? 'spam' : ''}" style="animation-delay: ${i * 0.04}s" onclick="openEmail(${e.id})">
               <div class="card-fill"></div>
               <div class="card-glow"></div>
               ${e.is_starred ? '<span class="star">★</span>' : ''}
+              ${e.is_spam ? '<span class="spam-badge">SPAM</span>' : ''}
               <div class="content-row">
                 <div class="avatar" style="background: ${avatarColor(identifier)}">${escapeHtml(initial(identifier))}</div>
                 <div class="body">
@@ -236,7 +660,6 @@
       }
     }
 
-    // ---- Open email ----
     async function openEmail(id) {
       try {
         const res = await fetch(`/api/emails/${id}`);
@@ -249,8 +672,7 @@
         const identifier = isSent ? (e.recipient || '') : (e.sender_email || e.sender_name || '?');
         const from = e.sender_name || e.sender_email || 'Neznámý';
         const fromEmail = e.sender_email ? `<${e.sender_email}>` : '';
-        const metaBlock = document.getElementById('rMetaBlock');
-        metaBlock.innerHTML = `
+        document.getElementById('rMetaBlock').innerHTML = `
           <div class="avatar" style="background: ${avatarColor(identifier)}">${escapeHtml(initial(identifier))}</div>
           <div class="info">
             <div class="from">${escapeHtml(isSent ? e.recipient : from)}</div>
@@ -259,8 +681,9 @@
           <div class="time">${formatFullDate(e.created_at)}</div>
         `;
         document.getElementById('rBody').textContent = e.body_text || stripHtml(e.body_html) || '(prázdná zpráva)';
-        document.getElementById('readerStarBtn').textContent = e.is_starred ? '★' : '☆';
-        document.getElementById('readerStarBtn').classList.toggle('active', e.is_starred);
+        const starBtn = document.getElementById('readerStarBtn');
+        starBtn.textContent = e.is_starred ? '★' : '☆';
+        starBtn.classList.toggle('active', e.is_starred);
         readerEl.classList.add('open');
         loadEmails();
         loadStats();
@@ -269,7 +692,6 @@
       }
     }
 
-    // ---- Star toggle ----
     async function toggleStarFromReader() {
       if (!currentEmailId) return;
       const current = currentEmails.find(e => e.id === currentEmailId);
@@ -291,7 +713,19 @@
       }
     }
 
-    // ---- Send email ----
+    async function moveToTrash() {
+      if (!currentEmailId) return;
+      try {
+        await fetch(`/api/emails/${currentEmailId}`, { method: 'DELETE' });
+        showToast('✓ Přesunuto do koše');
+        closeReader();
+        loadEmails();
+        loadStats();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
     async function sendEmail() {
       const payload = {
         to: document.getElementById('toField').value,
@@ -336,49 +770,39 @@
     async function loadStats() {
       try {
         const res = await fetch('/api/stats');
+        if (res.status === 401) { window.location.href = '/login'; return; }
         const s = await res.json();
-        document.getElementById('headerSubtitle').textContent =
-          s.unread ? `${s.unread} nepřečtených · ${s.inbound} celkem` : `${s.inbound} celkem`;
+        const sub = [];
+        if (s.unread) sub.push(`${s.unread} nepřečtených`);
+        if (s.spam) sub.push(`${s.spam} spam`);
+        sub.push(`${s.inbound} celkem`);
+        document.getElementById('headerSubtitle').textContent = sub.join(' · ');
         document.getElementById('tabInboxCount').textContent = s.unread || '';
+        document.getElementById('menuBadgeInbox').textContent = s.unread || '';
+        document.getElementById('menuBadgeStarred').textContent = s.starred || '';
+        document.getElementById('menuBadgeSpam').textContent = s.spam || '';
+        document.getElementById('menuBadgeTrash').textContent = s.trash || '';
       } catch (e) {}
-    }
-
-    // ---- Helpers ----
-    function escapeHtml(text) {
-      if (!text) return '';
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
-    }
-    function stripHtml(html) {
-      if (!html) return '';
-      const tmp = document.createElement('div');
-      tmp.innerHTML = html;
-      return tmp.textContent || tmp.innerText || '';
-    }
-    function formatDate(dateStr) {
-      if (!dateStr) return '';
-      const d = new Date(dateStr);
-      if (isNaN(d)) return dateStr;
-      const now = new Date();
-      const diff = now - d;
-      if (diff < 86400000) return d.toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' });
-      if (diff < 604800000) return d.toLocaleDateString('cs-CZ', { weekday: 'short' });
-      return d.toLocaleDateString('cs-CZ', { day: '2-digit', month: '2-digit' });
-    }
-    function formatFullDate(dateStr) {
-      if (!dateStr) return '';
-      const d = new Date(dateStr);
-      if (isNaN(d)) return dateStr;
-      return d.toLocaleString('cs-CZ', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
     }
 
     // ---- Init ----
     document.addEventListener('DOMContentLoaded', () => {
+      loadMe();
       loadEmails();
       loadStats();
+      loadFolders();
       connectSSE();
       setFolder('inbox');
+      // Activity tracker for session
+      let activityTimer = null;
+      ['click', 'keydown', 'mousemove', 'touchstart', 'scroll'].forEach(evt => {
+        document.addEventListener(evt, () => {
+          clearTimeout(activityTimer);
+          activityTimer = setTimeout(() => {
+            fetch('/api/me', { method: 'HEAD', cache: 'no-store' }).catch(() => {});
+          }, 60000);
+        }, { passive: true });
+      });
     });
   </script>
 </body>

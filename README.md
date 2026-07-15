@@ -62,3 +62,21 @@ iCloud SMTP vrací chybu `From address is not one of your addresses`. Řešení:
 - `requirements.txt` — Python závislosti
 - `start.sh` / `stop.sh` — spouštěcí skripty
 - `cloudflare-backup/` — záloha DNS
+
+
+## Cloudflare Access (Zero Trust)
+
+To secure the app behind Cloudflare Access:
+
+1. Go to Cloudflare Zero Trust Dashboard → Access → Applications
+2. Add an Application for 
+3. Set the **Audience Tag (AUD)** — copy it from application settings
+4. Configure your **Team Domain** (e.g. )
+5. Set identity provider (One-time PIN, Google, GitHub, etc.) and enable MFA if desired
+6. Update  on the server:
+
+
+
+7. Restart the server
+
+When enabled, Cloudflare handles authentication before the user ever reaches the app login page. The app validates the  header and creates a local session automatically.
