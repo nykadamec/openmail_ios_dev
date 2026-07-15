@@ -1,0 +1,520 @@
+/* ============================================================
+   Adamec.pro Mail — "Midnight Forge" original design
+   Inspired by liquid glass principles, but our own identity
+   ============================================================ */
+
+:root {
+  --bg: #0a0a0a;
+  --bg-2: #111111;
+  --bg-3: #161616;
+
+  --text: #f5f5f7;
+  --text-2: rgba(245, 245, 247, 0.65);
+  --text-3: rgba(245, 245, 247, 0.35);
+
+  --accent: #ff6b35;
+  --accent-2: #ff9558;
+  --accent-glow: rgba(255, 107, 53, 0.4);
+  --accent-deep: #c8431f;
+
+  --warm: #ffb088;
+  --cool: #4a90e2;
+
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.18);
+  --border-warm: rgba(255, 107, 53, 0.3);
+
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --tab-height: 68px;
+  --header-height: 76px;
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  margin: 0; padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  height: 100dvh; overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.01em;
+}
+
+/* === Layered background — warm gradient mesh === */
+body {
+  background:
+    radial-gradient(ellipse 80% 60% at 10% 0%, rgba(255, 107, 53, 0.18), transparent 50%),
+    radial-gradient(ellipse 70% 50% at 100% 100%, rgba(255, 149, 88, 0.12), transparent 60%),
+    radial-gradient(ellipse 100% 80% at 50% 50%, rgba(74, 144, 226, 0.04), transparent 70%),
+    var(--bg);
+  background-attachment: fixed;
+}
+
+/* === Animated grain texture overlay === */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 0;
+  opacity: 0.5;
+}
+
+/* === Floating warm orbs === */
+.bg-orb {
+  position: fixed; border-radius: 50%; filter: blur(80px);
+  pointer-events: none; z-index: 0;
+  animation: orbFloat 25s ease-in-out infinite;
+}
+.orb-1 {
+  width: 350px; height: 350px;
+  background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
+  top: -80px; left: -80px; opacity: 0.25;
+}
+.orb-2 {
+  width: 280px; height: 280px;
+  background: radial-gradient(circle, var(--cool) 0%, transparent 70%);
+  bottom: 20%; right: -60px; opacity: 0.15;
+  animation-delay: -8s; animation-duration: 30s;
+}
+.orb-3 {
+  width: 320px; height: 320px;
+  background: radial-gradient(circle, var(--warm) 0%, transparent 70%);
+  bottom: -100px; left: 30%; opacity: 0.18;
+  animation-delay: -16s; animation-duration: 35s;
+}
+
+@keyframes orbFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(40px, -30px) scale(1.1); }
+  66% { transform: translate(-30px, 40px) scale(0.9); }
+}
+
+/* ============================================================
+   App container
+   ============================================================ */
+#app {
+  display: flex; flex-direction: column;
+  height: 100dvh; max-width: 520px; margin: 0 auto;
+  position: relative; z-index: 1;
+}
+
+/* ============================================================
+   Header
+   ============================================================ */
+.header {
+  position: relative;
+  padding: calc(var(--safe-top) + 14px) 24px 16px;
+  display: flex; align-items: flex-start; justify-content: space-between;
+  flex-shrink: 0;
+  z-index: 5;
+}
+.header-content {
+  display: flex; flex-direction: column; gap: 4px;
+}
+.header .brand-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 0.65rem; font-weight: 600; letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 2px;
+}
+.header .brand-tag::before {
+  content: ''; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent-glow);
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+.header h1 {
+  font-size: 1.85rem; font-weight: 800; margin: 0;
+  letter-spacing: -0.04em; line-height: 1;
+  background: linear-gradient(135deg, #ffffff 0%, #ffb088 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.header .subtitle {
+  font-size: 0.75rem; color: var(--text-2);
+  font-weight: 500; margin-top: 4px;
+}
+.header-actions { display: flex; gap: 8px; align-items: center; }
+
+/* ============================================================
+   Email List
+   ============================================================ */
+.content {
+  flex: 1; overflow-y: auto; overflow-x: hidden;
+  padding: 4px 16px calc(var(--tab-height) + var(--safe-bottom) + 30px);
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  z-index: 2;
+}
+.content::-webkit-scrollbar { display: none; }
+
+/* === Email card — frosted glass with warm gradient border === */
+.email-card {
+  position: relative;
+  margin-bottom: 10px;
+  border-radius: 18px;
+  cursor: pointer;
+  transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1), box-shadow 0.3s;
+  isolation: isolate;
+  overflow: hidden;
+}
+.email-card::before {
+  content: '';
+  position: absolute; inset: 0;
+  border-radius: 18px;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(255, 107, 53, 0.4) 0%, rgba(255, 255, 255, 0.05) 50%, rgba(74, 144, 226, 0.2) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 3;
+  opacity: 0.6;
+  transition: opacity 0.3s;
+}
+.email-card:hover::before, .email-card.unread::before { opacity: 1; }
+.email-card.unread::before {
+  background: linear-gradient(135deg, rgba(255, 107, 53, 0.7) 0%, rgba(255, 149, 88, 0.3) 50%, rgba(74, 144, 226, 0.4) 100%);
+}
+.email-card .card-fill {
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%);
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  z-index: 1;
+  border-radius: 18px;
+}
+.email-card .card-glow {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 80% 50% at 0% 0%, rgba(255, 107, 53, 0.08), transparent 60%);
+  pointer-events: none; z-index: 1;
+  border-radius: 18px;
+  transition: opacity 0.3s;
+}
+.email-card.unread .card-glow { opacity: 1.5; }
+.email-card:active { transform: scale(0.985); }
+
+.email-card .content-row {
+  position: relative; z-index: 4;
+  display: flex; align-items: center; gap: 14px;
+  padding: 16px 18px;
+}
+.email-card .avatar {
+  width: 46px; height: 46px; border-radius: 14px;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 1rem; color: #fff;
+  position: relative;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.1) inset;
+}
+.email-card .body { flex: 1; min-width: 0; }
+.email-card .meta-row {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 4px;
+}
+.email-card .from-name {
+  font-size: 0.95rem; font-weight: 600;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  max-width: 75%;
+  color: var(--text);
+}
+.email-card.unread .from-name { color: #fff; font-weight: 700; }
+.email-card .time { font-size: 0.72rem; color: var(--text-3); font-weight: 500; white-space: nowrap; }
+.email-card .subject {
+  font-size: 0.88rem; font-weight: 500;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  margin-bottom: 3px;
+  color: var(--text);
+}
+.email-card .preview {
+  font-size: 0.8rem; color: var(--text-2);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  line-height: 1.3;
+}
+.email-card .unread-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--accent);
+  flex-shrink: 0;
+  box-shadow: 0 0 12px var(--accent-glow), 0 0 0 2px rgba(255, 107, 53, 0.2);
+  margin-left: -2px;
+}
+.email-card .star {
+  position: absolute; top: 18px; right: 16px;
+  color: var(--accent); font-size: 0.85rem;
+  z-index: 5;
+  text-shadow: 0 0 8px var(--accent-glow);
+}
+
+/* ============================================================
+   Floating Tab Bar — pill shape with warm glow
+   ============================================================ */
+.tab-bar-wrap {
+  position: fixed; bottom: calc(var(--safe-bottom) + 12px);
+  left: 50%; transform: translateX(-50%);
+  width: calc(100% - 20px); max-width: 480px;
+  z-index: 100;
+}
+.tab-bar {
+  position: relative;
+  height: var(--tab-height);
+  display: flex; align-items: center; justify-content: space-around;
+  padding: 6px;
+  border-radius: 30px;
+  isolation: isolate;
+  overflow: visible;
+}
+.tab-bar .bar-fill {
+  position: absolute; inset: 0;
+  background: rgba(20, 20, 22, 0.6);
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  border-radius: 30px;
+  border: 1px solid var(--border);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+  z-index: -1;
+}
+/* Active tab glow indicator */
+.tab-bar .active-glow {
+  position: absolute;
+  width: 44px; height: 44px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(255, 107, 53, 0.25), rgba(200, 67, 31, 0.15));
+  box-shadow: 0 0 0 1px rgba(255, 107, 53, 0.3) inset;
+  z-index: 0;
+  transform: translateX(-100px);
+  transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.2s;
+  opacity: 0;
+  pointer-events: none;
+}
+.tab-bar.has-active .active-glow { opacity: 1; }
+/* Hide glow when compose button is active (compose has its own gradient) */
+.tab-bar:has(.tab.compose.active) .active-glow { opacity: 0; }
+
+.tab {
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+  width: 52px; height: 52px;
+  background: none; border: none;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: color 0.25s, transform 0.2s;
+  -webkit-tap-highlight-color: transparent;
+  z-index: 2;
+.tab .icon { font-size: 1.4rem; line-height: 1; transition: transform 0.3s; }
+.tab.active { color: #fff; }
+.tab.active .icon { transform: scale(1.05); }
+.tab:active { transform: scale(0.9); }
+
+.tab .count {
+  position: absolute; top: 4px; right: 4px;
+  background: var(--accent); color: #fff;
+  font-size: 0.55rem; font-weight: 700;
+  min-width: 16px; height: 16px; line-height: 16px;
+  padding: 0 4px; border-radius: 8px;
+  text-align: center;
+  border: 1.5px solid rgba(20, 20, 22, 0.8);
+  z-index: 3;
+  box-shadow: 0 2px 8px rgba(255, 107, 53, 0.4);
+
+/* Compose — special elevated button */
+.tab.compose {
+  width: 60px; height: 60px;
+  margin-top: -10px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-deep) 100%);
+  color: #fff;
+  box-shadow:
+    0 8px 28px var(--accent-glow),
+    0 0 0 1px rgba(255, 255, 255, 0.15) inset,
+    0 -2px 0 rgba(0, 0, 0, 0.2) inset;
+.tab.compose .icon { font-size: 1.6rem; }
+.tab.compose:active { transform: scale(0.92); }
+.tab.compose::after {
+  content: ''; position: absolute; inset: -2px;
+  border-radius: 22px;
+  background: linear-gradient(135deg, var(--accent), transparent, var(--accent-2));
+  z-index: -1; opacity: 0.4; filter: blur(8px);
+
+/* ============================================================
+   Reader
+   ============================================================ */
+.reader {
+  position: fixed; inset: 0;
+  background: rgba(10, 10, 10, 0.85);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  z-index: 50;
+  display: none; flex-direction: column;
+  animation: readerIn 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+.reader.open { display: flex; }
+@keyframes readerIn {
+  from { transform: translateY(60px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+.reader-top {
+  padding: calc(var(--safe-top) + 10px) 14px 10px;
+  display: flex; align-items: center; gap: 10px;
+  flex-shrink: 0;
+.reader-top button {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+  color: var(--text);
+  width: 40px; height: 40px;
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 1.05rem;
+  transition: background 0.2s, transform 0.15s;
+.reader-top button:active { transform: scale(0.92); background: rgba(255, 255, 255, 0.12); }
+.reader-top .spacer { flex: 1; }
+.reader-top button.star-btn.active { color: var(--accent); border-color: var(--border-warm); }
+.reader-scroll { flex: 1; overflow-y: auto; padding: 0 24px 40px; -webkit-overflow-scrolling: touch; }
+
+.reader h2 {
+  font-size: 1.5rem; font-weight: 700;
+  letter-spacing: -0.025em; line-height: 1.25;
+  margin: 16px 0 16px;
+  color: var(--text);
+.reader .meta-block {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 28px; padding-bottom: 18px;
+  border-bottom: 1px solid var(--border);
+.reader .meta-block .avatar {
+  width: 48px; height: 48px; border-radius: 16px;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 1.05rem; color: #fff;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+.reader .meta-block .info { flex: 1; min-width: 0; }
+.reader .meta-block .from { font-size: 0.95rem; font-weight: 600; color: var(--text); }
+.reader .meta-block .to { font-size: 0.78rem; color: var(--text-2); margin-top: 2px; }
+.reader .meta-block .time { font-size: 0.75rem; color: var(--text-3); }
+
+.reader .body {
+  font-size: 0.95rem; line-height: 1.7;
+  white-space: pre-wrap; word-break: break-word;
+  color: rgba(255, 255, 255, 0.9);
+
+/* ============================================================
+   Composer
+   ============================================================ */
+.composer {
+  position: fixed; inset: 0;
+  background: rgba(10, 10, 10, 0.85);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  z-index: 60;
+  display: none; flex-direction: column;
+  animation: readerIn 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+.composer.open { display: flex; }
+.composer-top {
+  padding: calc(var(--safe-top) + 10px) 14px 10px;
+  display: flex; align-items: center; gap: 12px;
+  flex-shrink: 0;
+.composer-top button {
+  background: none; border: none; color: var(--accent);
+  font-size: 0.92rem; font-weight: 600;
+  cursor: pointer; padding: 8px 4px;
+.composer-top .send-btn {
+  background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+  color: #fff;
+  padding: 9px 20px; border-radius: 22px;
+  font-size: 0.88rem; font-weight: 700;
+  box-shadow: 0 4px 16px var(--accent-glow);
+.composer-top .spacer { flex: 1; }
+
+.composer .form {
+  flex: 1; padding: 14px 18px;
+  display: flex; flex-direction: column; gap: 10px;
+.composer .field {
+  display: flex; align-items: center;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  transition: border-color 0.2s;
+.composer .field:focus-within { border-color: var(--border-warm); }
+.composer .field input {
+  flex: 1; background: none; border: none; outline: none;
+  color: var(--text); font: inherit; font-size: 0.95rem;
+.composer .field .prefix { color: var(--accent); margin-right: 10px; font-size: 0.85rem; font-weight: 600; }
+.composer textarea {
+  flex: 1; resize: none;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  color: var(--text); font: inherit; font-size: 0.95rem;
+  padding: 16px;
+  line-height: 1.6;
+  outline: none;
+  transition: border-color 0.2s;
+.composer textarea:focus { border-color: var(--border-warm); }
+
+/* ============================================================
+   Toast
+   ============================================================ */
+.toast {
+  position: fixed; bottom: calc(var(--tab-height) + var(--safe-bottom) + 30px);
+  left: 50%; transform: translateX(-50%);
+  padding: 11px 20px;
+  border-radius: 18px;
+  background: rgba(20, 20, 22, 0.8);
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  border: 1px solid var(--border-strong);
+  color: var(--text);
+  font-size: 0.85rem; font-weight: 500;
+  z-index: 200;
+  display: none;
+  animation: toastIn 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+  white-space: nowrap;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+.toast.show { display: block; }
+.toast.success { border-color: var(--border-warm); }
+.toast.error { border-color: var(--danger); }
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(20px) scale(0.92); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+
+/* ============================================================
+   Loading / Empty
+   ============================================================ */
+.loading, .empty {
+  text-align: center; padding: 60px 20px;
+  color: var(--text-3); font-size: 0.9rem;
+.loading .spinner {
+  display: inline-block;
+  width: 28px; height: 28px;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 14px;
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ============================================================
+   Animations
+   ============================================================ */
+.email-card {
+  animation: cardIn 0.4s cubic-bezier(0.32, 0.72, 0, 1) backwards;
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+
+/* ============================================================
+   Desktop
+   ============================================================ */
+@media (min-width: 768px) {
+  #app { max-width: 640px; }
+  .tab-bar-wrap { max-width: 560px; }

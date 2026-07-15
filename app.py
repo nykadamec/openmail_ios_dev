@@ -3,6 +3,8 @@ import sqlite3
 import ssl
 import email
 import imaplib
+import json
+import queue
 from datetime import datetime, timezone
 from email.header import decode_header
 from email.mime.text import MIMEText
@@ -13,7 +15,7 @@ from typing import Any
 import resend
 import requests
 from dotenv import load_dotenv
-from flask import Flask, abort, jsonify, render_template, request
+from flask import Flask, Response, abort, jsonify, render_template, request, stream_with_context
 
 load_dotenv()
 
@@ -29,6 +31,22 @@ FROM_NAME = os.environ.get("FROM_NAME", "Dominik Adamec")
 
 if RESEND_API_KEY:
     resend.api_key = RESEND_API_KEY
+
+# SSE: one queue per connected client
+_sse_clients: list[queue.Queue] = []
+
+
+def notify_sse(event: str, data: dict):
+    """Push event to all connected SSE clients."""
+    payload = json.dumps(data)
+    dead: list[queue.Queue] = []
+    for q in _sse_clients:
+        try:
+            q.put_nowait((event, payload))
+        except queue.Full:
+            dead.append(q)
+    for q in dead:
+        _sse_clients.remove(q)
 
 
 # ---------------------------------------------------------------------------
@@ -167,6 +185,39 @@ def fetch_resend_email(email_id: str) -> dict:
 @app.route("/")
 def index():
     return render_template("index.html", from_email=FROM_EMAIL)
+
+
+@app.route("/api/events")
+def sse_stream():
+    """Server-Sent Events stream for real-time notifications."""
+    q: queue.Queue = queue.Queue(maxsize=100)
+    _sse_clients.append(q)
+
+    def generate():
+        try:
+            # Send initial keepalive
+            yield "event: connected\ndata: {}\n\n"
+            while True:
+                try:
+                    event, data = q.get(timeout=30)
+                    yield f"event: {event}\ndata: {data}\n\n"
+                except queue.Empty:
+                    yield ": keepalive\n\n"
+        except GeneratorExit:
+            pass
+        finally:
+            if q in _sse_clients:
+                _sse_clients.remove(q)
+
+    return Response(
+        stream_with_context(generate()),
+        mimetype="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
 
 
 @app.route("/api/emails", methods=["GET"])
@@ -357,6 +408,9 @@ def inbound_webhook():
     conn.commit()
     conn.close()
 
+    # Notify SSE clients
+    notify_sse("new_email", {"id": email_row_id, "subject": parsed["subject"]})
+
     return jsonify({"ok": True, "id": email_row_id, "new": True})
 
 
@@ -392,8 +446,6 @@ def sync_emails():
     if not RESEND_API_KEY:
         return jsonify({"error": "RESEND_API_KEY not configured"}), 400
     try:
-        # Resend receiving API list is not directly exposed in Python SDK,
-        # use REST endpoint. Page size limited; simple implementation.
         headers = {"Authorization": f"Bearer {RESEND_API_KEY}"}
         resp = requests.get(
             "https://api.resend.com/emails/receiving",
@@ -415,7 +467,6 @@ def sync_emails():
             conn.close()
             if existing:
                 continue
-            # simulate webhook payload to reuse logic
             webhook_payload = {
                 "type": "email.received",
                 "data": {
