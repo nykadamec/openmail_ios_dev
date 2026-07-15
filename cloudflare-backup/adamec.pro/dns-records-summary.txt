@@ -1,0 +1,73 @@
+# DNS Backup for adamec.pro
+# Generated: 2026-07-15T17:33:10.202320Z
+# Zone ID: 8bd2de554e7c03b8753405d7e91762ca
+# Status: active
+# Name servers: jerry.ns.cloudflare.com, sue.ns.cloudflare.com
+
+Total records: 22
+
+A      adamec.pro                               185.199.111.153
+       TTL: 1  Proxied: True  ID: 0bdee4ba2a7abf9abc6657b50ab55419
+
+A      adamec.pro                               185.199.110.153
+       TTL: 1  Proxied: True  ID: 8b0a9d14951422b9889d03ddf667b4bc
+
+A      adamec.pro                               185.199.109.153
+       TTL: 1  Proxied: True  ID: b07f9a9a4685c5243370c636bd2c831b
+
+A      adamec.pro                               185.199.108.153
+       TTL: 1  Proxied: True  ID: c48f1dd776ac9a5ce4cb2d09f624e874
+
+A      claw.adamec.pro                          185.229.224.18
+       TTL: 1  Proxied: True  ID: 01ecfbeb92b1f1949c0b4239ed23bc15
+
+CNAME  65635594.adamec.pro                      google.com
+       TTL: 3600  Proxied: False  ID: 73fc76758b446d7047cc18cbb7b3e0bb
+
+CNAME  _domainconnect.adamec.pro                _domainconnect.gd.domaincontrol.com
+       TTL: 1  Proxied: True  ID: 6c79ad8a274bfd325491716cd04ddd04
+
+CNAME  data.insta.adamec.pro                    public.r2.dev
+       TTL: 1  Proxied: True  ID: bb59f4abd27720a51f088812d3b6d286
+
+CNAME  insta.adamec.pro                         3bf57463-2fc5-4a7e-acdf-7b5c36c7af27.cfargotunnel.com
+       TTL: 1  Proxied: True  ID: cb849a18229938f9d682695b4c2f9e34
+
+CNAME  sig1._domainkey.adamec.pro               sig1.dkim.adamec.pro.at.icloudmailadmin.com
+       TTL: 3600  Proxied: False  ID: f3444dbcad8dd34d410fce20481a0e50
+
+CNAME  www.adamec.pro                           nykadamec.github.io
+       TTL: 1  Proxied: True  ID: 48d6b7a90464a2f8c6b9bf3278c3f350
+
+CNAME  zit.adamec.pro                           86a09f46-167c-41e1-8e4a-86edbeeecaf9.cfargotunnel.com
+       TTL: 1  Proxied: True  ID: e6f7e36e4d5c9eabe1f284ef584318a6
+
+MX     adamec.pro                               route3.mx.cloudflare.net
+       TTL: 1  Proxied: False  ID: 9206ed492868d4cd5012c58ab04d19df
+
+MX     adamec.pro                               route2.mx.cloudflare.net
+       TTL: 1  Proxied: False  ID: 9808243942118702988ce26a873b2cf3
+
+MX     adamec.pro                               route1.mx.cloudflare.net
+       TTL: 1  Proxied: False  ID: 530ff35ede9f3de60ff15ca0652f0e5d
+
+TXT    _dmarc.adamec.pro                        "v=DMARC1; p=quarantine"
+       TTL: 1  Proxied: False  ID: 2e615b574883d788fa94cf8b944215e3
+
+TXT    _dmarc.adamec.pro                        "v=DMARC1; p=quarantine; adkim=r; aspf=r; rua=mailto:dmarc_rua@onsecur
+       TTL: 1  Proxied: False  ID: 362dbb85c5a69faf047f7c9bf293321f
+
+TXT    adamec.pro                               "v=spf1 include:_spf.mx.cloudflare.net ~all"
+       TTL: 1  Proxied: False  ID: 1edad623dad955b75f8bbf6915156326
+
+TXT    adamec.pro                               "apple-domain=5myKpI8YILznFGN1"
+       TTL: 3600  Proxied: False  ID: 319c1023b4eccbf4a27f3b7681bf7ea7
+
+TXT    adamec.pro                               "apple-domain=OJFoIAeftV9HuL7y"
+       TTL: 3600  Proxied: False  ID: 2a4fbcd072b016f6f99b2992859fff27
+
+TXT    cf2024-1._domainkey.adamec.pro           "v=DKIM1; h=sha256; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCA
+       TTL: 1  Proxied: False  ID: 5d87b96190ee91668f042cda419f5072
+
+TXT    zmail._domainkey.adamec.pro              "v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCPFElkGS4pogJ
+       TTL: 1  Proxied: False  ID: 0721115c73d7db0000dc893c202b6ec3

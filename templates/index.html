@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adamec.pro Mail</title>
+  <style>
+    :root {
+      --bg: #0f1115;
+      --surface: #17191f;
+      --surface-2: #1f222b;
+      --surface-3: #2a2e3b;
+      --text: #e8eaed;
+      --text-muted: #9aa0a6;
+      --accent: #8ab4f8;
+      --accent-2: #c58af9;
+      --border: #2f333c;
+      --success: #81c995;
+      --danger: #f28b82;
+      --warning: #f9ab00;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface);
+    }
+    header h1 { margin: 0; font-size: 1.2rem; }
+    header .identity { color: var(--text-muted); font-size: 0.85rem; }
+    header .stats { display: flex; gap: 1rem; font-size: 0.8rem; color: var(--text-muted); }
+    header .stats span { cursor: pointer; }
+    header .stats span:hover { color: var(--accent); }
+    main { flex: 1; display: flex; overflow: hidden; }
+    aside {
+      width: 240px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 0.75rem;
+    }
+    aside button {
+      background: var(--accent);
+      color: #000;
+      border: none;
+      padding: 0.7rem;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 1rem;
+    }
+    aside button:hover { opacity: 0.9; }
+    nav { display: flex; flex-direction: column; gap: 0.4rem; }
+    nav .item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.6rem 0.75rem;
+      border-radius: 8px;
+      cursor: pointer;
+      color: var(--text);
+      font-size: 0.92rem;
+    }
+    nav .item:hover { background: var(--surface-2); }
+    nav .item.active { background: var(--surface-3); font-weight: 600; }
+    nav .item .badge {
+      background: var(--accent); color: #000;
+      font-size: 0.7rem; font-weight: 700;
+      padding: 0.15rem 0.45rem; border-radius: 10px;
+    }
+    .sync-btn {
+      background: var(--surface-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      margin-top: auto;
+    }
+    .content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .toolbar {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border);
+      display: flex; gap: 0.75rem; align-items: center;
+    }
+    .toolbar input {
+      background: var(--surface-2); color: var(--text); border: 1px solid var(--border);
+      border-radius: 8px; padding: 0.45rem 0.7rem; min-width: 220px;
+    }
+    .list { flex: 1; overflow-y: auto; padding: 1rem; }
+    .email-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.9rem 1rem;
+      margin-bottom: 0.6rem;
+      cursor: pointer;
+      transition: background 0.15s;
+      position: relative;
+    }
+    .email-item:hover { background: var(--surface-2); }
+    .email-item.unread { border-left: 3px solid var(--accent); }
+    .email-item.starred { border-left: 3px solid var(--warning); }
+    .email-item .top { display: flex; justify-content: space-between; align-items: flex-start; }
+    .email-item .from { font-weight: 600; }
+    .email-item .date { color: var(--text-muted); font-size: 0.8rem; white-space: nowrap; }
+    .email-item .subject { margin: 0.3rem 0; color: var(--text); }
+    .email-item .preview { color: var(--text-muted); font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .email-item .actions { position: absolute; top: 0.75rem; right: 6rem; display: none; gap: 0.5rem; }
+    .email-item:hover .actions { display: flex; }
+    .email-item .actions button {
+      background: transparent; border: none; color: var(--text-muted); cursor: pointer;
+      font-size: 1rem; padding: 0.2rem;
+    }
+    .email-item .actions button.star-active { color: var(--warning); }
+    .reader, .composer {
+      flex: 1; display: none; flex-direction: column; padding: 1.5rem; overflow-y: auto;
+    }
+    .reader.active, .composer.active { display: flex; }
+    .reader .topbar, .composer .topbar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding-bottom: 1rem; border-bottom: 1px solid var(--border); margin-bottom: 1rem;
+    }
+    .reader h2 { margin: 0; font-size: 1.3rem; }
+    .reader .meta { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem; }
+    .reader .body {
+      line-height: 1.6; white-space: pre-wrap;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.95rem;
+    }
+    .composer label { display: block; margin-bottom: 0.3rem; color: var(--text-muted); font-size: 0.85rem; }
+    .composer input, .composer textarea {
+      width: 100%; background: var(--surface-2); color: var(--text);
+      border: 1px solid var(--border); border-radius: 8px; padding: 0.7rem;
+      margin-bottom: 1rem; font: inherit;
+    }
+    .composer textarea { flex: 1; min-height: 200px; resize: vertical; }
+    .composer .actions { display: flex; gap: 0.75rem; }
+    .composer .actions button { padding: 0.7rem 1.4rem; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; }
+    .send-btn { background: var(--accent); color: #000; }
+    .cancel-btn { background: var(--surface-2); color: var(--text); border: 1px solid var(--border); }
+    .toast {
+      position: fixed; bottom: 1rem; right: 1rem;
+      background: var(--surface-2); color: var(--text);
+      padding: 0.8rem 1.2rem; border-radius: 8px;
+      border: 1px solid var(--border); display: none; z-index: 100;
+    }
+    .toast.show { display: block; }
+    .toast.success { border-color: var(--success); }
+    .toast.error { border-color: var(--danger); }
+    .loading { color: var(--text-muted); text-align: center; padding: 2rem; }
+    .empty { color: var(--text-muted); text-align: center; padding: 2rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Adamec.pro Mail</h1>
+      <div class="identity">{{ from_email }}</div>
+    </div>
+    <div class="stats">
+      <span onclick="setFolder('inbox')">📥 <span id="stat-inbound">0</span></span>
+      <span onclick="setFolder('sent')">📤 <span id="stat-outbound">0</span></span>
+      <span onclick="setFolder('starred')">⭐ <span id="stat-starred">0</span></span>
+      <span>🔔 <span id="stat-unread">0</span></span>
+    </div>
+  </header>
+  <main>
+    <aside>
+      <button onclick="openComposer()">+ Nový e-mail</button>
+      <nav>
+        <div class="item active" data-folder="inbox" onclick="setFolder('inbox')">
+          <span>📥 Příchozí</span>
+          <span class="badge" id="badge-inbox">0</span>
+        </div>
+        <div class="item" data-folder="sent" onclick="setFolder('sent')">
+          <span>📤 Odeslané</span>
+        </div>
+        <div class="item" data-folder="starred" onclick="setFolder('starred')">
+          <span>⭐ S hvězdičkou</span>
+        </div>
+      </nav>
+      <button class="sync-btn" onclick="syncEmails()">🔄 Synchronizovat</button>
+    </aside>
+    <div class="content">
+      <div class="toolbar">
+        <strong id="folderTitle">Příchozí</strong>
+        <input type="text" id="search" placeholder="Hledat..." oninput="loadEmails()">
+      </div>
+      <div id="emailList" class="list">
+        <div class="loading">Načítání...</div>
+      </div>
+      <div id="reader" class="reader">
+        <div class="topbar">
+          <button class="cancel-btn" onclick="showList()">← Zpět</button>
+          <div class="actions">
+            <button onclick="toggleStarFromReader()">⭐</button>
+            <button onclick="deleteEmail()">🗑️</button>
+          </div>
+        </div>
+        <h2 id="rSubject"></h2>
+        <div class="meta" id="rMeta"></div>
+        <div class="body" id="rBody"></div>
+      </div>
+      <div id="composer" class="composer">
+        <div class="topbar">
+          <button class="cancel-btn" onclick="showList()">← Zpět</button>
+          <h2>Nový e-mail</h2>
+        </div>
+        <label>Pro:</label>
+        <input type="email" id="toField" placeholder="prijemce@example.com">
+        <label>Předmět:</label>
+        <input type="text" id="subjectField" placeholder="Předmět zprávy">
+        <label>Zpráva:</label>
+        <textarea id="bodyField" placeholder="Napište zprávu..."></textarea>
+        <div class="actions">
+          <button class="send-btn" onclick="sendEmail()">Odeslat</button>
+          <button class="cancel-btn" onclick="showList()">Zrušit</button>
+        </div>
+      </div>
+    </div>
+  </main>
+  <div id="toast" class="toast"></div>
+
+  <script>
+    let currentFolder = 'inbox';
+    let currentEmailId = null;
+    let currentEmails = [];
+
+    const listEl = document.getElementById('emailList');
+    const readerEl = document.getElementById('reader');
+    const composerEl = document.getElementById('composer');
+    const toastEl = document.getElementById('toast');
+
+    function showToast(msg, type='success') {
+      toastEl.textContent = msg;
+      toastEl.className = 'toast show ' + type;
+      setTimeout(() => toastEl.className = 'toast', 3000);
+    }
+
+    function showList() {
+      readerEl.classList.remove('active');
+      composerEl.classList.remove('active');
+      listEl.style.display = 'block';
+      currentEmailId = null;
+    }
+
+    function openComposer() {
+      listEl.style.display = 'none';
+      readerEl.classList.remove('active');
+      composerEl.classList.add('active');
+    }
+
+    function setFolder(folder) {
+      currentFolder = folder;
+      document.querySelectorAll('nav .item').forEach(el => el.classList.remove('active'));
+      const active = document.querySelector(`nav .item[data-folder="${folder}"]`);
+      if (active) active.classList.add('active');
+      const titles = { inbox: 'Příchozí', sent: 'Odeslané', starred: 'S hvězdičkou' };
+      document.getElementById('folderTitle').textContent = titles[folder] || folder;
+      loadEmails();
+    }
+
+    async function loadEmails() {
+      const search = document.getElementById('search').value.toLowerCase();
+      let url;
+      if (currentFolder === 'starred') {
+        url = '/api/emails?starred=1&direction=inbound';
+      } else {
+        url = `/api/emails?folder=${currentFolder}&direction=${currentFolder === 'sent' ? 'outbound' : 'inbound'}`;
+      }
+      listEl.innerHTML = '<div class="loading">Načítání...</div>';
+      try {
+        const res = await fetch(url);
+        const emails = await res.json();
+        if (!res.ok) throw new Error(emails.error || 'Chyba');
+        currentEmails = emails;
+        const filtered = search ? emails.filter(e =>
+          (e.subject || '').toLowerCase().includes(search) ||
+          (e.sender_email || '').toLowerCase().includes(search) ||
+          (e.sender_name || '').toLowerCase().includes(search) ||
+          (e.preview || '').toLowerCase().includes(search)
+        ) : emails;
+        if (filtered.length === 0) {
+          listEl.innerHTML = '<div class="empty">Žádné e-maily.</div>';
+          return;
+        }
+        listEl.innerHTML = filtered.map(e => `
+          <div class="email-item ${e.is_read ? '' : 'unread'} ${e.is_starred ? 'starred' : ''}" data-id="${e.id}" onclick="openEmail(${e.id})">
+            <div class="actions" onclick="event.stopPropagation()">
+              <button class="${e.is_starred ? 'star-active' : ''}" onclick="toggleStar(${e.id}, event)">⭐</button>
+            </div>
+            <div class="top">
+              <div class="from">${escapeHtml(displayFrom(e))}</div>
+              <div class="date">${formatDate(e.created_at)}</div>
+            </div>
+            <div class="subject">${escapeHtml(e.subject || '(bez předmětu)')}</div>
+            <div class="preview">${escapeHtml(e.preview || '')}</div>
+          </div>
+        `).join('');
+      } catch (err) {
+        listEl.innerHTML = `<div class="loading">Chyba: ${escapeHtml(err.message)}</div>`;
+      }
+    }
+
+    function displayFrom(e) {
+      if (currentFolder === 'sent') return `Komu: ${e.recipient || ''}`;
+      return e.sender_name || e.sender_email || 'Neznámý';
+    }
+
+    async function openEmail(id) {
+      try {
+        const res = await fetch(`/api/emails/${id}`);
+        const e = await res.json();
+        if (!res.ok) throw new Error(e.error || 'Chyba');
+        currentEmailId = id;
+        document.getElementById('rSubject').textContent = e.subject || '(bez předmětu)';
+        const from = e.sender_name ? `${e.sender_name} <${e.sender_email}>` : e.sender_email;
+        const to = currentFolder === 'sent' ? `Komu: ${e.recipient}` : `Od: ${from}`;
+        document.getElementById('rMeta').textContent = `${to} | ${formatDate(e.created_at)}`;
+        document.getElementById('rBody').textContent = e.body_text || stripHtml(e.body_html) || '(prázdná zpráva)';
+        listEl.style.display = 'none';
+        composerEl.classList.remove('active');
+        readerEl.classList.add('active');
+        await loadEmails();
+        await loadStats();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    async function toggleStar(id, event) {
+      if (event) event.stopPropagation();
+      const current = currentEmails.find(e => e.id === id);
+      const newStar = current ? (current.is_starred ? 0 : 1) : 1;
+      try {
+        const res = await fetch(`/api/emails/${id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ is_starred: newStar })
+        });
+        if (!res.ok) throw new Error('Nepodařilo se uložit');
+        await loadEmails();
+        await loadStats();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    async function toggleStarFromReader() {
+      if (!currentEmailId) return;
+      await toggleStar(currentEmailId, null);
+      const current = currentEmails.find(e => e.id === currentEmailId);
+      showToast(current?.is_starred ? 'Přidána hvězdička' : 'Hvězdička odebrána');
+    }
+
+    async function deleteEmail() {
+      if (!currentEmailId) return;
+      try {
+        const res = await fetch(`/api/emails/${currentEmailId}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error('Nepodařilo se smazat');
+        showToast('E-mail smazán');
+        showList();
+        await loadEmails();
+        await loadStats();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    async function sendEmail() {
+      const payload = {
+        to: document.getElementById('toField').value,
+        subject: document.getElementById('subjectField').value,
+        body: document.getElementById('bodyField').value
+      };
+      if (!payload.to || !payload.subject) {
+        showToast('Vyplňte příjemce a předmět', 'error');
+        return;
+      }
+      try {
+        const res = await fetch('/api/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Chyba');
+        showToast('E-mail odeslán');
+        document.getElementById('toField').value = '';
+        document.getElementById('subjectField').value = '';
+        document.getElementById('bodyField').value = '';
+        showList();
+        await loadEmails();
+        await loadStats();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    async function syncEmails() {
+      showToast('Synchronizuji s Resend...');
+      try {
+        const res = await fetch('/api/sync', { method: 'POST' });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Chyba');
+        showToast(`Načteno ${data.imported} e-mailů`);
+        await loadEmails();
+        await loadStats();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    async function loadStats() {
+      try {
+        const res = await fetch('/api/stats');
+        const s = await res.json();
+        document.getElementById('stat-inbound').textContent = s.inbound;
+        document.getElementById('stat-outbound').textContent = s.outbound;
+        document.getElementById('stat-starred').textContent = s.starred;
+        document.getElementById('stat-unread').textContent = s.unread;
+        document.getElementById('badge-inbox').textContent = s.unread || '';
+      } catch (e) {}
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function stripHtml(html) {
+      if (!html) return '';
+      const tmp = document.createElement('div');
+      tmp.innerHTML = html;
+      return tmp.textContent || tmp.innerText || '';
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return '';
+      const d = new Date(dateStr);
+      if (isNaN(d)) return dateStr;
+      return d.toLocaleString('cs-CZ', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadEmails();
+      loadStats();
+    });
+  </script>
+</body>
+</html>
