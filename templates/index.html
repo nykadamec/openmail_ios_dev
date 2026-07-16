@@ -887,7 +887,16 @@
         const bodyEl = document.getElementById('rBody');
         let bodyHtml = '';
         if (e.body_html) {
-          bodyHtml = '<div class="body-html"><iframe sandbox="allow-same-origin" srcdoc="' + escapeHtml(e.body_html).replace(/"/g, '&quot;') + '"></iframe></div><div class="body-plain" style="display:none">' + escapeHtml(e.body_text || stripHtml(e.body_html)) + '</div><button class="html-toggle" onclick="toggleHtmlView()">' + '<i class="hgi-stroke hgi-code" aria-hidden="true"></i> ' + __('reader.html_toggle') + '</button>';
+          const emailCss = `<style>
+            :root { color-scheme: dark; }
+            body { margin: 0; padding: 16px; font: 15px/1.5 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: rgba(255,255,255,0.92); background: transparent; }
+            a { color: #60a5fa; text-decoration: underline; }
+            p, h1, h2, h3 { margin: 0 0 12px; }
+            img { max-width: 100%; height: auto; border-radius: 8px; }
+            blockquote { border-left: 2px solid rgba(255,255,255,0.2); padding-left: 12px; margin-left: 0; color: rgba(255,255,255,0.7); }
+          </style>`;
+          const wrappedHtml = emailCss + e.body_html;
+          bodyHtml = '<div class="body-html"><iframe sandbox="allow-same-origin" srcdoc="' + escapeHtml(wrappedHtml).replace(/"/g, '&quot;') + '"></iframe></div><div class="body-plain" style="display:none">' + escapeHtml(e.body_text || stripHtml(e.body_html)) + '</div><button class="html-toggle" onclick="toggleHtmlView()">' + '<i class="hgi-stroke hgi-code" aria-hidden="true"></i> ' + __('reader.html_toggle') + '</button>';
         } else {
           bodyHtml = escapeHtml(e.body_text || __('error.not_found'));
         }

@@ -960,7 +960,6 @@ body::before {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--border);
   border-radius: 16px;
-  padding: 4px;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
@@ -969,8 +968,8 @@ body::before {
 .reader .body-html iframe {
   width: 100%;
   border: none;
-  border-radius: 14px;
-  background: rgba(12, 12, 14, 0.6);
+  border-radius: 16px;
+  background: transparent;
   min-height: 200px;
   display: block;
   color-scheme: dark;
