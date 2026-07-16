@@ -970,10 +970,13 @@ body::before {
   border: none;
   border-radius: 16px;
   background: transparent;
-  min-height: 200px;
+  min-height: 100vh;
   display: block;
   color-scheme: dark;
+  overflow: hidden;
 }
+.reader .body-html iframe::-webkit-scrollbar { display: none; }
+.reader .body-html iframe { scrollbar-width: none; }
 .html-toggle {
   display: inline-flex;
   align-items: center;
