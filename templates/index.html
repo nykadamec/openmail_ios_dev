@@ -887,7 +887,7 @@
         const bodyEl = document.getElementById('rBody');
         let bodyHtml = '';
         if (e.body_html) {
-          bodyHtml = '<div class="body-html"><iframe sandbox="allow-same-origin" srcdoc="' + escapeHtml(e.body_html).replace(/"/g, '&quot;') + '"></iframe></div><div class="body-plain" style="display:none">' + escapeHtml(e.body_text || stripHtml(e.body_html)) + '</div><button class="html-toggle" onclick="toggleHtmlView()">' + __('reader.html_toggle') + '</button>';
+          bodyHtml = '<div class="body-html"><iframe sandbox="allow-same-origin" srcdoc="' + escapeHtml(e.body_html).replace(/"/g, '&quot;') + '"></iframe></div><div class="body-plain" style="display:none">' + escapeHtml(e.body_text || stripHtml(e.body_html)) + '</div><button class="html-toggle" onclick="toggleHtmlView()">' + '<i class="hgi-stroke hgi-code" aria-hidden="true"></i> ' + __('reader.html_toggle') + '</button>';
         } else {
           bodyHtml = escapeHtml(e.body_text || __('error.not_found'));
         }

@@ -956,25 +956,46 @@ body::before {
 /* ============================================================
    HTML render
    ============================================================ */
+.reader .body-html {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 4px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+}
 .reader .body-html iframe {
   width: 100%;
   border: none;
-  border-radius: 12px;
-  background: #fff;
+  border-radius: 14px;
+  background: rgba(12, 12, 14, 0.6);
   min-height: 200px;
+  display: block;
+  color-scheme: dark;
 }
 .html-toggle {
-  display: block;
-  margin: 8px 0;
-  padding: 6px 14px;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 12px 0 4px;
+  padding: 8px 14px;
+  background: var(--glass-bg-light);
+  border: 1px solid var(--border);
+  border-radius: 10px;
   color: var(--text-2);
   font-size: 0.78rem;
+  font-weight: 600;
   cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
-.html-toggle:hover { background: rgba(255,255,255,0.12); }
+.html-toggle:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--text);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+.html-toggle i { font-size: 0.9rem; }
 
 /* ============================================================
    Bulk actions
