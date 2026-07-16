@@ -37,6 +37,12 @@
   "menu.logout": "Odhlásit se",
   "menu.logged_in": "Přihlášen",
 
+  "tab.inbox": "Inbox",
+  "tab.starred": "Hvězdy",
+  "tab.compose": "Nový e-mail",
+  "tab.spam": "Spam",
+  "tab.sync": "Synchronizovat",
+
   "composer.cancel": "Zrušit",
   "composer.send": "Odeslat",
   "composer.to": "Komu",

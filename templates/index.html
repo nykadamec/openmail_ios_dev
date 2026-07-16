@@ -7,6 +7,9 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>{{ _("index.title") }}</title>
+  <link rel="preconnect" href="https://use.hugeicons.com">
+  <link rel="preconnect" href="https://ico.hugeicons.com">
+  <link rel="stylesheet" href="https://use.hugeicons.com/font/icons.css">
   <link rel="stylesheet" href="/static/liquid-glass.css">
 </head>
 <body>
@@ -96,21 +99,21 @@
     <div class="tab-bar-wrap">
       <nav class="tab-bar" id="tabBar">
         <div class="bar-fill"></div>
-        <button class="tab" data-folder="inbox" onclick="setFolder('inbox')">
-          <span class="icon">📥</span>
+        <button class="tab" data-folder="inbox" onclick="setFolder('inbox')" aria-label="{{ _('tab.inbox') }}">
+          <i class="hgi-stroke hgi-inbox" aria-hidden="true"></i>
           <span class="count" id="tabInboxCount"></span>
         </button>
-        <button class="tab" data-folder="starred" onclick="setFolder('starred')">
-          <span class="icon">⭐</span>
+        <button class="tab" data-folder="starred" onclick="setFolder('starred')" aria-label="{{ _('tab.starred') }}">
+          <i class="hgi-stroke hgi-star" aria-hidden="true"></i>
         </button>
-        <button class="tab compose" onclick="openComposer()">
-          <span class="icon">✏️</span>
+        <button class="tab compose" onclick="openComposer()" aria-label="{{ _('tab.compose') }}">
+          <i class="hgi-stroke hgi-edit-01" aria-hidden="true"></i>
         </button>
-        <button class="tab" data-folder="spam" onclick="setFolder('spam')">
-          <span class="icon">🚫</span>
+        <button class="tab" data-folder="spam" onclick="setFolder('spam')" aria-label="{{ _('tab.spam') }}">
+          <i class="hgi-stroke hgi-spam" aria-hidden="true"></i>
         </button>
-        <button class="tab" onclick="syncEmails()">
-          <span class="icon">🔄</span>
+        <button class="tab" onclick="syncEmails()" aria-label="{{ _('tab.sync') }}">
+          <i class="hgi-stroke hgi-refresh" aria-hidden="true"></i>
         </button>
       </nav>
     </div>

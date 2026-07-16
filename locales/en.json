@@ -37,6 +37,12 @@
   "menu.logout": "Log out",
   "menu.logged_in": "Logged in",
 
+  "tab.inbox": "Inbox",
+  "tab.starred": "Starred",
+  "tab.compose": "New email",
+  "tab.spam": "Spam",
+  "tab.sync": "Sync",
+
   "composer.cancel": "Cancel",
   "composer.send": "Send",
   "composer.to": "To",
