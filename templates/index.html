@@ -207,6 +207,9 @@
 
           <h3>{{ _("settings.session") }}</h3>
           <p class="info-text">{{ _("settings.session_info") }}</p>
+          <button class="secondary-btn" onclick="clearCache()">
+            <i class="hgi-stroke hgi-refresh" aria-hidden="true"></i> {{ _("settings.clear_cache") }}
+          </button>
 
           <h3>{{ _("settings.language") }}</h3>
           <div class="lang-switch">
@@ -400,6 +403,18 @@
         showToast(__('toast.password_changed'));
         document.getElementById('currentPassword').value = '';
         document.getElementById('newPassword').value = '';
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+    async function clearCache() {
+      try {
+        if ('caches' in window) {
+          const keys = await caches.keys();
+          await Promise.all(keys.map(k => caches.delete(k)));
+        }
+        showToast(__('settings.cache_cleared'));
+        setTimeout(() => window.location.reload(true), 900);
       } catch (err) {
         showToast(err.message, 'error');
       }

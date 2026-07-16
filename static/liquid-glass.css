@@ -756,7 +756,9 @@ body::before {
   font: inherit; font-size: 0.9rem; font-weight: 600;
   cursor: pointer;
   margin-top: 16px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
 }
+.secondary-btn i { font-size: 1.05rem; }
 .cancel-btn {
   flex: 1;
   padding: 12px;

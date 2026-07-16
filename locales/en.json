@@ -68,6 +68,8 @@
   "settings.change_password_btn": "Change password",
   "settings.session": "Session",
   "settings.session_info": "You will be automatically logged out after 15 minutes of inactivity.",
+  "settings.clear_cache": "Clear cache",
+  "settings.cache_cleared": "Cache cleared — reloading page",
   "settings.logout_btn": "Log out",
   "settings.language": "Language",
   "settings.language.cs": "🇨🇿 Čeština",

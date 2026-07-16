@@ -68,6 +68,8 @@
   "settings.change_password_btn": "Změnit heslo",
   "settings.session": "Session",
   "settings.session_info": "Budeš automaticky odhlášen po 15 minutách neaktivity.",
+  "settings.clear_cache": "Vyčistit cache",
+  "settings.cache_cleared": "Cache vyčištěna — stránka se znovu načte",
   "settings.logout_btn": "Odhlásit se",
   "settings.language": "Jazyk",
   "settings.language.cs": "🇨🇿 Čeština",
