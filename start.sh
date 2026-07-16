@@ -19,7 +19,7 @@ sleep 2
 cloudflared tunnel --config ~/.cloudflared/config.yml run > logs/cloudflared.log 2>&1 &
 echo $! > .cloudflared.pid
 
-echo "Adamec.pro Mail started"
+echo "openMail started"
 echo "Local:  http://127.0.0.1:5005"
 echo "Public: https://email.adamec.pro"
 echo "Logs:   logs/app.log, logs/cloudflared.log"

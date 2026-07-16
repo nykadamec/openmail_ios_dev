@@ -1,4 +1,4 @@
-# Adamec.pro Mail
+# openMail
 
 Jednoduchý lokální e-mailový klient pro `dominik@adamec.pro`, běžící na tvém Macu a dostupný přes `https://email.adamec.pro`.
 

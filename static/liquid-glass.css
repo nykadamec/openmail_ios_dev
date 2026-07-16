@@ -109,6 +109,27 @@ body::before {
 }
 .menu-toggle:active { transform: scale(0.92); }
 
+.select-toggle {
+  background: var(--glass-bg-light);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+.select-toggle:active { transform: scale(0.92); }
+.select-toggle.active {
+  border-color: var(--accent);
+  background: rgba(255, 107, 53, 0.2);
+}
+
 /* ============================================================
    Content
    ============================================================ */
@@ -294,6 +315,42 @@ body::before {
   font-size: 0.95rem; line-height: 1.6;
   color: var(--text);
   white-space: pre-wrap;
+}
+
+.reader .attachments {
+  margin-top: 16px;
+  padding: 12px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 12px;
+}
+.reader .attachments-title {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-2);
+  margin-bottom: 8px;
+}
+.reader .attachment-item {
+  padding: 6px 0;
+}
+.reader .attachment-item a {
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 0.85rem;
+}
+.reader .attachment-item a:hover { text-decoration: underline; }
+.attachment-preview-item {
+  font-size: 0.78rem;
+  color: var(--text-2);
+  padding: 4px 0;
+}
+.attach-btn {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  color: #fff;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 0.85rem;
 }
 
 /* ============================================================
@@ -831,3 +888,89 @@ body::before {
   #app { max-width: 640px; }
   .tab-bar-wrap { max-width: 560px; }
 }
+
+/* ============================================================
+   HTML render
+   ============================================================ */
+.reader .body-html iframe {
+  width: 100%;
+  border: none;
+  border-radius: 12px;
+  background: #fff;
+  min-height: 200px;
+}
+.html-toggle {
+  display: block;
+  margin: 8px 0;
+  padding: 6px 14px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px;
+  color: var(--text-2);
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+.html-toggle:hover { background: rgba(255,255,255,0.12); }
+
+/* ============================================================
+   Bulk actions
+   ============================================================ */
+.email-card .checkbox {
+  display: none;
+  width: 20px;
+  height: 20px;
+  margin: 0 8px 0 0;
+  accent-color: var(--accent);
+  flex-shrink: 0;
+}
+.select-mode .email-card .checkbox { display: block; }
+.email-card.selected { border-color: var(--accent); }
+.email-card.selected .card-fill { border-color: var(--accent); }
+.bulk-bar {
+  display: none;
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  background: rgba(20,20,22,0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
+  padding: 10px 16px;
+  gap: 8px;
+  align-items: center;
+  white-space: nowrap;
+}
+.bulk-bar.show { display: flex; }
+.bulk-bar .count { font-size: 0.82rem; color: var(--text-2); margin-right: 4px; }
+.bulk-bar button {
+  padding: 6px 12px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+.bulk-bar button:hover { background: rgba(255,255,255,0.12); }
+.bulk-bar button.danger { color: #ff8a82; }
+.bulk-bar button:disabled { opacity: 0.4; cursor: default; }
+
+/* ============================================================
+   Language switcher
+   ============================================================ */
+.lang-switch { display: flex; gap: 8px; margin: 8px 0; }
+.lang-btn {
+  flex: 1;
+  padding: 8px 12px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  color: #fff;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.lang-btn:hover { background: rgba(255,255,255,0.12); }
+.lang-btn.active { border-color: var(--accent); background: rgba(255,107,53,0.15); }

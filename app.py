@@ -26,8 +26,9 @@ from cryptography.hazmat.primitives import hashes
 from dotenv import load_dotenv
 from flask import (
     Flask, Response, abort, jsonify, make_response,
-    render_template, request, stream_with_context, redirect, url_for
+    render_template, request, stream_with_context, redirect, url_for, send_file
 )
+from i18n import t, get_locale, set_locale, _load, get_all_keys
 
 load_dotenv()
 
@@ -141,6 +142,21 @@ FROM_NAME = os.environ.get("FROM_NAME", "Dominik Adamec")
 
 if RESEND_API_KEY:
     resend.api_key = RESEND_API_KEY
+
+# ---------------------------------------------------------------------------
+# i18n context processor
+# ---------------------------------------------------------------------------
+@app.context_processor
+def inject_i18n():
+    """Inject locale, t(), _() into all templates."""
+    locale = request.cookies.get("locale", "cs")
+    set_locale(locale)
+    return {
+        "locale": get_locale(),
+        "t": t,
+        "_": t,
+        "locale_json": json.dumps(get_all_keys(), ensure_ascii=False),
+    }
 
 # SSE: one queue per connected client
 _sse_clients: list[queue.Queue] = []
@@ -575,6 +591,7 @@ def parse_inbound_event(payload: dict) -> dict:
     sender_name, sender_email = parseaddr(from_addr)
     if not sender_email:
         sender_email = from_addr
+    attachments = data.get("attachments", [])
     return {
         "resend_id": email_id,
         "direction": "inbound",
@@ -584,6 +601,7 @@ def parse_inbound_event(payload: dict) -> dict:
         "recipient": ", ".join(data.get("to", [])) or None,
         "subject": data.get("subject", ""),
         "created_at": data.get("created_at") or now_iso(),
+        "attachments": attachments,
     }
 
 
@@ -609,7 +627,7 @@ def setup():
         username = (data.get("username") or "").strip()
         password = data.get("password") or ""
         if not username or len(password) < 6:
-            return render_template("setup.html", error="Heslo musí mít alespoň 6 znaků"), 400
+            return render_template("setup.html", error=t("setup.error.short")), 400
         user_id = create_user(username, password)
         sid = create_session(user_id)
         resp = make_response(redirect(url_for('index')))
@@ -628,14 +646,14 @@ def login_page():
         return resp
     if CF_ACCESS_ENABLED:
         # If CF Access is enabled but token missing/invalid, let Cloudflare redirect to its login
-        return render_template("login.html", error="Přístup vyžaduje Cloudflare Access autentizaci."), 403
+        return render_template("login.html", error=t("login.error.required")), 403
     if request.method == "POST":
         data = request.form if request.form else (request.json or {})
         username = (data.get("username") or "").strip()
         password = data.get("password") or ""
         user_id = verify_user(username, password)
         if not user_id:
-            return render_template("login.html", error="Neplatné přihlašovací údaje"), 401
+            return render_template("login.html", error=t("login.error.invalid")), 401
         sid = create_session(user_id)
         resp = make_response(redirect(url_for('index')))
         resp.set_cookie('session_id', sid, httponly=True, samesite='Lax', max_age=15*60)
@@ -674,6 +692,19 @@ def me():
     if not user:
         return jsonify({"error": "Unauthorized"}), 401
     return jsonify(user)
+
+
+@app.route("/api/locale", methods=["GET", "POST"])
+def api_locale():
+    """Get or set the current locale."""
+    if request.method == "POST":
+        data = request.json or {}
+        lang = data.get("locale", "cs")
+        set_locale(lang)
+        resp = jsonify({"locale": get_locale()})
+        resp.set_cookie("locale", lang, max_age=365*24*3600, samesite="Lax")
+        return resp
+    return jsonify({"locale": get_locale(), "data": get_all_keys()})
 
 
 @app.route("/api/events")
@@ -741,6 +772,8 @@ def list_emails():
         where.append("custom_folder_id = ?")
         params.append(custom_folder_id)
 
+    count_sql = "SELECT COUNT(*) FROM emails WHERE " + " AND ".join(where)
+    total = conn.execute(count_sql, params).fetchone()[0]
     sql = "SELECT id, folder, custom_folder_id, sender_name, sender_email, recipient, subject, preview, is_starred, is_read, is_spam, is_trash, created_at FROM emails WHERE " + " AND ".join(where) + " ORDER BY datetime(created_at) DESC LIMIT ? OFFSET ?"
     params.extend([limit, offset])
     rows = conn.execute(sql, params).fetchall()
@@ -755,7 +788,7 @@ def list_emails():
         d['subject'] = decrypt_email_field(d.get('subject'), user_id)
         d['preview'] = decrypt_email_field(d.get('preview'), user_id)
         result.append(d)
-    return jsonify(result)
+    return jsonify({"emails": result, "total": total, "limit": limit, "offset": offset})
 
 
 @app.route("/api/emails/<int:email_id>", methods=["GET"])
@@ -778,6 +811,10 @@ def get_email(email_id):
     d['preview'] = decrypt_email_field(d.get('preview'), user_id)
     d['body_text'] = decrypt_email_field(d.get('body_text'), user_id)
     d['body_html'] = decrypt_email_field(d.get('body_html'), user_id)
+    try:
+        d['attachments'] = json.loads(d.get('attachments') or '[]')
+    except (json.JSONDecodeError, TypeError):
+        d['attachments'] = []
     return jsonify(d)
 
 
@@ -809,6 +846,35 @@ def update_email(email_id):
     return jsonify(dict(row))
 
 
+
+@app.route("/api/emails/bulk", methods=["POST"])
+@login_required
+def bulk_email_action():
+    """Perform bulk action on multiple emails."""
+    data = request.json or {}
+    ids = data.get("ids", [])
+    action = data.get("action", "")
+    if not ids or not action:
+        return jsonify({"error": "Missing ids or action"}), 400
+    conn = get_db()
+    placeholders = ",".join("?" for _ in ids)
+    if action == "read":
+        conn.execute(f"UPDATE emails SET is_read = 1 WHERE id IN ({placeholders})", ids)
+    elif action == "unread":
+        conn.execute(f"UPDATE emails SET is_read = 0 WHERE id IN ({placeholders})", ids)
+    elif action == "trash":
+        conn.execute(f"UPDATE emails SET is_trash = 1 WHERE id IN ({placeholders})", ids)
+    elif action == "spam":
+        conn.execute(f"UPDATE emails SET is_spam = 1, folder = 'spam' WHERE id IN ({placeholders})", ids)
+    elif action == "delete":
+        conn.execute(f"DELETE FROM emails WHERE id IN ({placeholders})", ids)
+    else:
+        conn.close()
+        return jsonify({"error": "Unknown action"}), 400
+    conn.commit()
+    conn.close()
+    return jsonify({"ok": True, "count": len(ids)})
+
 @app.route("/api/send", methods=["POST"])
 @login_required
 def send_email():
@@ -822,6 +888,18 @@ def send_email():
         return jsonify({"error": "Missing recipient or subject"}), 400
     try:
         from_header = FROM_EMAIL if not FROM_NAME else f"{FROM_NAME} <{FROM_EMAIL}>"
+        attachments = data.get("attachments", [])
+        resend_attachments = []
+        for att in attachments:
+            filename = att.get("filename", "attachment.bin")
+            content = att.get("content", "")
+            content_type = att.get("content_type", "application/octet-stream")
+            if content:
+                resend_attachments.append({
+                    "filename": filename,
+                    "content": content,
+                    "content_type": content_type,
+                })
         params: resend.Emails.SendParams = {
             "from": from_header,
             "to": [to],
@@ -829,15 +907,18 @@ def send_email():
             "text": body,
             "reply_to": FROM_EMAIL,
         }
+        if resend_attachments:
+            params["attachments"] = resend_attachments
         result = resend.Emails.send(params)
         conn = get_db()
         user_id = _current_user_id() or 1
         preview = (body or "")[:300]
+        attachments_json = json.dumps([{"filename": a["filename"], "content_type": a["content_type"]} for a in resend_attachments]) if resend_attachments else "[]"
         conn.execute(
             """INSERT INTO emails
             (resend_id, direction, folder, sender_name, sender_email, recipient,
-             subject, preview, body_text, body_html, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+             subject, preview, body_text, body_html, attachments, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (
                 result.get("id"),
                 "outbound",
@@ -849,6 +930,7 @@ def send_email():
                 encrypt_email_field(preview, user_id),
                 encrypt_email_field(body, user_id),
                 None,
+                attachments_json,
                 now_iso(),
             ),
         )
@@ -911,13 +993,47 @@ def inbound_webhook():
         ),
     )
     email_row_id = conn.execute("SELECT last_insert_rowid()").fetchone()[0]
+
+    # Download attachments
+    attachments_json = "[]"
+    att_list = parsed.get("attachments", [])
+    if att_list:
+        att_dir = Path("data/attachments") / str(email_row_id)
+        att_dir.mkdir(parents=True, exist_ok=True)
+        saved = []
+        for att in att_list:
+            filename = att.get("filename", "attachment.bin")
+            content_type = att.get("content_type", "application/octet-stream")
+            url = att.get("url")
+            if url:
+                try:
+                    r = requests.get(url, timeout=30)
+                    if r.status_code == 200:
+                        (att_dir / filename).write_bytes(r.content)
+                        saved.append({"filename": filename, "content_type": content_type})
+                except Exception:
+                    pass
+        attachments_json = json.dumps(saved)
+        # Update email with attachment metadata
+        conn.execute("UPDATE emails SET attachments = ? WHERE id = ?", (attachments_json, email_row_id))
+
     conn.commit()
     conn.close()
 
     notify_sse("new_email", {
         "id": email_row_id, "subject": parsed["subject"], "is_spam": spam
     })
-    return jsonify({"ok": True, "id": email_row_id, "new": True, "is_spam": spam})
+
+
+@app.route("/api/attachments/<int:email_id>/<path:filename>")
+@login_required
+def get_attachment(email_id, filename):
+    """Serve an attachment file."""
+    att_dir = Path("data/attachments") / str(email_id)
+    file_path = att_dir / filename
+    if not file_path.exists():
+        return jsonify({"error": "Attachment not found"}), 404
+    return send_file(str(file_path), as_attachment=True, download_name=filename)
 
 
 @app.route("/api/folders", methods=["GET"])
@@ -1088,9 +1204,9 @@ def change_password():
     current_pw = data.get("current_password") or ""
     new_pw = data.get("new_password") or ""
     if len(new_pw) < 6:
-        return jsonify({"error": "Nové heslo musí mít alespoň 6 znaků"}), 400
+        return jsonify({"error": t("error.password_short")}), 400
     if not verify_user(user['username'], current_pw):
-        return jsonify({"error": "Současné heslo je nesprávné"}), 401
+        return jsonify({"error": t("error.password_wrong")}), 401
     # Re-encrypt DEK with new password
     conn = get_db()
     row = conn.execute("SELECT dek_salt, encrypted_dek FROM users WHERE id = ?", (user_id,)).fetchone()
@@ -1102,7 +1218,7 @@ def change_password():
         new_encrypted_dek = _encrypt_dek(dek, new_pw, new_salt)
     except Exception as e:
         app.logger.error(f'Failed to re-encrypt DEK during password change: {e}')
-        return jsonify({"error": "Chyba při změně šifrovacího klíče"}), 500
+        return jsonify({"error": t("error.encryption")}), 500
     new_hash = bcrypt.hashpw(new_pw.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
     conn = get_db()
     conn.execute(

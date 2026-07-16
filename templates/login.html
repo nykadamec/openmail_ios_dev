@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
-  <title>Přihlášení — Adamec.pro Mail</title>
+  <title>{{ _("login.title") }}</title>
   <style>
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     html, body {
@@ -118,9 +118,9 @@
 
   <form class="card" method="post">
     <div class="brand">
-      <div class="tag">Adamec.pro Mail</div>
-      <h1>Přihlásit se</h1>
-      <p>Vítej zpět</p>
+      <div class="tag">openMail</div>
+      <h1>{{ _("login.heading") }}</h1>
+      <p>{{ _("login.welcome") }}</p>
     </div>
 
     {% if error %}
@@ -128,17 +128,17 @@
     {% endif %}
 
     <div class="field">
-      <label>Uživatel</label>
+      <label>{{ _("login.username") }}</label>
       <input type="text" name="username" autofocus required>
     </div>
     <div class="field">
-      <label>Heslo</label>
+      <label>{{ _("login.password") }}</label>
       <input type="password" name="password" required>
     </div>
 
-    <button type="submit">Přihlásit se</button>
+    <button type="submit">{{ _("login.submit") }}</button>
 
-    <div class="footer">Session: 15 min · Automatické odhlášení</div>
+    <div class="footer">{{ _("login.footer") }}</div>
   </form>
 </body>
 </html>

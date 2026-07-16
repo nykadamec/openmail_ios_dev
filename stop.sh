@@ -11,4 +11,4 @@ if [ -f .cloudflared.pid ]; then
   rm -f .cloudflared.pid
 fi
 
-echo "Adamec.pro Mail stopped"
+echo "openMail stopped"

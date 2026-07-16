@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
-  <title>Nastavení — Adamec.pro Mail</title>
+  <title>{{ _("setup.title") }}</title>
   <style>
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     html, body {
@@ -83,8 +83,8 @@
 <body>
   <form class="card" method="post">
     <div class="brand">
-      <h1>Vítej</h1>
-      <p>Vytvoř si účet pro přístup k tvé schránce</p>
+      <h1>{{ _("setup.heading") }}</h1>
+      <p>{{ _("setup.subtitle") }}</p>
     </div>
 
     {% if error %}
@@ -92,15 +92,15 @@
     {% endif %}
 
     <div class="field">
-      <label>Uživatel</label>
+      <label>{{ _("setup.username") }}</label>
       <input type="text" name="username" autofocus required>
     </div>
     <div class="field">
-      <label>Heslo (min 6 znaků)</label>
+      <label>{{ _("setup.password") }}</label>
       <input type="password" name="password" minlength="6" required>
     </div>
 
-    <button type="submit">Vytvořit účet</button>
+    <button type="submit">{{ _("setup.submit") }}</button>
   </form>
 </body>
 </html>
