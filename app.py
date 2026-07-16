@@ -84,6 +84,11 @@ def _clear_user_dek(user_id: int):
     USER_DEKS.pop(user_id, None)
 
 
+def _user_unlocked(user_id: int | None) -> bool:
+    """True, pokud má uživatel odemčený DEK v paměti."""
+    return user_id is not None and user_id in USER_DEKS
+
+
 def encrypt_email_field(value: str | None, user_id: int | None = None) -> str | None:
     if value is None:
         return None
@@ -494,10 +499,15 @@ def login_required(f):
     @wraps(f)
     def wrapped(*args, **kwargs):
         user = current_user()
-        if not user:
+        if not user or not _user_unlocked(user.get('id')):
+            sid = request.cookies.get('session_id')
+            if sid:
+                delete_session(sid)
+            resp = make_response(redirect(url_for('login_page')))
+            resp.delete_cookie('session_id')
             if request.path.startswith('/api/'):
-                return jsonify({'error': 'Unauthorized'}), 401
-            return redirect(url_for('login_page'))
+                return jsonify({'error': 'Locked', 'code': 'dek_missing'}), 401
+            return resp
         return f(*args, **kwargs)
     return wrapped
 
@@ -691,6 +701,13 @@ def me():
     user = current_user()
     if not user:
         return jsonify({"error": "Unauthorized"}), 401
+    if not _user_unlocked(user.get('id')):
+        sid = request.cookies.get('session_id')
+        if sid:
+            delete_session(sid)
+        resp = jsonify({'error': 'Locked', 'code': 'dek_missing'})
+        resp.delete_cookie('session_id')
+        return resp, 401
     return jsonify(user)
 
 
@@ -972,26 +989,31 @@ def inbound_webhook():
 
     user_id = _current_user_id() or 1
     preview = (body_text or "")[:300]
-    conn.execute(
-        """INSERT INTO emails
-        (resend_id, direction, folder, sender_name, sender_email, recipient,
-         subject, preview, body_text, body_html, is_spam, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-        (
-            parsed["resend_id"],
-            parsed["direction"],
-            folder,
-            encrypt_email_field(parsed["sender_name"], user_id),
-            encrypt_email_field(parsed["sender_email"], user_id),
-            encrypt_email_field(parsed["recipient"], user_id),
-            encrypt_email_field(parsed["subject"], user_id),
-            encrypt_email_field(preview, user_id),
-            encrypt_email_field(body_text or None, user_id),
-            encrypt_email_field(body_html or None, user_id),
-            1 if spam else 0,
-            parsed["created_at"],
-        ),
-    )
+    try:
+        conn.execute(
+            """INSERT INTO emails
+            (resend_id, direction, folder, sender_name, sender_email, recipient,
+             subject, preview, body_text, body_html, is_spam, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (
+                parsed["resend_id"],
+                parsed["direction"],
+                folder,
+                encrypt_email_field(parsed["sender_name"], user_id),
+                encrypt_email_field(parsed["sender_email"], user_id),
+                encrypt_email_field(parsed["recipient"], user_id),
+                encrypt_email_field(parsed["subject"], user_id),
+                encrypt_email_field(preview, user_id),
+                encrypt_email_field(body_text or None, user_id),
+                encrypt_email_field(body_html or None, user_id),
+                1 if spam else 0,
+                parsed["created_at"],
+            ),
+        )
+    except RuntimeError:
+        app.logger.error(f"DEK missing for user {user_id}, cannot store inbound email {email_id}")
+        conn.close()
+        return jsonify({"error": "Server locked"}), 503
     email_row_id = conn.execute("SELECT last_insert_rowid()").fetchone()[0]
 
     # Download attachments
