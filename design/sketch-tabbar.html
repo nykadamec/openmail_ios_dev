@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Tab Bar Sketch — modern minimal</title>
+  <link rel="stylesheet" href="https://use.hugeicons.com/font/icons.css">
+  <style>
+    :root {
+      --bg: #0B0B0F;
+      --surface: #141419;
+      --surface-hover: #1C1C22;
+      --border: rgba(255,255,255,0.08);
+      --text: #F2F2F7;
+      --text-secondary: #8E8E93;
+      --text-tertiary: #636366;
+      --accent: #3B82F6;
+      --accent-subtle: rgba(59,130,246,0.12);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    html, body {
+      height: 100dvh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      overflow: hidden;
+    }
+
+    /* Simulated app frame */
+    .app {
+      max-width: 430px;
+      margin: 0 auto;
+      height: 100dvh;
+      border-left: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .header h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; }
+    .header p { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+
+    .list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 16px;
+    }
+
+    .card {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px 16px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      background: var(--surface);
+    }
+    .card:hover { background: var(--surface-hover); }
+    .avatar {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: #2C2C2E;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 600; font-size: 15px; color: var(--text);
+      flex-shrink: 0;
+    }
+    .body { flex: 1; min-width: 0; }
+    .meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }
+    .from { font-weight: 600; font-size: 15px; }
+    .time { font-size: 13px; color: var(--text-secondary); }
+    .subject { font-size: 15px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .subject.unread { font-weight: 600; }
+    .preview { font-size: 14px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--accent); flex-shrink: 0; margin-top: 8px;
+    }
+
+    /* ============================================================
+       FLOATING BOTTOM NAV BAR
+       ============================================================ */
+    .tabbar {
+      position: fixed;
+      bottom: calc(12px + var(--safe-bottom));
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 48px);
+      max-width: 360px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.45);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+      padding: 0 12px;
+      z-index: 100;
+    }
+
+    .tab {
+      flex: 1;
+      height: 48px;
+      border: none;
+      border-radius: 16px;
+      background: transparent;
+      color: var(--text-tertiary);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      cursor: pointer;
+      transition: color 0.15s, background 0.15s;
+    }
+    .tab i { font-size: 22px; }
+    .tab span { font-size: 10px; font-weight: 500; }
+    .tab.active {
+      color: var(--accent);
+      background: var(--accent-subtle);
+    }
+    .tab:active { opacity: 0.7; }
+
+    .compose-wrap {
+      padding: 0 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .compose {
+      width: 48px; height: 48px;
+      border-radius: 16px;
+      border: none;
+      background: var(--accent);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(59,130,246,0.35);
+      transition: transform 0.1s, box-shadow 0.15s;
+    }
+    .compose i { font-size: 22px; }
+    .compose:active { transform: scale(0.95); }
+
+    /* For demo: toggle active state */
+    .tab[data-tab="inbox"] { color: var(--accent); background: var(--accent-subtle); }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="header">
+      <h1>Inbox</h1>
+      <p>2 unread · 14 total</p>
+    </div>
+
+    <div class="list">
+      <div class="card">
+        <div class="avatar">A</div>
+        <div class="body">
+          <div class="meta">
+            <div class="from">Alice Smith</div>
+            <div class="time">10:23</div>
+          </div>
+          <div class="subject unread">Project update</div>
+          <div class="preview">Hey, here is the latest version of the design files...</div>
+        </div>
+        <div class="dot"></div>
+      </div>
+
+      <div class="card">
+        <div class="avatar">M</div>
+        <div class="body">
+          <div class="meta">
+            <div class="from">Martin Novák</div>
+            <div class="time">09:45</div>
+          </div>
+          <div class="subject">Invoice #2042</div>
+          <div class="preview">Please find the invoice attached. Let me know if...</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="avatar">S</div>
+        <div class="body">
+          <div class="meta">
+            <div class="from">Slack</div>
+            <div class="time">Yesterday</div>
+          </div>
+          <div class="subject">New sign-in from Chrome</div>
+          <div class="preview">We noticed a new sign-in to your workspace...</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="avatar">G</div>
+        <div class="body">
+          <div class="meta">
+            <div class="from">GitHub</div>
+            <div class="time">Tue</div>
+          </div>
+          <div class="subject">Security alert</div>
+          <div class="preview">A new SSH key was added to your account.</div>
+        </div>
+      </div>
+    </div>
+
+    <nav class="tabbar">
+      <button class="tab active" data-tab="inbox" aria-label="Inbox">
+        <i class="hgi-stroke hgi-inbox" aria-hidden="true"></i>
+        <span>Inbox</span>
+      </button>
+      <button class="tab" data-tab="starred" aria-label="Starred">
+        <i class="hgi-stroke hgi-star" aria-hidden="true"></i>
+        <span>Starred</span>
+      </button>
+      <div class="compose-wrap">
+        <button class="compose" aria-label="Compose">
+          <i class="hgi-stroke hgi-edit-01" aria-hidden="true"></i>
+        </button>
+      </div>
+      <button class="tab" data-tab="spam" aria-label="Spam">
+        <i class="hgi-stroke hgi-spam" aria-hidden="true"></i>
+        <span>Spam</span>
+      </button>
+      <button class="tab" data-tab="sync" aria-label="Sync">
+        <i class="hgi-stroke hgi-refresh" aria-hidden="true"></i>
+        <span>Sync</span>
+      </button>
+    </nav>
+  </div>
+
+  <script>
+    // Demo interactivity: click tabs to switch active state
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>

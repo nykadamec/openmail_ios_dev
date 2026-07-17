@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Login Sketch — modern minimal</title>
+  <link rel="stylesheet" href="https://use.hugeicons.com/font/icons.css">
+  <style>
+    :root {
+      --bg: #0B0B0F;
+      --surface: #141419;
+      --surface-hover: #1C1C22;
+      --border: rgba(255,255,255,0.08);
+      --text: #F2F2F7;
+      --text-secondary: #8E8E93;
+      --text-tertiary: #636366;
+      --accent: #3B82F6;
+      --accent-subtle: rgba(59,130,246,0.12);
+      --error: #FF453A;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    html, body {
+      min-height: 100dvh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 16px;
+    }
+    .card {
+      width: 100%;
+      max-width: 520px;
+      margin-top: 8vh;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 28px 22px;
+      box-shadow: none;
+    }
+    @media (min-width: 520px) {
+      .card {
+        width: 420px;
+        border-radius: 24px;
+        padding: 36px 36px;
+      }
+    }
+    .brand {
+      text-align: center; margin-bottom: 28px;
+    }
+    .brand .logo {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 52px; height: 52px;
+      border-radius: 16px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 24px;
+      margin-bottom: 16px;
+    }
+    .brand h1 {
+      font-size: 26px; font-weight: 800;
+      letter-spacing: -0.03em; margin-bottom: 4px;
+    }
+    .brand p { font-size: 14px; color: var(--text-secondary); }
+
+    .field { margin-bottom: 14px; }
+    .field label {
+      display: block;
+      font-size: 13px; font-weight: 600;
+      color: var(--text-secondary); margin-bottom: 7px;
+    }
+    .field input {
+      width: 100%;
+      padding: 13px 15px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      color: var(--text);
+      font-size: 16px;
+      outline: none;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .field input:focus {
+      border-color: var(--accent);
+      background: var(--surface-hover);
+    }
+
+    .primary-btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 14px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 16px; font-weight: 700;
+      cursor: pointer;
+      margin-top: 6px;
+      transition: transform 0.1s, opacity 0.15s;
+    }
+    .primary-btn:active { transform: scale(0.98); }
+
+    .error {
+      background: rgba(255,69,58,0.10);
+      border: 1px solid rgba(255,69,58,0.25);
+      color: #ff8a82;
+      padding: 11px 14px;
+      border-radius: 12px;
+      font-size: 14px;
+      margin-bottom: 14px;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 12px;
+      color: var(--text-tertiary);
+    }
+  </style>
+</head>
+<body>
+  <form class="card">
+    <div class="brand">
+      <div class="logo">
+        <i class="hgi-stroke hgi-mail-01" aria-hidden="true"></i>
+      </div>
+      <h1>openMail</h1>
+      <p>Sign in to your mailbox</p>
+    </div>
+
+    <div class="error">Invalid username or password.</div>
+
+    <div class="field">
+      <label>Username</label>
+      <input type="text" value="dominik" autofocus>
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" value="••••••••">
+    </div>
+
+    <button type="submit" class="primary-btn">Sign in</button>
+
+    <div class="footer">Secure, self-hosted e-mail client.</div>
+  </form>
+</body>
+</html>

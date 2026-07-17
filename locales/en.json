@@ -44,6 +44,7 @@
   "tab.spam": "Spam",
   "tab.sync": "Sync",
 
+  "composer.new": "New message",
   "composer.cancel": "Cancel",
   "composer.send": "Send",
   "composer.to": "To",
@@ -78,6 +79,7 @@
   "contacts.title": "Contacts",
   "contacts.add": "+ Add contact",
   "contacts.search": "Search...",
+  "emails.empty": "No emails",
   "contacts.empty": "No contacts",
   "contacts.new.title": "New contact",
   "contacts.new.name": "Name",

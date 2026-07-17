@@ -3,92 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0B0B0F">
   <title>{{ _("setup.title") }}</title>
-  <style>
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    html, body {
-      margin: 0; padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
-      background: #0a0a0a;
-      color: #f5f5f7;
-      height: 100dvh; overflow: hidden;
-      -webkit-font-smoothing: antialiased;
-    }
-    body {
-      background:
-        radial-gradient(ellipse 80% 60% at 10% 0%, rgba(255, 107, 53, 0.2), transparent 50%),
-        radial-gradient(ellipse 70% 50% at 100% 100%, rgba(255, 149, 88, 0.12), transparent 60%),
-        #0a0a0a;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-    }
-    .card {
-      position: relative; z-index: 1;
-      width: 100%; max-width: 380px;
-      padding: 40px 28px;
-      background: rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(40px) saturate(180%);
-      -webkit-backdrop-filter: blur(40px) saturate(180%);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 28px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-    }
-    .brand { text-align: center; margin-bottom: 28px; }
-    .brand h1 {
-      font-size: 1.8rem; font-weight: 800; margin: 0 0 8px;
-      letter-spacing: -0.04em;
-      background: linear-gradient(135deg, #ffffff 0%, #ffb088 100%);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    }
-    .brand p { font-size: 0.85rem; color: rgba(255,255,255,0.55); margin: 0; }
-    .field { margin-bottom: 16px; }
-    .field label {
-      display: block; font-size: 0.7rem; font-weight: 600;
-      letter-spacing: 0.1em; text-transform: uppercase;
-      color: rgba(255, 255, 255, 0.5);
-      margin-bottom: 8px;
-    }
-    .field input {
-      width: 100%;
-      padding: 14px 16px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 14px;
-      color: #fff; font: inherit; font-size: 0.95rem;
-      outline: none;
-    }
-    .field input:focus { border-color: rgba(255, 107, 53, 0.5); }
-    button[type="submit"] {
-      width: 100%;
-      padding: 14px;
-      background: linear-gradient(135deg, #ff6b35 0%, #c8431f 100%);
-      color: #fff;
-      border: none;
-      border-radius: 14px;
-      font: inherit; font-size: 0.95rem; font-weight: 700;
-      cursor: pointer;
-      margin-top: 8px;
-      box-shadow: 0 4px 16px rgba(255, 107, 53, 0.4);
-    }
-    .error {
-      background: rgba(255, 69, 58, 0.15);
-      border: 1px solid rgba(255, 69, 58, 0.3);
-      color: #ff8a82;
-      padding: 10px 14px;
-      border-radius: 10px;
-      font-size: 0.85rem;
-      margin-bottom: 16px;
-    }
-  </style>
+  <link rel="stylesheet" href="https://use.hugeicons.com/font/icons.css">
+  <link rel="stylesheet" href="/static/app.css">
+  <link rel="manifest" href="/static/manifest.json">
+  <link rel="apple-touch-icon" href="/static/icon-192.png">
 </head>
-<body>
-  <form class="card" method="post">
-    <div class="brand">
+<body class="auth-body">
+  <form class="auth-card" method="post">
+    <div class="auth-brand">
+      <div class="logo">
+        <i class="hgi-stroke hgi-mail-01" aria-hidden="true"></i>
+      </div>
       <h1>{{ _("setup.heading") }}</h1>
       <p>{{ _("setup.subtitle") }}</p>
     </div>
 
     {% if error %}
-    <div class="error">{{ error }}</div>
+    <div class="error-msg">{{ error }}</div>
     {% endif %}
 
     <div class="field">
@@ -100,7 +33,12 @@
       <input type="password" name="password" minlength="6" required>
     </div>
 
-    <button type="submit">{{ _("setup.submit") }}</button>
+    <button type="submit" class="primary-btn">{{ _("setup.submit") }}</button>
   </form>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js');
+    }
+  </script>
 </body>
 </html>

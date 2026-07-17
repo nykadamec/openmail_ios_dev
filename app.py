@@ -27,7 +27,8 @@ from cryptography.hazmat.primitives import hashes
 from dotenv import load_dotenv
 from flask import (
     Flask, Response, abort, jsonify, make_response,
-    render_template, request, stream_with_context, redirect, url_for, send_file
+    render_template, request, stream_with_context, redirect, url_for, send_file,
+    send_from_directory
 )
 from i18n import t, get_locale, set_locale, _load, get_all_keys
 
@@ -656,6 +657,10 @@ def fetch_resend_email(email_id: str) -> dict:
 # ---------------------------------------------------------------------------
 # Public routes
 # ---------------------------------------------------------------------------
+@app.route("/sw.js")
+def service_worker():
+    return send_from_directory(".", "sw.js", mimetype="application/javascript")
+
 @app.route("/setup", methods=["GET", "POST"])
 def setup():
     if has_users():
@@ -1158,8 +1163,15 @@ def delete_custom_folder(folder_id):
 
 
 @app.route("/api/stats", methods=["GET"])
-@login_required
 def stats():
+    user = current_user()
+    if not user:
+        sid = request.cookies.get('session_id')
+        if sid:
+            delete_session(sid)
+        resp = make_response(jsonify({'error': 'Locked', 'code': 'dek_missing'}), 401)
+        resp.delete_cookie('session_id')
+        return resp
     conn = get_db()
     inbound = conn.execute("SELECT COUNT(*) FROM emails WHERE direction = 'inbound' AND is_trash = 0").fetchone()[0]
     outbound = conn.execute("SELECT COUNT(*) FROM emails WHERE direction = 'outbound' AND is_trash = 0").fetchone()[0]

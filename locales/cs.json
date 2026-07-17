@@ -44,6 +44,7 @@
   "tab.spam": "Spam",
   "tab.sync": "Synchronizovat",
 
+  "composer.new": "Nová zpráva",
   "composer.cancel": "Zrušit",
   "composer.send": "Odeslat",
   "composer.to": "Komu",
@@ -78,6 +79,7 @@
   "contacts.title": "Kontakty",
   "contacts.add": "+ Přidat kontakt",
   "contacts.search": "Hledat...",
+  "emails.empty": "Žádné e-maily",
   "contacts.empty": "Žádné kontakty",
   "contacts.new.title": "Nový kontakt",
   "contacts.new.name": "Jméno",

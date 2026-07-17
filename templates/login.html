@@ -3,128 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0B0B0F">
   <title>{{ _("login.title") }}</title>
-  <style>
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    html, body {
-      margin: 0; padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
-      background: #0a0a0a;
-      color: #f5f5f7;
-      height: 100dvh; overflow: hidden;
-      -webkit-font-smoothing: antialiased;
-    }
-    body {
-      background:
-        radial-gradient(ellipse 80% 60% at 10% 0%, rgba(255, 107, 53, 0.2), transparent 50%),
-        radial-gradient(ellipse 70% 50% at 100% 100%, rgba(255, 149, 88, 0.12), transparent 60%),
-        #0a0a0a;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-    }
-    .orb {
-      position: fixed; border-radius: 50%; filter: blur(80px);
-      pointer-events: none; z-index: 0;
-    }
-    .orb-1 { width: 350px; height: 350px; background: radial-gradient(circle, #ff6b35 0%, transparent 70%); top: -80px; left: -80px; opacity: 0.25; }
-    .orb-2 { width: 280px; height: 280px; background: radial-gradient(circle, #4a90e2 0%, transparent 70%); bottom: 20%; right: -60px; opacity: 0.15; }
-
-    .card {
-      position: relative; z-index: 1;
-      width: 100%; max-width: 380px;
-      padding: 40px 28px;
-      background: rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(40px) saturate(180%);
-      -webkit-backdrop-filter: blur(40px) saturate(180%);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 28px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-    }
-    .brand {
-      text-align: center; margin-bottom: 32px;
-    }
-    .brand .tag {
-      display: inline-flex; align-items: center; gap: 6px;
-      font-size: 0.7rem; font-weight: 600; letter-spacing: 0.2em;
-      text-transform: uppercase; color: #ff6b35;
-      margin-bottom: 12px;
-    }
-    .brand .tag::before {
-      content: ''; width: 6px; height: 6px; border-radius: 50%;
-      background: #ff6b35; box-shadow: 0 0 8px rgba(255, 107, 53, 0.4);
-    }
-    .brand h1 {
-      font-size: 2rem; font-weight: 800; margin: 0;
-      letter-spacing: -0.04em;
-      background: linear-gradient(135deg, #ffffff 0%, #ffb088 100%);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    }
-    .brand p { font-size: 0.85rem; color: rgba(255,255,255,0.55); margin: 8px 0 0; }
-
-    .field { margin-bottom: 16px; }
-    .field label {
-      display: block; font-size: 0.7rem; font-weight: 600;
-      letter-spacing: 0.1em; text-transform: uppercase;
-      color: rgba(255, 255, 255, 0.5);
-      margin-bottom: 8px;
-    }
-    .field input {
-      width: 100%;
-      padding: 14px 16px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 14px;
-      color: #fff; font: inherit; font-size: 0.95rem;
-      outline: none;
-      transition: border-color 0.2s, background 0.2s;
-    }
-    .field input:focus {
-      border-color: rgba(255, 107, 53, 0.5);
-      background: rgba(255, 255, 255, 0.07);
-    }
-
-    button[type="submit"] {
-      width: 100%;
-      padding: 14px;
-      background: linear-gradient(135deg, #ff6b35 0%, #c8431f 100%);
-      color: #fff;
-      border: none;
-      border-radius: 14px;
-      font: inherit; font-size: 0.95rem; font-weight: 700;
-      cursor: pointer;
-      margin-top: 8px;
-      box-shadow: 0 4px 16px rgba(255, 107, 53, 0.4);
-      transition: transform 0.15s, box-shadow 0.2s;
-    }
-    button[type="submit"]:active { transform: scale(0.98); }
-
-    .error {
-      background: rgba(255, 69, 58, 0.15);
-      border: 1px solid rgba(255, 69, 58, 0.3);
-      color: #ff8a82;
-      padding: 10px 14px;
-      border-radius: 10px;
-      font-size: 0.85rem;
-      margin-bottom: 16px;
-    }
-    .footer {
-      text-align: center; margin-top: 24px;
-      font-size: 0.75rem; color: rgba(255, 255, 255, 0.35);
-    }
-  </style>
+  <link rel="stylesheet" href="https://use.hugeicons.com/font/icons.css">
+  <link rel="stylesheet" href="/static/app.css">
+  <link rel="manifest" href="/static/manifest.json">
+  <link rel="apple-touch-icon" href="/static/icon-192.png">
 </head>
-<body>
-  <div class="orb orb-1"></div>
-  <div class="orb orb-2"></div>
-
-  <form class="card" method="post">
-    <div class="brand">
-      <div class="tag">openMail</div>
+<body class="auth-body">
+  <form class="auth-card" method="post">
+    <div class="auth-brand">
+      <div class="logo">
+        <i class="hgi-stroke hgi-mail-01" aria-hidden="true"></i>
+      </div>
       <h1>{{ _("login.heading") }}</h1>
       <p>{{ _("login.welcome") }}</p>
     </div>
 
     {% if error %}
-    <div class="error">{{ error }}</div>
+    <div class="error-msg">{{ error }}</div>
     {% endif %}
 
     <div class="field">
@@ -136,9 +33,14 @@
       <input type="password" name="password" required>
     </div>
 
-    <button type="submit">{{ _("login.submit") }}</button>
+    <button type="submit" class="primary-btn">{{ _("login.submit") }}</button>
 
-    <div class="footer">{{ _("login.footer") }}</div>
+    <div class="auth-footer">{{ _("login.footer") }}</div>
   </form>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js');
+    }
+  </script>
 </body>
 </html>
