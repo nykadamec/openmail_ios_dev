@@ -15,7 +15,7 @@
   <link rel="apple-touch-icon" href="/static/icon-192.png">
   <script data-cfasync="false">
     window.__OPENMAIL_FROM_EMAIL = {{ from_email | tojson }};
-    window.__OPENMAIL_LOCALE = {{ locale_json | safe }};
+    window.__OPENMAIL_LOCALE = {{ locale_json | tojson | safe }};
   </script>
 </head>
 <body>

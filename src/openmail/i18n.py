@@ -18,27 +18,37 @@ _LOCALES_DIR = Path(__file__).resolve().parent.parent.parent / "locales"
 _DEFAULT_LOCALE = "cs"
 
 _cache: dict[str, dict[str, str]] = {}
+_mtime: dict[str, float] = {}
 _cache_lock = threading.Lock()
 _current_locale: str = _DEFAULT_LOCALE
 
 
-def _load_locale(lang: str) -> dict[str, str]:
-    """Load a locale file from disk. Returns {} on failure."""
+def _load_locale(lang: str) -> tuple[dict[str, str], float]:
+    """Load a locale file from disk. Returns ({}, 0) on failure."""
     path = _LOCALES_DIR / f"{lang}.json"
     if not path.exists():
-        return {}
+        return {}, 0
     try:
+        mtime = path.stat().st_mtime
         with open(path, "r", encoding="utf-8") as f:
-            return json.load(f)
+            return json.load(f), mtime
     except (json.JSONDecodeError, OSError):
-        return {}
+        return {}, 0
 
 
 def _get_data(lang: str) -> dict[str, str]:
-    """Get locale data, with cache."""
+    """Get locale data, with cache invalidated on file change."""
+    path = _LOCALES_DIR / f"{lang}.json"
+    try:
+        current_mtime = path.stat().st_mtime
+    except OSError:
+        current_mtime = 0
     with _cache_lock:
-        if lang not in _cache:
-            _cache[lang] = _load_locale(lang)
+        cached_mtime = _mtime.get(lang, 0)
+        if lang not in _cache or current_mtime > cached_mtime:
+            data, mtime = _load_locale(lang)
+            _cache[lang] = data
+            _mtime[lang] = mtime
         return _cache[lang]
 
 
