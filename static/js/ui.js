@@ -29,9 +29,7 @@ export function renderEmailList(emails, currentFolder, listEl) {
             <div class="time">${formatDate(e.created_at)}</div>
           </div>
           <div class="subject">${escapeHtml(e.subject || __('error.not_found'))}</div>
-          <div class="preview">${escapeHtml(e.preview || '')}</div>
         </div>
-        ${!e.is_read ? '<div class="unread-dot"></div>' : ''}
       </div>
     `;
     frag.appendChild(card);

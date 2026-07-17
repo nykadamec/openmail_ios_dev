@@ -13,6 +13,10 @@
   <link rel="stylesheet" href="/static/app.css">
   <link rel="manifest" href="/static/manifest.json">
   <link rel="apple-touch-icon" href="/static/icon-192.png">
+  <script data-cfasync="false">
+    window.__OPENMAIL_FROM_EMAIL = {{ from_email | tojson }};
+    window.__OPENMAIL_LOCALE = {{ locale_json | safe }};
+  </script>
 </head>
 <body>
   <div id="app">
@@ -23,10 +27,10 @@
         <div class="subtitle" id="headerSubtitle">{{ _("index.header.subtitle") }}</div>
       </div>
       <div class="header-actions">
-        <button class="icon-btn" onclick="toggleMenu()" aria-label="{{ _('menu.open') }}">
+        <button class="icon-btn" data-action="toggleMenu" aria-label="{{ _('menu.open') }}">
           <i class="hgi-stroke hgi-menu-01" aria-hidden="true"></i>
         </button>
-        <button class="icon-btn" onclick="toggleSelectMode()" id="selectToggle" title="{{ _('action.select') }}">
+        <button class="icon-btn" data-action="selectMode" id="selectToggle" title="{{ _('action.select') }}">
           <i class="hgi-stroke hgi-square" aria-hidden="true"></i>
         </button>
       </div>
@@ -38,7 +42,7 @@
     </div>
 
     <!-- Side menu drawer -->
-    <div class="menu-drawer" id="menuDrawer" onclick="if(event.target.id==='menuDrawer')closeMenu()">
+    <div class="menu-drawer" id="menuDrawer">
       <div class="menu-panel">
         <div class="menu-header">
           <div class="menu-user" id="menuUser">@</div>
@@ -46,44 +50,44 @@
             <div class="menu-username" id="menuUsername">dominik</div>
             <div class="menu-sub">{{ _("menu.logged_in") }}</div>
           </div>
-          <button class="menu-close" onclick="closeMenu()" aria-label="{{ _('action.close') }}">
+          <button class="menu-close" data-action="closeMenu" aria-label="{{ _('action.close') }}">
             <i class="hgi-stroke hgi-cancel-01" aria-hidden="true"></i>
           </button>
         </div>
 
         <div class="menu-section">
           <div class="menu-section-title">{{ _("menu.section.folders") }}</div>
-          <button class="menu-item" data-folder="inbox" onclick="setFolder('inbox');closeMenu()">
+          <button class="menu-item" data-folder="inbox">
             <i class="hgi-stroke hgi-inbox icon" aria-hidden="true"></i><span>{{ _("menu.folder.inbox") }}</span><span class="badge" id="menuBadgeInbox">0</span>
           </button>
-          <button class="menu-item" data-folder="starred" onclick="setFolder('starred');closeMenu()">
+          <button class="menu-item" data-folder="starred">
             <i class="hgi-stroke hgi-star icon" aria-hidden="true"></i><span>{{ _("menu.folder.starred") }}</span><span class="badge" id="menuBadgeStarred">0</span>
           </button>
-          <button class="menu-item" data-folder="sent" onclick="setFolder('sent');closeMenu()">
+          <button class="menu-item" data-folder="sent">
             <i class="hgi-stroke hgi-mail-send-01 icon" aria-hidden="true"></i><span>{{ _("menu.folder.sent") }}</span>
           </button>
-          <button class="menu-item" data-folder="spam" onclick="setFolder('spam');closeMenu()">
+          <button class="menu-item" data-folder="spam">
             <i class="hgi-stroke hgi-spam icon" aria-hidden="true"></i><span>{{ _("menu.folder.spam") }}</span><span class="badge" id="menuBadgeSpam">0</span>
           </button>
-          <button class="menu-item" data-folder="trash" onclick="setFolder('trash');closeMenu()">
+          <button class="menu-item" data-folder="trash">
             <i class="hgi-stroke hgi-delete-01 icon" aria-hidden="true"></i><span>{{ _("menu.folder.trash") }}</span><span class="badge" id="menuBadgeTrash">0</span>
           </button>
           <div id="customFoldersList"></div>
-          <button class="menu-item-add" onclick="showNewFolder()">
+          <button class="menu-item-add" data-action="newFolder">
             <i class="hgi-stroke hgi-add-01 icon" aria-hidden="true"></i><span>{{ _("menu.folder.new") }}</span>
           </button>
         </div>
 
         <div class="menu-section">
           <div class="menu-section-title">{{ _("menu.section.address") }}</div>
-          <button class="menu-item" onclick="openContacts()">
+          <button class="menu-item" data-action="openContacts">
             <i class="hgi-stroke hgi-user icon" aria-hidden="true"></i><span>{{ _("menu.contacts") }}</span>
           </button>
         </div>
 
         <div class="menu-section">
           <div class="menu-section-title">{{ _("menu.section.account") }}</div>
-          <button class="menu-item" onclick="openSettings()">
+          <button class="menu-item" data-action="openSettings">
             <i class="hgi-stroke hgi-settings-01 icon" aria-hidden="true"></i><span>{{ _("menu.settings") }}</span>
           </button>
           <button class="menu-item" onclick="document.getElementById('logoutForm').submit()">
@@ -97,24 +101,24 @@
     <!-- Floating Tab Bar -->
     <div class="tab-bar-wrap">
       <nav class="tab-bar" id="tabBar">
-        <button class="tab" data-folder="inbox" onclick="setFolder('inbox')" aria-label="{{ _('tab.inbox') }}">
+        <button class="tab" data-folder="inbox" aria-label="{{ _('tab.inbox') }}">
           <i class="hgi-stroke hgi-inbox" aria-hidden="true"></i>
           <span>Inbox</span>
         </button>
-        <button class="tab" data-folder="starred" onclick="setFolder('starred')" aria-label="{{ _('tab.starred') }}">
+        <button class="tab" data-folder="starred" aria-label="{{ _('tab.starred') }}">
           <i class="hgi-stroke hgi-star" aria-hidden="true"></i>
           <span>Starred</span>
         </button>
         <div class="compose-wrap">
-          <button class="compose" onclick="openComposer()" aria-label="{{ _('tab.compose') }}">
+          <button class="compose" data-action="openComposer" aria-label="{{ _('tab.compose') }}">
             <i class="hgi-stroke hgi-edit-01" aria-hidden="true"></i>
           </button>
         </div>
-        <button class="tab" data-folder="spam" onclick="setFolder('spam')" aria-label="{{ _('tab.spam') }}">
+        <button class="tab" data-folder="spam" aria-label="{{ _('tab.spam') }}">
           <i class="hgi-stroke hgi-spam" aria-hidden="true"></i>
           <span>Spam</span>
         </button>
-        <button class="tab" onclick="syncEmails()" aria-label="{{ _('tab.sync') }}">
+        <button class="tab" data-action="sync" aria-label="{{ _('tab.sync') }}">
           <i class="hgi-stroke hgi-refresh" aria-hidden="true"></i>
           <span>Sync</span>
         </button>
@@ -124,26 +128,26 @@
     <!-- Bulk action bar -->
     <div class="bulk-bar" id="bulkBar">
       <span class="count" id="bulkCount">{{ _("action.selected", count=0) }}</span>
-      <button onclick="bulkAction('read')">{{ _("action.read") }}</button>
-      <button onclick="bulkAction('unread')">{{ _("action.unread") }}</button>
-      <button onclick="bulkAction('trash')">{{ _("action.trash") }}</button>
-      <button onclick="bulkAction('spam')">{{ _("action.spam") }}</button>
-      <button class="danger" onclick="bulkAction('delete')">{{ _("action.delete") }}</button>
+      <button data-bulk="read">{{ _("action.read") }}</button>
+      <button data-bulk="unread">{{ _("action.unread") }}</button>
+      <button data-bulk="trash">{{ _("action.trash") }}</button>
+      <button data-bulk="spam">{{ _("action.spam") }}</button>
+      <button class="danger" data-bulk="delete">{{ _("action.delete") }}</button>
     </div>
 
     <!-- Reader -->
     <div class="reader" id="reader">
       <div class="reader-top">
         <div class="left">
-          <button class="icon-btn" onclick="closeReader()" aria-label="{{ _('action.back') }}">
+          <button class="icon-btn" data-action="closeReader" aria-label="{{ _('action.back') }}">
             <i class="hgi-stroke hgi-arrow-left-01" aria-hidden="true"></i>
           </button>
         </div>
         <div class="right">
-          <button class="icon-btn" id="readerStarBtn" onclick="toggleStarFromReader()" aria-label="{{ _('action.star') }}">
+          <button class="icon-btn" id="readerStarBtn" data-action="toggleStarFromReader" aria-label="{{ _('action.star') }}">
             <i class="hgi-stroke hgi-star" aria-hidden="true"></i>
           </button>
-          <button class="icon-btn" onclick="moveToTrash()" aria-label="{{ _('action.trash') }}">
+          <button class="icon-btn" data-action="moveToTrash" aria-label="{{ _('action.trash') }}">
             <i class="hgi-stroke hgi-delete-01" aria-hidden="true"></i>
           </button>
         </div>
@@ -158,14 +162,14 @@
     <!-- Composer with autocomplete -->
     <div class="composer" id="composer">
       <div class="composer-top">
-        <button class="text-btn" onclick="closeComposer()">{{ _("composer.cancel") }}</button>
+        <button class="text-btn" data-action="closeComposer">{{ _("composer.cancel") }}</button>
         <h1>{{ _("composer.new") }}</h1>
-        <button class="text-btn primary" onclick="sendEmail()">{{ _("composer.send") }}</button>
+        <button class="text-btn primary" data-action="sendEmail">{{ _("composer.send") }}</button>
       </div>
       <div class="form">
         <div class="row" style="position: relative;">
           <span class="label">{{ _("composer.to") }}</span>
-          <input type="email" id="toField" placeholder="{{ _('composer.placeholder.to') }}" autocomplete="email" oninput="onToInput()">
+          <input type="email" id="toField" placeholder="{{ _('composer.placeholder.to') }}" autocomplete="email">
           <div class="autocomplete" id="autocompleteList"></div>
         </div>
         <div class="row">
@@ -175,8 +179,8 @@
         <textarea id="bodyField" placeholder="{{ _('composer.placeholder.body') }}"></textarea>
         <div class="attachments-preview" id="attachmentPreview"></div>
         <div class="composer-actions">
-          <input type="file" id="attachmentInput" multiple onchange="onAttachmentsChange()" style="display:none">
-          <button class="attach-btn" onclick="document.getElementById('attachmentInput').click()" aria-label="{{ _('composer.attach') }}">
+          <input type="file" id="attachmentInput" multiple style="display:none">
+          <button class="attach-btn" data-action="attach" aria-label="{{ _('composer.attach') }}">
             <i class="hgi-stroke hgi-attachment-01" aria-hidden="true"></i>
           </button>
         </div>
@@ -186,7 +190,7 @@
     <!-- Settings panel -->
     <div class="side-panel" id="settingsPanel">
       <div class="panel-top">
-        <button class="icon-btn" onclick="closeSettings()" aria-label="{{ _('action.back') }}">
+        <button class="icon-btn" data-action="closeSettings" aria-label="{{ _('action.back') }}">
           <i class="hgi-stroke hgi-arrow-left-01" aria-hidden="true"></i>
         </button>
         <h2>{{ _("settings.title") }}</h2>
@@ -210,17 +214,17 @@
           <label>{{ _("settings.new_password") }}</label>
           <input type="password" id="newPassword" autocomplete="new-password">
         </div>
-        <button class="primary-btn" onclick="changePassword()">{{ _("settings.change_password_btn") }}</button>
+        <button class="primary-btn" data-action="changePassword">{{ _("settings.change_password_btn") }}</button>
 
         <div class="panel-section-title">{{ _("settings.language") }}</div>
         <div class="lang-switch">
-          <button class="active" data-lang="cs" onclick="setLanguage('cs')">{{ _("settings.language.cs") }}</button>
-          <button data-lang="en" onclick="setLanguage('en')">{{ _("settings.language.en") }}</button>
+          <button data-lang="cs">{{ _("settings.language.cs") }}</button>
+          <button data-lang="en">{{ _("settings.language.en") }}</button>
         </div>
 
         <div class="panel-section-title">{{ _("settings.session") }}</div>
         <p style="font-size:13px;color:var(--text-secondary);margin-bottom:12px;">{{ _("settings.session_info") }}</p>
-        <button class="secondary-btn" onclick="clearCache()">
+        <button class="secondary-btn" data-action="clearCache">
           <i class="hgi-stroke hgi-refresh" aria-hidden="true"></i> {{ _("settings.clear_cache") }}
         </button>
 
@@ -235,15 +239,15 @@
     <!-- Contacts panel -->
     <div class="side-panel" id="contactsPanel">
       <div class="panel-top">
-        <button class="icon-btn" onclick="closeContacts()" aria-label="{{ _('action.back') }}">
+        <button class="icon-btn" data-action="closeContacts" aria-label="{{ _('action.back') }}">
           <i class="hgi-stroke hgi-arrow-left-01" aria-hidden="true"></i>
         </button>
         <h2>{{ _("contacts.title") }}</h2>
       </div>
       <div class="panel-body">
-        <button class="primary-btn" onclick="showNewContact()">{{ _("contacts.add") }}</button>
+        <button class="primary-btn" data-action="newContact">{{ _("contacts.add") }}</button>
         <div class="search-box">
-          <input type="text" id="contactSearch" placeholder="{{ _('contacts.search') }}" oninput="loadContacts()">
+          <input type="text" id="contactSearch" placeholder="{{ _('contacts.search') }}">
         </div>
         <div id="contactsList"></div>
       </div>
@@ -257,830 +261,6 @@
       <div class="modal-content" id="modalContent"></div>
     </div>
   </div>
-  <script data-cfasync="false">
-    // ---- State ----
-    let currentFolder = 'inbox';
-    let currentEmailId = null;
-    let currentEmails = [];
-    let currentEmailData = null;
-    let customFolders = [];
-    const FROM_EMAIL = '{{ from_email }}';
-    const LOCALE = {{ locale_json|safe }};
-    function __(key, ...args) {
-      let val = LOCALE[key];
-      if (!val) return '??' + key + '??';
-      if (args.length) {
-        let i = 0;
-        val = val.replace(/\{(\w+)\}/g, (_, k) => args[i++] ?? ('{' + k + '}'));
-      }
-      return val;
-    }
-    async function setLanguage(lang) {
-      await fetch('/api/locale', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({locale: lang}) });
-      location.reload();
-    }
-
-    // ---- DOM refs ----
-    const listEl = document.getElementById('emailList');
-    const readerEl = document.getElementById('reader');
-    const composerEl = document.getElementById('composer');
-    const toastEl = document.getElementById('toast');
-    const tabBar = document.getElementById('tabBar');
-
-    // ---- Avatar colors ----
-    const AVATAR_COLORS = ['#2C2C2E', '#3A3A3C', '#48484A', '#636366', '#8E8E93'];
-    function avatarColor(seed) {
-      let h = 0;
-      for (let i = 0; i < seed.length; i++) h = (h << 5) - h + seed.charCodeAt(i);
-      return AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length];
-    }
-    function initial(text) {
-      if (!text) return '?';
-      const c = text.replace(/[^a-zA-Z0-9]/g, '');
-      return (c[0] || text[0] || '?').toUpperCase();
-    }
-    function escapeHtml(text) {
-      if (!text) return '';
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
-    }
-    function stripHtml(html) {
-      if (!html) return '';
-      const tmp = document.createElement('div');
-      tmp.innerHTML = html;
-      return tmp.textContent || tmp.innerText || '';
-    }
-    function formatDate(dateStr) {
-      if (!dateStr) return '';
-      const d = new Date(dateStr);
-      if (isNaN(d)) return dateStr;
-      const now = new Date();
-      const diff = now - d;
-      if (diff < 86400000) return d.toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' });
-      if (diff < 604800000) return d.toLocaleDateString('cs-CZ', { weekday: 'short' });
-      return d.toLocaleDateString('cs-CZ', { day: '2-digit', month: '2-digit' });
-    }
-    function formatFullDate(dateStr) {
-      if (!dateStr) return '';
-      const d = new Date(dateStr);
-      if (isNaN(d)) return dateStr;
-      return d.toLocaleString('cs-CZ', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-    }
-
-    // ---- Toast ----
-    let toastTimer = null;
-    function showToast(msg, type = 'success') {
-      toastEl.textContent = msg;
-      toastEl.className = 'toast show ' + type;
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => toastEl.className = 'toast', 2500);
-    }
-
-    // ---- SSE ----
-    function connectSSE() {
-      const evt = new EventSource('/api/events');
-      evt.addEventListener('new_email', (e) => {
-        try {
-          const data = JSON.parse(e.data);
-          if (data.is_spam) {
-            showToast(__('toast.spam', data.subject || ''));
-          } else {
-            showToast(__('toast.new_email', data.subject || ''));
-          }
-          loadEmails();
-          loadStats();
-        } catch {}
-      });
-      evt.onerror = () => setTimeout(connectSSE, 3000);
-    }
-
-    // ---- Menu ----
-    function toggleMenu() {
-      document.getElementById('menuDrawer').classList.add('open');
-    }
-    function closeMenu() {
-      document.getElementById('menuDrawer').classList.remove('open');
-    }
-
-    // ---- Settings ----
-    function openSettings() {
-      closeMenu();
-      document.getElementById('settingsPanel').classList.add('open');
-    }
-    function closeSettings() {
-      document.getElementById('settingsPanel').classList.remove('open');
-    }
-    async function loadMe() {
-      try {
-        const res = await fetch('/api/me');
-        if (res.status === 401) {
-          window.location.href = '/login';
-          return;
-        }
-        const user = await res.json();
-        document.getElementById('menuUsername').textContent = '@' + user.username;
-        document.getElementById('menuUser').textContent = user.username[0].toUpperCase();
-        document.getElementById('settingsUsername').textContent = user.username;
-      } catch (e) {}
-    }
-    async function changePassword() {
-      const current_pw = document.getElementById('currentPassword').value;
-      const new_pw = document.getElementById('newPassword').value;
-      if (!current_pw || !new_pw) {
-        showToast(__('toast.fill_fields'), 'error');
-        return;
-      }
-      try {
-        const res = await fetch('/api/change_password', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ current_password: current_pw, new_password: new_pw })
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || __('error.generic'));
-        showToast(__('toast.password_changed'));
-        document.getElementById('currentPassword').value = '';
-        document.getElementById('newPassword').value = '';
-      } catch (err) {
-        showToast(err.message, 'error');
-      }
-    }
-    async function clearCache() {
-      try {
-        if ('caches' in window) {
-          const keys = await caches.keys();
-          await Promise.all(keys.map(k => caches.delete(k)));
-        }
-        showToast(__('settings.cache_cleared'));
-        setTimeout(() => window.location.reload(true), 900);
-      } catch (err) {
-        showToast(err.message, 'error');
-      }
-    }
-
-    // ---- Contacts ----
-    function openContacts() {
-      closeMenu();
-      document.getElementById('contactsPanel').classList.add('open');
-      loadContacts();
-    }
-    function closeContacts() {
-      document.getElementById('contactsPanel').classList.remove('open');
-    }
-    async function loadContacts() {
-      const q = document.getElementById('contactSearch')?.value || '';
-      try {
-        const res = await fetch('/api/contacts?q=' + encodeURIComponent(q));
-        const contacts = await res.json();
-        if (!res.ok) throw new Error(contacts.error || __('error.generic'));
-        const list = document.getElementById('contactsList');
-        if (contacts.length === 0) {
-          list.innerHTML = '<div class="empty">' + __('emails.empty') + '</div>';
-          return;
-        }
-        list.innerHTML = contacts.map(c => `
-          <div class="contact-item">
-            <div class="avatar" style="background: ${avatarColor(c.email)}">${escapeHtml(initial(c.name))}</div>
-            <div class="contact-info">
-              <div class="contact-name">${escapeHtml(c.name)}</div>
-              <div class="contact-email">${escapeHtml(c.email)}</div>
-            </div>
-            <button class="contact-action" onclick="deleteContact(${c.id})" aria-label="{{ _('contacts.delete') }}">
-              <i class="hgi-stroke hgi-delete-01" aria-hidden="true"></i>
-            </button>
-          </div>
-        `).join('');
-      } catch (err) {
-        showToast(err.message, 'error');
-      }
-    }
-    function showNewContact() {
-      showModal(`
-        <h2>${__('contacts.new.title')}</h2>
-        <div class="field"><label>${__('contacts.new.name')}</label><input type="text" id="newContactName" autofocus></div>
-        <div class="field"><label>${__('contacts.new.email')}</label><input type="email" id="newContactEmail"></div>
-        <div class="field"><label>${__('contacts.new.notes')}</label><input type="text" id="newContactNotes"></div>
-        <div class="modal-actions">
-          <button class="cancel-btn" onclick="closeModal()">${__('contacts.new.cancel')}</button>
-          <button class="primary-btn" onclick="createContact()">${__('contacts.new.save')}</button>
-        </div>
-      `);
-    }
-    async function createContact() {
-      const name = document.getElementById('newContactName').value;
-      const email = document.getElementById('newContactEmail').value;
-      const notes = document.getElementById('newContactNotes').value;
-      if (!name || !email) {
-        showToast(__('toast.fill_name_email'), 'error');
-        return;
-      }
-      try {
-        const res = await fetch('/api/contacts', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, email, notes })
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || __('error.generic'));
-        showToast(__('contacts.saved'));
-        closeModal();
-        loadContacts();
-      } catch (err) {
-        showToast(err.message, 'error');
-      }
-    }
-    async function deleteContact(id) {
-      if (!confirm(__('contacts.delete_confirm'))) return;
-      try {
-        await fetch('/api/contacts/' + id, { method: 'DELETE' });
-        loadContacts();
-      } catch (err) {
-        showToast(err.message, 'error');
-      }
-    }
-
-    // ---- Autocomplete in composer ----
-    let acTimer = null;
-    let acSelectedIdx = -1;
-    let acResults = [];
-    function onToInput() {
-      clearTimeout(acTimer);
-      const val = document.getElementById('toField').value;
-      if (val.length < 1) {
-        document.getElementById('autocompleteList').innerHTML = '';
-        return;
-      }
-      acTimer = setTimeout(() => fetchAutocomplete(val), 150);
-    }
-    async function fetchAutocomplete(q) {
-      try {
-        const res = await fetch('/api/contacts?q=' + encodeURIComponent(q));
-        acResults = await res.json();
-        renderAutocomplete();
-      } catch {}
-    }
-    function renderAutocomplete() {
-      const list = document.getElementById('autocompleteList');
-      if (acResults.length === 0) {
-        list.innerHTML = '';
-        return;
-      }
-      list.innerHTML = acResults.map((c, i) => `
-        <div class="ac-item" data-idx="${i}" onclick="selectContact(${i})">
-          <div class="ac-avatar" style="background: ${avatarColor(c.email)}">${escapeHtml(initial(c.name))}</div>
-          <div>
-            <div class="ac-name">${escapeHtml(c.name)}</div>
-            <div class="ac-email">${escapeHtml(c.email)}</div>
-          </div>
-        </div>
-      `).join('');
-    }
-    function selectContact(i) {
-      const c = acResults[i];
-      if (!c) return;
-      document.getElementById('toField').value = c.email;
-      document.getElementById('autocompleteList').innerHTML = '';
-    }
-    // Keyboard nav for autocomplete
-    document.addEventListener('keydown', (e) => {
-      const list = document.getElementById('autocompleteList');
-      const items = list.querySelectorAll('.ac-item');
-      if (items.length === 0) return;
-      if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        acSelectedIdx = Math.min(acSelectedIdx + 1, items.length - 1);
-        items.forEach((el, i) => el.classList.toggle('active', i === acSelectedIdx));
-      } else if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        acSelectedIdx = Math.max(acSelectedIdx - 1, 0);
-        items.forEach((el, i) => el.classList.toggle('active', i === acSelectedIdx));
-      } else if (e.key === 'Enter' && acSelectedIdx >= 0) {
-        e.preventDefault();
-        selectContact(acSelectedIdx);
-        acSelectedIdx = -1;
-      } else if (e.key === 'Escape') {
-        list.innerHTML = '';
-        acSelectedIdx = -1;
-      }
-    });
-
-    // ---- Folders ----
-    async function loadFolders() {
-      try {
-        const res = await fetch('/api/folders');
-        const data = await res.json();
-        customFolders = data.custom || [];
-        const list = document.getElementById('customFoldersList');
-        list.innerHTML = customFolders.map(f => `
-          <button class="menu-item" data-custom-folder="${f.id}" onclick="setFolder('custom', ${f.id});closeMenu()">
-            <span class="icon" style="color:${f.color}">${f.icon}</span><span>${escapeHtml(f.name)}</span>
-            <span class="menu-delete" onclick="event.stopPropagation();deleteFolder(${f.id})" aria-label="{{ _('action.delete') }}">
-              <i class="hgi-stroke hgi-cancel-01" aria-hidden="true"></i>
-            </span>
-          </button>
-        `).join('');
-      } catch {}
-    }
-    function showNewFolder() {
-      showModal(`
-        <h2>${__('folder.new.title')}</h2>
-        <div class="field"><label>${__('folder.new.name')}</label><input type="text" id="newFolderName" autofocus></div>
-        <div class="field"><label>${__('folder.new.name')}</label><input type="color" id="newFolderColor" value="#ff6b35"></div>
-        <div class="field"><label>${__('folder.new.name')}</label>
-          <select id="newFolderIcon" style="width:100%;padding:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;color:#fff;">
-            <option value='<i class="hgi-stroke hgi-folder-01" aria-hidden="true"></i>'>Folder</option>
-            <option value='<i class="hgi-stroke hgi-folder-open" aria-hidden="true"></i>'>Open folder</option>
-            <option value='<i class="hgi-stroke hgi-star" aria-hidden="true"></i>'>Star</option>
-            <option value='<i class="hgi-stroke hgi-fire" aria-hidden="true"></i>'>Fire</option>
-            <option value='<i class="hgi-stroke hgi-briefcase-01" aria-hidden="true"></i>'>Briefcase</option>
-            <option value='<i class="hgi-stroke hgi-home-01" aria-hidden="true"></i>'>Home</option>
-            <option value='<i class="hgi-stroke hgi-book-01" aria-hidden="true"></i>'>Book</option>
-            <option value='<i class="hgi-stroke hgi-target-01" aria-hidden="true"></i>'>Target</option>
-          </select>
-        </div>
-        <div class="modal-actions">
-          <button class="cancel-btn" onclick="closeModal()">${__('folder.new.cancel')}</button>
-          <button class="primary-btn" onclick="createFolder()">${__('folder.new.create')}</button>
-        </div>
-      `);
-    }
-    async function createFolder() {
-      const name = document.getElementById('newFolderName').value;
-      const color = document.getElementById('newFolderColor').value;
-      const icon = document.getElementById('newFolderIcon').value;
-      if (!name) {
-        showToast(__('error.name_required'), 'error');
-        return;
-      }
-      try {
-        const res = await fetch('/api/custom_folders', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, color, icon })
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || __('error.generic'));
-        showToast(__('folder.new.created'));
-        closeModal();
-        loadFolders();
-      } catch (err) {
-        showToast(err.message, 'error');
-      }
-    }
-    async function deleteFolder(id) {
-      if (!confirm(__('folder.new.title') + '?')) return;
-      try {
-        await fetch('/api/custom_folders/' + id, { method: 'DELETE' });
-        loadFolders();
-        if (currentCustomFolderId === id) setFolder('inbox');
-      } catch (err) {
-        showToast(err.message, 'error');
-      }
-    }
-
-    // ---- Navigation ----
-    let currentCustomFolderId = null;
-    function setFolder(folder, customFolderId) {
-      currentFolder = folder;
-      currentCustomFolderId = customFolderId || null;
-      // Update tab bar
-      document.querySelectorAll('.tab-bar .tab').forEach(el => el.classList.remove('active'));
-      const active = document.querySelector(`.tab-bar .tab[data-folder="${folder}"]`);
-      if (active) {
-        active.classList.add('active');
-      }
-      const titles = { inbox: __('folder.inbox'), sent: __('folder.sent'), starred: __('folder.starred'), spam: __('folder.spam'), trash: __('folder.trash'), custom: __('folder.inbox') };
-      const customName = customFolders.find(f => f.id === customFolderId)?.name;
-      const title = titles[folder] || customName || folder;
-      document.getElementById('headerTitle').textContent = title;
-      loadEmails();
-      loadStats();
-    }
-
-    function closeReader() {
-      readerEl.classList.remove('open');
-      currentEmailId = null;
-      currentEmailData = null;
-    }
-    function openComposer() {
-      composerEl.classList.add('open');
-      document.getElementById('autocompleteList').innerHTML = '';
-      setTimeout(() => document.getElementById('toField').focus(), 100);
-    }
-    function closeComposer() {
-      composerEl.classList.remove('open');
-      document.getElementById('toField').value = '';
-      document.getElementById('subjectField').value = '';
-      document.getElementById('bodyField').value = '';
-    }
-
-    // ---- Modal ----
-    function showModal(html) {
-      document.getElementById('modalContent').innerHTML = html;
-      document.getElementById('modal').classList.add('open');
-    }
-    function closeModal() {
-      document.getElementById('modal').classList.remove('open');
-    }
-
-    // ---- Bulk actions ----
-    let selectMode = false;
-    let selectedIds = new Set();
-    function toggleSelectMode() {
-      selectMode = !selectMode;
-      selectedIds.clear();
-      document.getElementById('app').classList.toggle('select-mode', selectMode);
-      document.getElementById('bulkBar').classList.toggle('show', false);
-        document.getElementById('selectToggle').innerHTML = selectMode
-          ? '<i class="hgi-stroke hgi-checkmark-square-01" aria-hidden="true"></i>'
-          : '<i class="hgi-stroke hgi-square" aria-hidden="true"></i>';
-      // Add/remove checkboxes
-      document.querySelectorAll('.email-card').forEach(card => {
-        const id = card.getAttribute('onclick')?.match(/\d+/)?.[0];
-        if (id) {
-          let cb = card.querySelector('.checkbox');
-          if (selectMode) {
-            if (!cb) {
-              cb = document.createElement('input');
-              cb.type = 'checkbox';
-              cb.className = 'checkbox';
-              cb.dataset.id = id;
-              cb.onchange = () => onSelectChange(id, cb.checked);
-              card.prepend(cb);
-            }
-          } else {
-            if (cb) cb.remove();
-          }
-        }
-        card.classList.remove('selected');
-      });
-    }
-    function onSelectChange(id, checked) {
-      if (checked) {
-        selectedIds.add(parseInt(id));
-      } else {
-        selectedIds.delete(parseInt(id));
-      }
-      const card = document.querySelector(`.email-card .checkbox[data-id="${id}"]`)?.closest('.email-card');
-      if (card) card.classList.toggle('selected', checked);
-      updateBulkBar();
-    }
-    function updateBulkBar() {
-      const count = selectedIds.size;
-      const bar = document.getElementById('bulkBar');
-      bar.classList.toggle('show', count > 0);
-      document.getElementById('bulkCount').textContent = __('action.selected', count);
-      bar.querySelectorAll('button').forEach(b => b.disabled = count === 0);
-    }
-    async function bulkAction(action) {
-      if (selectedIds.size === 0) {
-        showToast(__('toast.bulk_empty'), 'error');
-        return;
-      }
-      if (action === 'delete' && !confirm(__('action.confirm_delete', selectedIds.size))) return;
-      try {
-        const res = await fetch('/api/emails/bulk', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ids: Array.from(selectedIds), action })
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || __('error.generic'));
-        showToast(__('toast.bulk_done', data.count));
-        toggleSelectMode();
-        loadEmails();
-        loadStats();
-      } catch (err) {
-        showToast(err.message, 'error');
-      }
-    }
-    // ---- Pagination state ----
-    let emailOffset = 0;
-    let emailTotal = 0;
-    const PAGE_SIZE = 50;
-    let loadingMore = false;
-
-    // ---- Load emails ----
-    async function loadEmails(reset = true) {
-      if (reset) {
-        emailOffset = 0;
-        emailTotal = 0;
-      }
-      let url;
-      if (currentFolder === 'starred') {
-        url = `/api/emails?starred=1&direction=inbound&is_trash=0&limit=${PAGE_SIZE}&offset=${emailOffset}`;
-      } else if (currentFolder === 'spam') {
-        url = `/api/emails?direction=inbound&is_spam=1&is_trash=0&limit=${PAGE_SIZE}&offset=${emailOffset}`;
-      } else if (currentFolder === 'trash') {
-        url = `/api/emails?direction=inbound&is_trash=1&limit=${PAGE_SIZE}&offset=${emailOffset}`;
-      } else if (currentFolder === 'custom' && currentCustomFolderId) {
-        url = `/api/emails?direction=inbound&is_trash=0&custom_folder_id=${currentCustomFolderId}&limit=${PAGE_SIZE}&offset=${emailOffset}`;
-      } else {
-        url = `/api/emails?folder=${currentFolder}&direction=${currentFolder === 'sent' ? 'outbound' : 'inbound'}&is_trash=0&is_spam=0&limit=${PAGE_SIZE}&offset=${emailOffset}`;
-      }
-      if (reset) {
-        listEl.innerHTML = '<div class="loading"><div class="spinner"></div>' + __('index.header.subtitle') + '</div>';
-      }
-      try {
-        const res = await fetch(url);
-        if (res.status === 401) { window.location.href = '/login'; return; }
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || __('error.generic'));
-        const emails = data.emails || data;
-        emailTotal = data.total || emails.length;
-        if (reset) {
-          currentEmails = emails;
-        } else {
-          currentEmails = currentEmails.concat(emails);
-        }
-        if (reset && emails.length === 0) {
-          listEl.innerHTML = '<div class="empty">' + __('emails.empty') + '</div>';
-          return;
-        }
-        const html = emails.map((e, i) => {
-          const isSent = currentFolder === 'sent';
-          const identifier = isSent ? (e.recipient || '') : (e.sender_email || e.sender_name || '?');
-          const fromLabel = isSent ? (e.recipient || __('error.not_found')) : (e.sender_name || e.sender_email || __('error.not_found'));
-          return `
-            <div class="email-card ${e.is_read ? '' : 'unread'} ${e.is_starred ? 'starred' : ''} ${e.is_spam ? 'spam' : ''}" style="animation-delay: ${i * 0.04}s" onclick="openEmail(${e.id})">
-${e.is_starred ? '<i class="hgi-stroke hgi-star star" aria-hidden="true"></i>' : ''}
-              ${e.is_spam ? '<span class="spam-badge">SPAM</span>' : ''}
-              <div class="content-row">
-                <div class="avatar" style="background: ${avatarColor(identifier)}">${escapeHtml(initial(identifier))}</div>
-                <div class="body">
-                  <div class="meta-row">
-                    <div class="from-name">${escapeHtml(fromLabel)}</div>
-                    <div class="time">${formatDate(e.created_at)}</div>
-                  </div>
-                  <div class="subject">${escapeHtml(e.subject || __('error.not_found'))}</div>
-                  <div class="preview">${escapeHtml(e.preview || '')}</div>
-                </div>
-                ${!e.is_read ? '<div class="unread-dot"></div>' : ''}
-              </div>
-            </div>
-          `;
-        }).join('');
-        if (reset) {
-          listEl.innerHTML = html;
-        } else {
-          listEl.insertAdjacentHTML('beforeend', html);
-        }
-        // Add sentinel for infinite scroll
-        const sentinel = document.getElementById('scroll-sentinel');
-        if (sentinel) sentinel.remove();
-        if (emailOffset + PAGE_SIZE < emailTotal) {
-          listEl.insertAdjacentHTML('beforeend', '<div id="scroll-sentinel" class="scroll-sentinel"></div>');
-        }
-        setTimeout(setupScrollObserver, 50);
-      } catch (err) {
-        if (reset) listEl.innerHTML = `<div class="empty">${__('error.generic')}: ${escapeHtml(err.message)}</div>`;
-      }
-    }
-
-    async function loadMore() {
-      if (loadingMore) return;
-      if (emailOffset + PAGE_SIZE >= emailTotal) return;
-      loadingMore = true;
-      emailOffset += PAGE_SIZE;
-      await loadEmails(false);
-      loadingMore = false;
-    }
-
-    // ---- IntersectionObserver for infinite scroll ----
-    let scrollObserver = null;
-    function setupScrollObserver() {
-      if (scrollObserver) scrollObserver.disconnect();
-      scrollObserver = new IntersectionObserver((entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            loadMore();
-          }
-        }
-      }, { rootMargin: '200px' });
-      const sentinel = document.getElementById('scroll-sentinel');
-      if (sentinel) scrollObserver.observe(sentinel);
-    }
-
-    async function openEmail(id) {
-      try {
-        const res = await fetch(`/api/emails/${id}`);
-        const e = await res.json();
-        if (!res.ok) throw new Error(e.error || __('error.generic'));
-        currentEmailId = id;
-        currentEmailData = e;
-        document.getElementById('rSubject').textContent = e.subject || __('error.not_found');
-        const isSent = currentFolder === 'sent';
-        const identifier = isSent ? (e.recipient || '') : (e.sender_email || e.sender_name || '?');
-        const from = e.sender_name || e.sender_email || __('error.not_found');
-        const fromEmail = e.sender_email ? `<${e.sender_email}>` : '';
-        document.getElementById('rMetaBlock').innerHTML = `
-          <div class="avatar" style="background: ${avatarColor(identifier)}">${escapeHtml(initial(identifier))}</div>
-          <div class="info">
-            <div class="from">${escapeHtml(isSent ? e.recipient : from)}</div>
-            <div class="to">${escapeHtml(isSent ? __('composer.to') + ': ' + FROM_EMAIL : fromEmail)}</div>
-          </div>
-          <div class="time">${formatFullDate(e.created_at)}</div>
-        `;
-        const bodyEl = document.getElementById('rBody');
-        let bodyHtml = '';
-        if (e.body_html) {
-          const emailCss = `<style>
-            :root { color-scheme: dark; }
-            html, body { margin: 0; min-height: 100vh; }
-            body { padding: 16px; font: 15px/1.5 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: rgba(255,255,255,0.92); background: transparent; overflow-y: auto; scrollbar-width: none; }
-            body::-webkit-scrollbar { display: none; }
-            a { color: #60a5fa; text-decoration: underline; }
-            p, h1, h2, h3 { margin: 0 0 12px; }
-            img { max-width: 100%; height: auto; border-radius: 8px; }
-            blockquote { border-left: 2px solid rgba(255,255,255,0.2); padding-left: 12px; margin-left: 0; color: rgba(255,255,255,0.7); }
-          </style>`;
-          const wrappedHtml = emailCss + e.body_html;
-          bodyHtml = '<div class="body-html"><iframe sandbox="allow-same-origin" srcdoc="' + escapeHtml(wrappedHtml).replace(/"/g, '&quot;') + '"></iframe></div><div class="body-plain" style="display:none">' + escapeHtml(e.body_text || stripHtml(e.body_html)) + '</div><button class="html-toggle" onclick="toggleHtmlView()">' + '<i class="hgi-stroke hgi-code" aria-hidden="true"></i> ' + __('reader.html_toggle') + '</button>';
-        } else {
-          bodyHtml = escapeHtml(e.body_text || __('error.not_found'));
-        }
-        // Attachments
-        if (e.attachments && e.attachments.length) {
-          bodyHtml += '<div class="attachments"><div class="attachments-title">' + __('reader.attachments') + '</div>';
-          e.attachments.forEach(a => {
-            bodyHtml += '<div class="attachment-item"><a href="/api/attachments/' + e.id + '/' + encodeURIComponent(a.filename) + '" download>' + escapeHtml(a.filename) + '</a></div>';
-          });
-          bodyHtml += '</div>';
-        }
-        bodyEl.innerHTML = bodyHtml;
-        const starBtn = document.getElementById('readerStarBtn');
-        starBtn.innerHTML = '<i class="hgi-stroke hgi-star" aria-hidden="true"></i>';
-        starBtn.classList.toggle('active', e.is_starred);
-        readerEl.classList.add('open');
-        loadEmails();
-        loadStats();
-      } catch (err) {
-        showToast(err.message, 'error');
-      }
-    }
-
-    let htmlView = true;
-    function toggleHtmlView() {
-      htmlView = !htmlView;
-      const htmlEl = document.querySelector('.body-html');
-      const plainEl = document.querySelector('.body-plain');
-      if (htmlEl) htmlEl.style.display = htmlView ? '' : 'none';
-      if (plainEl) plainEl.style.display = htmlView ? 'none' : '';
-    }
-
-    async function toggleStarFromReader() {
-      if (!currentEmailId) return;
-      const current = currentEmails.find(e => e.id === currentEmailId);
-      const newStar = current ? (current.is_starred ? 0 : 1) : 1;
-      try {
-        await fetch(`/api/emails/${currentEmailId}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ is_starred: newStar })
-        });
-        const btn = document.getElementById('readerStarBtn');
-        btn.classList.toggle('active', !!newStar);
-        showToast(__('folder.starred'));
-        loadEmails();
-        loadStats();
-      } catch (err) {
-        showToast(err.message, 'error');
-      }
-    }
-
-    async function moveToTrash() {
-      if (!currentEmailId) return;
-      try {
-        await fetch(`/api/emails/${currentEmailId}`, { method: 'DELETE' });
-        showToast(__('toast.email_deleted'));
-        closeReader();
-        loadEmails();
-        loadStats();
-      } catch (err) {
-        showToast(err.message, 'error');
-      }
-    }
-
-    // ---- Attachments ----
-    let pendingAttachments = [];
-    function onAttachmentsChange() {
-      const input = document.getElementById('attachmentInput');
-      pendingAttachments = [];
-      const preview = document.getElementById('attachmentPreview');
-      preview.innerHTML = '';
-      for (const file of input.files) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          pendingAttachments.push({
-            filename: file.name,
-            content: e.target.result.split(',')[1],
-            content_type: file.type || 'application/octet-stream'
-          });
-          const div = document.createElement('div');
-          div.className = 'attachment-chip';
-          div.innerHTML = '<i class="hgi-stroke hgi-attachment-01" aria-hidden="true"></i> ' + escapeHtml(file.name) + ' (' + Math.round(file.size / 1024) + ' KB)';
-          preview.appendChild(div);
-        };
-        reader.readAsDataURL(file);
-      }
-    }
-
-    async function sendEmail() {
-      const payload = {
-        to: document.getElementById('toField').value,
-        subject: document.getElementById('subjectField').value,
-        body: document.getElementById('bodyField').value,
-        attachments: pendingAttachments
-      };
-      if (!payload.to || !payload.subject) {
-        showToast(__('error.missing_recipient'), 'error');
-        return;
-      }
-      try {
-        const res = await fetch('/api/send', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || __('error.generic'));
-        showToast(__('toast.email_sent'));
-        closeComposer();
-        loadEmails();
-        loadStats();
-      } catch (err) {
-        showToast(err.message, 'error');
-      }
-    }
-
-    async function syncEmails() {
-      showToast(__('toast.sync_started'));
-      try {
-        const res = await fetch('/api/sync', { method: 'POST' });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || __('error.generic'));
-        showToast(__('toast.sync_done', data.imported));
-        loadEmails();
-        loadStats();
-      } catch (err) {
-        showToast(err.message, 'error');
-      }
-    }
-
-    async function loadStats() {
-      try {
-        const res = await fetch('/api/stats');
-        if (res.status === 401) { window.location.href = '/login'; return; }
-        const s = await res.json();
-        const sub = [];
-        if (s.unread) sub.push(s.unread + ' ' + __('action.unread'));
-        if (s.spam) sub.push(s.spam + ' ' + __('folder.spam'));
-        sub.push(s.inbound + ' ' + __('folder.inbox'));
-        const setText = (id, val) => {
-          const el = document.getElementById(id);
-          if (el) el.textContent = val || '';
-        };
-        document.getElementById('headerSubtitle').textContent = sub.join(' · ');
-        setText('tabInboxCount', s.unread);
-        setText('menuBadgeInbox', s.unread);
-        setText('menuBadgeStarred', s.starred);
-        setText('menuBadgeSpam', s.spam);
-        setText('menuBadgeTrash', s.trash);
-      } catch (e) {}
-    }
-
-    // ---- Init ----
-    document.addEventListener('DOMContentLoaded', () => {
-      loadMe();
-      loadFolders();
-      // setFolder triggers loadEmails and loadStats once; avoids duplicate init calls
-      setFolder('inbox');
-    });
-
-    // SSE and non-critical listeners after page load so they don't block onload
-    window.addEventListener('load', () => {
-      // Small delay so Safari/iOS stops showing the page loading indicator before
-      // opening the long-lived SSE connection.
-      setTimeout(() => {
-        connectSSE();
-      }, 500);
-      // Activity tracker for session
-      let activityTimer = null;
-      ['click', 'keydown', 'mousemove', 'touchstart', 'scroll'].forEach(evt => {
-        document.addEventListener(evt, () => {
-          clearTimeout(activityTimer);
-          activityTimer = setTimeout(() => {
-            fetch('/api/me', { method: 'HEAD', cache: 'no-store' }).catch(() => {});
-          }, 60000);
-        }, { passive: true });
-      });
-    });
-  </script>
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js');
-    }
-  </script>
+  <script type="module" src="/static/js/app.js"></script>
 </body>
 </html>

@@ -48,9 +48,17 @@ export function formatDate(dateStr) {
   if (isNaN(d)) return dateStr;
   const now = new Date();
   const diff = now - d;
-  if (diff < 86400000) return d.toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' });
-  if (diff < 604800000) return d.toLocaleDateString('cs-CZ', { weekday: 'short' });
-  return d.toLocaleDateString('cs-CZ', { day: '2-digit', month: '2-digit' });
+  const days = Math.floor(diff / 86400000);
+
+  let rel = '';
+  if (days === 0) rel = __('date.today');
+  else if (days === 1) rel = __('date.yesterday');
+  else if (days < 7) rel = __('date.days_ago', days);
+  else if (days < 30) rel = __('date.weeks_ago', Math.floor(days / 7));
+  else rel = __('date.months_ago', Math.floor(days / 30));
+
+  const time = d.toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' });
+  return `${rel} ${time}`;
 }
 
 export function formatFullDate(dateStr) {

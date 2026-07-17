@@ -60,6 +60,12 @@
   "reader.download": "Download",
   "reader.html_toggle": "HTML / Plain",
 
+  "date.today": "today",
+  "date.yesterday": "yesterday",
+  "date.days_ago": "{count} days ago",
+  "date.weeks_ago": "{count} weeks ago",
+  "date.months_ago": "{count} months ago",
+
   "settings.title": "Settings",
   "settings.account": "Account",
   "settings.username": "Username",

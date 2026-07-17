@@ -60,6 +60,12 @@
   "reader.download": "Stáhnout",
   "reader.html_toggle": "HTML / Plain",
 
+  "date.today": "dnes",
+  "date.yesterday": "včera",
+  "date.days_ago": "před {count} dny",
+  "date.weeks_ago": "před {count} týdny",
+  "date.months_ago": "před {count} měsíci",
+
   "settings.title": "Nastavení",
   "settings.account": "Účet",
   "settings.username": "Uživatel",
