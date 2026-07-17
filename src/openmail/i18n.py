@@ -14,7 +14,7 @@ import threading
 from pathlib import Path
 from typing import Optional
 
-_LOCALES_DIR = Path(__file__).parent / "locales"
+_LOCALES_DIR = Path(__file__).resolve().parent.parent.parent / "locales"
 _DEFAULT_LOCALE = "cs"
 
 _cache: dict[str, dict[str, str]] = {}
