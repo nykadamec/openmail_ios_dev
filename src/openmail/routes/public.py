@@ -1,6 +1,8 @@
 """Public routes: index, setup, login, logout, sw.js, manifest."""
 from __future__ import annotations
 
+from pathlib import Path
+
 from flask import Blueprint, render_template, request, make_response, redirect, url_for, send_from_directory, jsonify
 
 from openmail.config import FROM_EMAIL
@@ -13,6 +15,8 @@ from openmail.crypto.dek import clear_user_dek
 
 bp = Blueprint('public', __name__)
 
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent.parent
+
 
 def _set_session_cookie(resp, sid: str) -> None:
     resp.set_cookie('session_id', sid, httponly=True, samesite='Lax', max_age=15*60)
@@ -20,7 +24,7 @@ def _set_session_cookie(resp, sid: str) -> None:
 
 @bp.route("/sw.js")
 def service_worker():
-    return send_from_directory(".", "sw.js", mimetype="application/javascript")
+    return send_from_directory(str(REPO_ROOT), "sw.js", mimetype="application/javascript")
 
 
 @bp.route("/setup", methods=["GET", "POST"])
