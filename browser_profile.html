@@ -1,0 +1,35 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Profile openMail</title></head>
+<body>
+<script>
+const results = [];
+async function timeFetch(url, opts={}) {
+  const t0 = performance.now();
+  const r = await fetch(url, opts);
+  const t1 = performance.now();
+  results.push({url, method: opts.method||'GET', status: r.status, ms: +(t1-t0).toFixed(2)});
+  return r;
+}
+async function run() {
+  // login
+  await timeFetch('/login', {method:'GET'});
+  await timeFetch('/login', {
+    method:'POST',
+    headers:{'Content-Type':'application/x-www-form-urlencoded'},
+    body:'username=dominik&password=adamec'
+  });
+  // index + assets
+  await timeFetch('/');
+  await timeFetch('/static/liquid-glass.css');
+  // api calls in parallel-ish but measured separately
+  await timeFetch('/api/me');
+  await timeFetch('/api/folders');
+  await timeFetch('/api/stats');
+  await timeFetch('/api/emails?folder=inbox&direction=inbound&is_trash=0&is_spam=0&limit=50&offset=0');
+  document.body.innerHTML = '<pre>' + JSON.stringify(results, null, 2) + '</pre>';
+}
+run().catch(e => document.body.textContent = e);
+</script>
+</body>
+</html>

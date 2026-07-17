@@ -1,0 +1,11 @@
+{
+  "schema": "open-design.browser-page-archive.v1",
+  "capturedAt": 1784235084144,
+  "title": "openMail",
+  "url": "http://localhost:5005/",
+  "baseUrl": "http://localhost:5005/",
+  "htmlFile": "browser/snapshots/localhost-2026-07-16T20-51-24-111Z/page.html",
+  "cssFile": "browser/snapshots/localhost-2026-07-16T20-51-24-111Z/styles.css",
+  "manifestFile": "browser/snapshots/localhost-2026-07-16T20-51-24-111Z/manifest.json",
+  "resources": []
+}
