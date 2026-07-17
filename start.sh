@@ -8,9 +8,9 @@ source .venv/bin/activate
 lsof -ti:5005 | xargs kill 2>/dev/null || true
 
 # Start Flask app (without reloader for tunnel stability)
-HOST="${FLASK_HOST:-127.0.0.1}"
+HOST="${FLASK_HOST:-0.0.0.0}"
 PORT="${FLASK_PORT:-5005}"
-python -c "from app import app; app.run(host='$HOST', port=$PORT, debug=False, use_reloader=False)" > logs/app.log 2>&1 &
+python -c "from app import app, init_db; init_db(); app.run(host='$HOST', port=$PORT, debug=False, use_reloader=False)" > logs/app.log 2>&1 &
 echo $! > .flask.pid
 
 sleep 2

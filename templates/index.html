@@ -656,6 +656,7 @@
       const title = titles[folder] || customName || folder;
       document.getElementById('headerTitle').textContent = title;
       loadEmails();
+      loadStats();
     }
 
     function closeReader() {
@@ -1051,11 +1052,18 @@
     // ---- Init ----
     document.addEventListener('DOMContentLoaded', () => {
       loadMe();
-      loadEmails();
-      loadStats();
       loadFolders();
-      connectSSE();
+      // setFolder triggers loadEmails and loadStats once; avoids duplicate init calls
       setFolder('inbox');
+    });
+
+    // SSE and non-critical listeners after page load so they don't block onload
+    window.addEventListener('load', () => {
+      // Small delay so Safari/iOS stops showing the page loading indicator before
+      // opening the long-lived SSE connection.
+      setTimeout(() => {
+        connectSSE();
+      }, 500);
       // Activity tracker for session
       let activityTimer = null;
       ['click', 'keydown', 'mousemove', 'touchstart', 'scroll'].forEach(evt => {

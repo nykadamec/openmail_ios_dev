@@ -19,6 +19,7 @@ import resend
 import requests
 import bcrypt
 import jwt
+from cryptography.exceptions import InvalidTag
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
@@ -42,26 +43,30 @@ load_dotenv()
 USER_DEKS: dict[int, bytes] = {}
 
 
-def _derive_key(password: str, salt: bytes) -> bytes:
+PBKDF2_ITERATIONS = 100_000
+PBKDF2_ITERATIONS_LEGACY = 600_000
+
+
+def _derive_key(password: str, salt: bytes, iterations: int | None = None) -> bytes:
     kdf = PBKDF2HMAC(
         algorithm=hashes.SHA256(),
         length=32,
         salt=salt,
-        iterations=600_000,
+        iterations=iterations or PBKDF2_ITERATIONS,
     )
     return kdf.derive(password.encode('utf-8'))
 
 
-def _encrypt_dek(dek: bytes, password: str, salt: bytes) -> str:
-    key = _derive_key(password, salt)
+def _encrypt_dek(dek: bytes, password: str, salt: bytes, iterations: int | None = None) -> str:
+    key = _derive_key(password, salt, iterations)
     aes = AESGCM(key)
     nonce = secrets.token_bytes(12)
     ct = aes.encrypt(nonce, dek, None)
     return base64.urlsafe_b64encode(nonce + ct).decode().rstrip('=')
 
 
-def _decrypt_dek(ciphertext: str, password: str, salt: bytes) -> bytes:
-    key = _derive_key(password, salt)
+def _decrypt_dek(ciphertext: str, password: str, salt: bytes, iterations: int | None = None) -> bytes:
+    key = _derive_key(password, salt, iterations)
     aes = AESGCM(key)
     pad = 4 - (len(ciphertext) % 4)
     if pad != 4:
@@ -70,6 +75,16 @@ def _decrypt_dek(ciphertext: str, password: str, salt: bytes) -> bytes:
     nonce = data[:12]
     ct = data[12:]
     return aes.decrypt(nonce, ct, None)
+
+
+def _decrypt_dek_with_fallback(ciphertext: str, password: str, salt: bytes) -> tuple[bytes, bool]:
+    """Decrypt DEK using current iterations; fall back to legacy count on InvalidTag.
+    Returns (dek, was_legacy).
+    """
+    try:
+        return _decrypt_dek(ciphertext, password, salt, PBKDF2_ITERATIONS), False
+    except InvalidTag:
+        return _decrypt_dek(ciphertext, password, salt, PBKDF2_ITERATIONS_LEGACY), True
 
 
 def _get_user_dek(user_id: int) -> bytes | None:
@@ -318,6 +333,8 @@ def init_db():
         CREATE INDEX IF NOT EXISTS idx_emails_starred ON emails(is_starred);
         CREATE INDEX IF NOT EXISTS idx_emails_spam ON emails(is_spam);
         CREATE INDEX IF NOT EXISTS idx_emails_trash ON emails(is_trash);
+        CREATE INDEX IF NOT EXISTS idx_emails_read ON emails(is_read);
+        CREATE INDEX IF NOT EXISTS idx_emails_custom_folder ON emails(custom_folder_id);
         CREATE INDEX IF NOT EXISTS idx_emails_created ON emails(created_at DESC);
 
         CREATE TABLE IF NOT EXISTS contacts (
@@ -407,8 +424,19 @@ def verify_user(username: str, password: str) -> Optional[int]:
         user_id = row['id']
         try:
             salt = base64.urlsafe_b64decode(row['dek_salt'].encode())
-            dek = _decrypt_dek(row['encrypted_dek'], password, salt)
+            dek, legacy = _decrypt_dek_with_fallback(row['encrypted_dek'], password, salt)
             _set_user_dek(user_id, dek)
+            # Migrate to current PBKDF2 iterations if the DEK was encrypted with legacy count
+            if legacy:
+                new_salt = secrets.token_bytes(16)
+                new_encrypted_dek = _encrypt_dek(dek, password, new_salt)
+                conn2 = get_db()
+                conn2.execute(
+                    "UPDATE users SET dek_salt = ?, encrypted_dek = ? WHERE id = ?",
+                    (base64.urlsafe_b64encode(new_salt).decode(), new_encrypted_dek, user_id)
+                )
+                conn2.commit()
+                conn2.close()
         except Exception as e:
             app.logger.error(f'Failed to decrypt DEK for user {user_id}: {e}')
             return None
@@ -735,7 +763,7 @@ def sse_stream():
             yield "event: connected\ndata: {}\n\n"
             while True:
                 try:
-                    event, data = q.get(timeout=30)
+                    event, data = q.get(timeout=15)
                     yield f"event: {event}\ndata: {data}\n\n"
                 except queue.Empty:
                     yield ": keepalive\n\n"
@@ -958,24 +986,21 @@ def send_email():
         return jsonify({"error": str(e)}), 500
 
 
-@app.route("/api/inbound", methods=["POST"])
-def inbound_webhook():
-    """Receive inbound email webhook from Resend. No auth required (Resend signature)."""
-    payload = request.get_json(silent=True) or {}
-    if payload.get("type") != "email.received":
-        return jsonify({"ok": True})
+def _process_inbound_email(payload: dict, user_id: int, conn: sqlite3.Connection) -> dict | None:
+    """Core logic shared by webhook and sync: parse, fetch, classify, insert.
+    Returns {"id": row_id, "is_spam": bool, "subject": str} or None if duplicate.
+    Raises RuntimeError if DEK is not available for this user.
+    """
     parsed = parse_inbound_event(payload)
     email_id = parsed["resend_id"]
     if not email_id:
-        return jsonify({"error": "Missing email id"}), 400
+        return None
 
-    conn = get_db()
     existing = conn.execute(
         "SELECT id FROM emails WHERE resend_id = ?", (email_id,)
     ).fetchone()
     if existing:
-        conn.close()
-        return jsonify({"ok": True, "id": existing["id"], "new": False})
+        return None
 
     full_email = fetch_resend_email(email_id)
     body_text = full_email.get("text") if full_email else ""
@@ -987,7 +1012,6 @@ def inbound_webhook():
     spam = is_spam(parsed["subject"], body_text, parsed["sender_email"] or "")
     folder = "spam" if spam else "inbox"
 
-    user_id = _current_user_id() or 1
     preview = (body_text or "")[:300]
     try:
         conn.execute(
@@ -1011,9 +1035,7 @@ def inbound_webhook():
             ),
         )
     except RuntimeError:
-        app.logger.error(f"DEK missing for user {user_id}, cannot store inbound email {email_id}")
-        conn.close()
-        return jsonify({"error": "Server locked"}), 503
+        raise
     email_row_id = conn.execute("SELECT last_insert_rowid()").fetchone()[0]
 
     # Download attachments
@@ -1039,12 +1061,35 @@ def inbound_webhook():
         # Update email with attachment metadata
         conn.execute("UPDATE emails SET attachments = ? WHERE id = ?", (attachments_json, email_row_id))
 
+    return {"id": email_row_id, "is_spam": spam, "subject": parsed["subject"]}
+
+
+@app.route("/api/inbound", methods=["POST"])
+def inbound_webhook():
+    """Receive inbound email webhook from Resend. No auth required (Resend signature)."""
+    payload = request.get_json(silent=True) or {}
+    if payload.get("type") != "email.received":
+        return jsonify({"ok": True})
+    parsed = parse_inbound_event(payload)
+    email_id = parsed["resend_id"]
+    if not email_id:
+        return jsonify({"error": "Missing email id"}), 400
+
+    conn = get_db()
+    user_id = _current_user_id() or 1
+    try:
+        result = _process_inbound_email(payload, user_id, conn)
+    except RuntimeError:
+        app.logger.error(f"DEK missing for user {user_id}, cannot store inbound email {email_id}")
+        conn.close()
+        return jsonify({"error": "Server locked"}), 503
     conn.commit()
     conn.close()
 
-    notify_sse("new_email", {
-        "id": email_row_id, "subject": parsed["subject"], "is_spam": spam
-    })
+    if result:
+        notify_sse("new_email", result)
+        return jsonify({"ok": True, "id": result["id"], "new": True})
+    return jsonify({"ok": True, "id": None, "new": False})
 
 
 @app.route("/api/attachments/<int:email_id>/<path:filename>")
@@ -1235,7 +1280,7 @@ def change_password():
     conn.close()
     try:
         salt = base64.urlsafe_b64decode(row['dek_salt'].encode())
-        dek = _decrypt_dek(row['encrypted_dek'], current_pw, salt)
+        dek, _ = _decrypt_dek_with_fallback(row['encrypted_dek'], current_pw, salt)
         new_salt = secrets.token_bytes(16)
         new_encrypted_dek = _encrypt_dek(dek, new_pw, new_salt)
     except Exception as e:
@@ -1272,6 +1317,8 @@ def sync_emails():
         resp.raise_for_status()
         data = resp.json().get("data", [])
         imported = 0
+        user_id = _current_user_id() or 1
+        conn = get_db()
         for item in data:
             email_id = item.get("id")
             if not email_id:
@@ -1287,13 +1334,15 @@ def sync_emails():
                     "created_at": item.get("created_at"),
                 }
             }
-            with app.test_client() as client:
-                client.post(
-                    "/api/inbound",
-                    json=webhook_payload,
-                    headers={"Content-Type": "application/json"},
-                )
-            imported += 1
+            try:
+                result = _process_inbound_email(webhook_payload, user_id, conn)
+                if result:
+                    imported += 1
+            except RuntimeError:
+                app.logger.error(f"DEK missing during sync for email {email_id}")
+                continue
+        conn.commit()
+        conn.close()
         return jsonify({"imported": imported})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
