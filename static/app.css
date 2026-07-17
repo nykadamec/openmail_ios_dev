@@ -370,6 +370,13 @@ html, body {
 
 .email-card.unread .subject { font-weight: 700; }
 
+.email-card .time {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
 .email-card.unread .time {
   color: var(--text-secondary);
   font-weight: 500;

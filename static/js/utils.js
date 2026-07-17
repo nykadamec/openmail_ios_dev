@@ -47,18 +47,25 @@ export function formatDate(dateStr) {
   const d = new Date(dateStr);
   if (isNaN(d)) return dateStr;
   const now = new Date();
-  const diff = now - d;
-  const days = Math.floor(diff / 86400000);
 
-  let rel = '';
-  if (days === 0) rel = __('date.today');
-  else if (days === 1) rel = __('date.yesterday');
-  else if (days < 7) rel = __('date.days_ago', days);
-  else if (days < 30) rel = __('date.weeks_ago', Math.floor(days / 7));
-  else rel = __('date.months_ago', Math.floor(days / 30));
+  // Calendar-day comparison: 17.7 23:00 is "yesterday" on 18.7 00:30
+  const dateDay = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  const nowDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const dayDiff = Math.round((nowDay - dateDay) / 86400000);
+
+  const sameYear = d.getFullYear() === now.getFullYear();
+  const pad = (n) => String(n).padStart(2, '0');
+  const datePart = sameYear
+    ? `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()}`
+    : `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()}`;
 
   const time = d.toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' });
-  return `${rel} ${time}`;
+
+  if (dayDiff === 0) return `${__('date.today')} (${datePart}) ${time}`;
+  if (dayDiff === 1) return `${__('date.yesterday')} (${datePart}) ${time}`;
+  if (dayDiff < 7) return `${__('date.days_ago', dayDiff)} ${time}`;
+  if (dayDiff < 30) return `${__('date.weeks_ago', Math.floor(dayDiff / 7))} ${time}`;
+  return `${__('date.months_ago', Math.floor(dayDiff / 30))} ${time}`;
 }
 
 export function formatFullDate(dateStr) {
