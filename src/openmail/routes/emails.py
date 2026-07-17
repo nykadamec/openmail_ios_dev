@@ -21,7 +21,7 @@ def sse_stream():
 @bp.route("/emails", methods=["GET"])
 @login_required
 def list_emails_route():
-    folder = request.args.get("folder", "inbox")
+    folder = request.args.get("folder")  # no default; special folders ignore it
     direction = request.args.get("direction", "inbound")
     starred = request.args.get("starred", type=int)
     is_spam = request.args.get("is_spam", type=int)
@@ -29,8 +29,11 @@ def list_emails_route():
     custom_folder_id = request.args.get("custom_folder_id", type=int)
     limit = request.args.get("limit", 50, type=int)
     offset = request.args.get("offset", 0, type=int)
+    # Default to inbox only when no special filter is active
+    if folder is None and starred is None and is_spam is None and is_trash is None and custom_folder_id is None:
+        folder = "inbox"
     return jsonify(email_service.list_emails(
-        folder=folder,
+        folder=folder or '',
         direction=direction,
         starred=starred,
         is_spam=is_spam,
