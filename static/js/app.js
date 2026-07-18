@@ -511,35 +511,20 @@ function toggleSelectMode() {
   selectMode = !selectMode;
   selectedIds.clear();
   els.app.classList.toggle('select-mode', selectMode);
-  els.bulkBar.classList.toggle('show', false);
-  els.selectToggle.innerHTML = selectMode
+  els.bulkBar?.classList.toggle('show', false);
+  const icon = selectMode
     ? '<i class="hgi-stroke hgi-checkmark-square-01" aria-hidden="true"></i>'
     : '<i class="hgi-stroke hgi-square" aria-hidden="true"></i>';
-  document.querySelectorAll('.email-card').forEach(card => {
-    const id = card.dataset.id;
-    if (!id) return;
-    let cb = card.querySelector('.checkbox');
-    if (selectMode) {
-      if (!cb) {
-        cb = document.createElement('input');
-        cb.type = 'checkbox';
-        cb.className = 'checkbox';
-        cb.dataset.id = id;
-        cb.addEventListener('change', () => onSelectChange(id, cb.checked));
-        card.prepend(cb);
-      }
-    } else if (cb) {
-      cb.remove();
-    }
-    card.classList.remove('selected');
-  });
+  els.selectToggle.innerHTML = icon;
+  document.querySelectorAll('.email-card').forEach(card => card.classList.remove('selected'));
+  updateBulkBar();
 }
 
 function onSelectChange(id, checked) {
   const numId = parseInt(id, 10);
   if (checked) selectedIds.add(numId);
   else selectedIds.delete(numId);
-  const card = document.querySelector(`.email-card .checkbox[data-id="${id}"]`)?.closest('.email-card');
+  const card = document.querySelector(`.email-card[data-id="${id}"]`);
   if (card) card.classList.toggle('selected', checked);
   updateBulkBar();
 }

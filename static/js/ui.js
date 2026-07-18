@@ -20,6 +20,7 @@ export function renderEmailList(emails, currentFolder, listEl, activeId = null) 
     card.dataset.id = e.id;
     card.innerHTML = `
       <i class="hgi-stroke hgi-star card-star ${e.is_starred ? 'active' : ''}" aria-hidden="true"></i>
+      <span class="select-check">✓</span>
       ${e.is_spam ? '<span class="spam-badge">SPAM</span>' : ''}
       <div class="content-row">
         <div class="avatar" style="background: ${avatarColor(identifier)}">${escapeHtml(initial(identifier))}</div>

@@ -473,10 +473,31 @@ html, body {
 
 .email-card.spam { opacity: 0.85; }
 
-.email-card .checkbox {
+.email-card.selected {
+  background: var(--accent-subtle) !important;
+  border-left-color: var(--accent);
+}
+
+.email-card .select-check {
+  display: none;
+  position: absolute;
+  top: 8px;
+  right: 8px;
   width: 18px;
   height: 18px;
-  margin-right: 4px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 12px;
+  align-items: center;
+  justify-content: center;
+}
+
+.email-card.selected .select-check {
+  display: flex;
+}
+
+.email-card .checkbox { display: none; }
   accent-color: var(--accent);
   cursor: pointer;
   flex-shrink: 0;
