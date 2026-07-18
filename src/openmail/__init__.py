@@ -11,7 +11,7 @@ SRC = Path(__file__).resolve().parent.parent
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
-from flask import Flask
+from flask import Flask, request
 
 from openmail import config
 from openmail.db import init_db, close_db
@@ -40,6 +40,15 @@ def create_app() -> Flask:
 
     # Register teardown
     app.teardown_appcontext(close_db)
+
+    # Disable caching for static JS/CSS during development
+    @app.after_request
+    def disable_static_cache(response):
+        if request.path.startswith('/static/'):
+            response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+            response.headers['Pragma'] = 'no-cache'
+            response.headers['Expires'] = '0'
+        return response
 
     # Initialize database + migrations
     with app.app_context():

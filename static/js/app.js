@@ -729,7 +729,6 @@ function initEventListeners() {
   });
 
   document.addEventListener('keydown', (e) => {
-  document.addEventListener('keydown', (e) => {
     // Ignore if typing in an input/textarea
     if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
     if (els.composer?.classList.contains('open')) {

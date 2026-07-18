@@ -1,8 +1,11 @@
-const CACHE_NAME = 'openmail-v1';
+const CACHE_NAME = 'openmail-v2';
 const STATIC_ASSETS = [
   '/',
   '/login',
   '/static/app.css',
+  '/static/js/app.js',
+  '/static/js/ui.js',
+  '/static/js/utils.js',
   '/static/manifest.json',
   '/static/icon-192.png',
   '/static/icon-512.png'
