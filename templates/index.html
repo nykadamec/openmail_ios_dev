@@ -36,12 +36,7 @@
       </div>
     </div>
 
-    <!-- Content -->
-    <div class="content" id="content">
-      <div id="emailList"></div>
-    </div>
-
-    <!-- Side menu drawer -->
+    <!-- Side menu drawer (mobile) / Sidebar (desktop) -->
     <div class="menu-drawer" id="menuDrawer">
       <div class="menu-panel">
         <div class="menu-header">
@@ -98,7 +93,7 @@
     </div>
     <form id="logoutForm" method="post" action="/logout" style="display:none"></form>
 
-    <!-- Floating Tab Bar -->
+    <!-- Floating Tab Bar (mobile only) -->
     <div class="tab-bar-wrap">
       <nav class="tab-bar" id="tabBar">
         <button class="tab" data-folder="inbox" aria-label="{{ _('tab.inbox') }}">
@@ -135,27 +130,35 @@
       <button class="danger" data-bulk="delete">{{ _("action.delete") }}</button>
     </div>
 
-    <!-- Reader -->
-    <div class="reader" id="reader">
-      <div class="reader-top">
-        <div class="left">
-          <button class="icon-btn" data-action="closeReader" aria-label="{{ _('action.back') }}">
-            <i class="hgi-stroke hgi-arrow-left-01" aria-hidden="true"></i>
-          </button>
-        </div>
-        <div class="right">
-          <button class="icon-btn" id="readerStarBtn" data-action="toggleStarFromReader" aria-label="{{ _('action.star') }}">
-            <i class="hgi-stroke hgi-star" aria-hidden="true"></i>
-          </button>
-          <button class="icon-btn" data-action="moveToTrash" aria-label="{{ _('action.trash') }}">
-            <i class="hgi-stroke hgi-delete-01" aria-hidden="true"></i>
-          </button>
-        </div>
+    <!-- Content + Reader panes (desktop) -->
+    <div class="desktop-panes">
+      <!-- Content -->
+      <div class="content" id="content">
+        <div id="emailList"></div>
       </div>
-      <div class="reader-scroll">
-        <h2 id="rSubject"></h2>
-        <div class="meta-block" id="rMetaBlock"></div>
-        <div class="body" id="rBody"></div>
+
+      <!-- Reader -->
+      <div class="reader" id="reader" data-empty="">
+        <div class="reader-top">
+          <div class="left">
+            <button class="icon-btn mobile-only" data-action="closeReader" aria-label="{{ _('action.back') }}">
+              <i class="hgi-stroke hgi-arrow-left-01" aria-hidden="true"></i>
+            </button>
+          </div>
+          <div class="right">
+            <button class="icon-btn" id="readerStarBtn" data-action="toggleStarFromReader" aria-label="{{ _('action.star') }}">
+              <i class="hgi-stroke hgi-star" aria-hidden="true"></i>
+            </button>
+            <button class="icon-btn" data-action="moveToTrash" aria-label="{{ _('action.trash') }}">
+              <i class="hgi-stroke hgi-delete-01" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+        <div class="reader-scroll">
+          <h2 id="rSubject"></h2>
+          <div class="meta-block" id="rMetaBlock"></div>
+          <div class="body" id="rBody"></div>
+        </div>
       </div>
     </div>
 
@@ -251,6 +254,14 @@
         </div>
         <div id="contactsList"></div>
       </div>
+    </div>
+
+    <!-- Context menu for desktop right-click -->
+    <div class="context-menu" id="contextMenu">
+      <div class="context-item" data-ctx="read">{{ _("ctx.mark_read") }}</div>
+      <div class="context-item" data-ctx="unread">{{ _("ctx.mark_unread") }}</div>
+      <div class="context-item" data-ctx="archive">{{ _("ctx.archive") }}</div>
+      <div class="context-item danger" data-ctx="delete">{{ _("ctx.delete") }}</div>
     </div>
 
     <!-- Toast -->

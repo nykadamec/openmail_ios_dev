@@ -136,7 +136,12 @@
   "folder.starred": "Starred",
   "folder.spam": "Spam",
   "folder.trash": "Trash",
+  "folder.archive": "Archive",
 
+  "ctx.mark_read": "Mark as read",
+  "ctx.mark_unread": "Mark as unread",
+  "ctx.archive": "Archive",
+  "ctx.delete": "Delete",
   "search.placeholder": "Search...",
 
   "error.generic": "Error",

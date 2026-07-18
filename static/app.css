@@ -368,6 +368,16 @@ html, body {
   color: var(--text);
 }
 
+.email-card .subject {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
 .email-card.unread .subject { font-weight: 700; }
 
 .email-card .time {
@@ -394,12 +404,57 @@ html, body {
 
 .email-card:not(.unread) .unread-dot { display: none; }
 
-.email-card .star {
+.email-card .card-star {
   position: absolute;
   top: 6px;
   right: 8px;
-  color: var(--accent);
+  color: var(--text-tertiary);
   font-size: 14px;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.email-card .card-star.active,
+.email-card .card-star:hover {
+  color: var(--accent);
+}
+
+.email-card .card-star::before {
+  content: '\e9d8';
+}
+
+.context-menu {
+  display: none;
+  position: fixed;
+  z-index: 200;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-float);
+  min-width: 180px;
+  overflow: hidden;
+}
+
+.context-menu.open { display: block; }
+
+.context-item {
+  padding: 10px 14px;
+  font-size: 13px;
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.context-item:hover {
+  background: var(--surface-hover);
+}
+
+.context-item.danger {
+  color: var(--error);
+}
+
+.context-item.danger:hover {
+  background: var(--error-subtle);
 }
 
 .email-card .spam-badge {
@@ -1256,3 +1311,202 @@ html, body {
 .danger {
   color: var(--error) !important;
 }
+
+/* ============================================================
+   Desktop layout (≥1024px)
+   ============================================================ */
+@media (min-width: 1024px) {
+  #app {
+    display: grid;
+    grid-template-columns: 240px 1fr 1.4fr;
+    grid-template-rows: auto 1fr;
+    height: 100dvh;
+    overflow: hidden;
+  }
+
+  .header {
+    grid-column: 2 / 4;
+    grid-row: 1;
+    position: static;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    padding: 14px 20px;
+  }
+
+  .header-actions .icon-btn[data-action="toggleMenu"] {
+    display: none;
+  }
+
+  .desktop-panes {
+    grid-column: 2 / 4;
+    grid-row: 2;
+    display: grid;
+    grid-template-columns: minmax(320px, 1fr) minmax(0, 1.4fr);
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .content {
+    grid-column: auto;
+    grid-row: auto;
+    padding: 0;
+    padding-bottom: 20px;
+    height: 100%;
+    border-right: 1px solid var(--border);
+  }
+
+  .tab-bar-wrap {
+    display: none;
+  }
+
+  .menu-drawer {
+    display: block !important;
+    position: static;
+    grid-column: 1;
+    grid-row: 1 / 3;
+    width: auto;
+    height: 100dvh;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    z-index: 50;
+    transform: none !important;
+    pointer-events: auto;
+  }
+
+  .menu-drawer .menu-panel {
+    height: 100%;
+    max-width: none;
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
+  }
+
+  .menu-drawer .menu-close { display: none; }
+
+  .menu-drawer .menu-user {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+  }
+
+  .menu-section-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin: 18px 0 8px;
+  }
+
+  .menu-item {
+    padding: 9px 12px;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+  }
+
+  .menu-item .icon {
+    font-size: 18px;
+    width: 22px;
+  }
+
+  .reader {
+    position: static;
+    grid-column: auto;
+    grid-row: auto;
+    width: auto;
+    height: 100%;
+    border-left: none;
+    background: var(--bg);
+    transform: none !important;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .reader:not(.open) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-tertiary);
+  }
+
+  .reader:not(.open)::after {
+    content: "Vyberte e-mail";
+    font-size: 15px;
+  }
+
+  .reader .reader-top .mobile-only {
+    display: none;
+  }
+
+  .reader-top {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .reader-scroll {
+    padding: 24px 32px;
+  }
+
+  .composer {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 640px;
+    max-width: 90vw;
+    height: auto;
+    max-height: 90vh;
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--border);
+  }
+
+  .composer:not(.open) { display: none; }
+
+  .side-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 380px;
+    max-width: 40vw;
+    height: 100dvh;
+    border-radius: 0;
+    border-left: 1px solid var(--border);
+    box-shadow: var(--shadow-float);
+  }
+
+  .email-card {
+    padding: 10px 14px;
+    border-left: 3px solid transparent;
+    border-radius: 0;
+  }
+
+  .email-card.unread {
+    border-left-color: var(--accent);
+    padding-left: 11px;
+  }
+
+  .email-card:hover { background: rgba(255, 255, 255, 0.03); }
+
+  .email-card.active {
+    background: var(--accent-subtle);
+    border-left-color: var(--accent);
+  }
+
+  .bulk-bar {
+    left: 260px;
+    right: auto;
+    width: calc(100vw - 260px - 42%);
+    bottom: 20px;
+    border-radius: var(--radius-lg);
+  }
+}
+
+@media (min-width: 1400px) {
+  .desktop-panes { grid-template-columns: 420px 1fr; }
+}
+
+.mobile-only { display: initial; }
+@media (min-width: 1024px) {
+  .mobile-only { display: none; }
+}
+

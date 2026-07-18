@@ -21,7 +21,12 @@ let emailOffset = 0;
 let emailTotal = 0;
 let loadingMore = false;
 let scrollObserver = null;
+let focusedEmailIdx = -1;
 const PAGE_SIZE = 50;
+
+function isDesktop() {
+  return window.matchMedia('(min-width: 1024px)').matches;
+}
 
 // Cached DOM refs
 const els = {};
@@ -33,7 +38,7 @@ function cacheElements() {
     'customFoldersList', 'headerTitle', 'headerSubtitle', 'rSubject', 'rMetaBlock',
     'rBody', 'readerStarBtn', 'toField', 'subjectField', 'bodyField',
     'attachmentPreview', 'attachmentInput', 'selectToggle', 'modal', 'modalContent',
-    'currentPassword', 'newPassword',
+    'currentPassword', 'newPassword', 'contextMenu',
   ];
   for (const id of ids) els[id] = document.getElementById(id);
 }
@@ -43,13 +48,16 @@ async function loadEmails(reset = true) {
   if (reset) {
     emailOffset = 0;
     emailTotal = 0;
+    focusedEmailIdx = -1;
+    markCardActive(null);
   }
   const params = { limit: PAGE_SIZE, offset: emailOffset };
-  if (currentFolder === 'starred') {
-    params.starred = 1;
+  if (currentFolder === 'archive') {
+    params.folder = 'archive';
     params.direction = 'inbound';
     params.is_trash = 0;
-  } else if (currentFolder === 'spam') {
+    params.is_spam = 0;
+  } else if (currentFolder === 'starred') {
     params.direction = 'inbound';
     params.is_spam = 1;
     params.is_trash = 0;
@@ -67,7 +75,11 @@ async function loadEmails(reset = true) {
     params.is_spam = 0;
   }
 
-  if (reset) els.emailList.innerHTML = `<div class="loading"><div class="spinner"></div>${__('index.header.subtitle')}</div>`;
+  if (reset) {
+    els.emailList.innerHTML = `<div class="loading"><div class="spinner"></div>${__('index.header.subtitle')}</div>`;
+    // Show something in header while loading, to avoid stale "Synchronizace…"
+    if (els.headerSubtitle) els.headerSubtitle.textContent = __('emails.loading') || __('index.header.subtitle');
+  }
   try {
     const data = await API.emails(params);
     const emails = data.emails || [];
@@ -78,7 +90,7 @@ async function loadEmails(reset = true) {
       els.emailList.innerHTML = `<div class="empty">${__('emails.empty')}</div>`;
       return;
     }
-    ui.renderEmailList(emails, currentFolder, els.emailList);
+    ui.renderEmailList(currentEmails, currentFolder, els.emailList, currentEmailId);
     setupInfiniteScroll();
   } catch (err) {
     if (reset) els.emailList.innerHTML = `<div class="empty">${__('error.generic')}: ${escapeHtml(err.message)}</div>`;
@@ -148,13 +160,20 @@ async function loadFolders() {
 function setFolder(folder, customFolderId = null) {
   currentFolder = folder;
   currentCustomFolderId = customFolderId;
-  els.tabBar.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
-  const active = els.tabBar.querySelector(`.tab[data-folder="${folder}"]`);
-  if (active) active.classList.add('active');
+  if (els.tabBar) {
+    els.tabBar.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+    const active = els.tabBar.querySelector(`.tab[data-folder="${folder}"]`);
+    if (active) active.classList.add('active');
+  }
+  if (els.menuDrawer) {
+    els.menuDrawer.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
+    const activeMenu = els.menuDrawer.querySelector(`.menu-item[data-folder="${folder}"]`);
+    if (activeMenu) activeMenu.classList.add('active');
+  }
 
   const titles = { inbox: __('folder.inbox'), sent: __('folder.sent'), starred: __('folder.starred'), spam: __('folder.spam'), trash: __('folder.trash'), custom: __('folder.inbox') };
   const customName = customFolders.find(f => f.id === customFolderId)?.name;
-  els.headerTitle.textContent = titles[folder] || customName || folder;
+  if (els.headerTitle) els.headerTitle.textContent = titles[folder] || customName || folder;
   loadEmails();
   loadStats();
 }
@@ -165,6 +184,21 @@ async function openEmail(id) {
     const e = await API.email(id);
     currentEmailId = id;
     currentEmailData = e;
+
+    // Mark card as read immediately in the DOM
+    const card = document.querySelector(`.email-card[data-id="${id}"]`);
+    if (card) {
+      card.classList.remove('unread');
+      markCardActive(card);
+    }
+
+    // Update in-memory state
+    const local = currentEmails.find(em => em.id === id);
+    if (local && !local.is_read) {
+      local.is_read = 1;
+      loadStats();
+    }
+
     ui.renderReader(e, currentFolder, {
       rSubject: els.rSubject,
       rMetaBlock: els.rMetaBlock,
@@ -177,10 +211,84 @@ async function openEmail(id) {
   }
 }
 
+function markCardActive(card) {
+  document.querySelectorAll('.email-card').forEach(c => c.classList.remove('active'));
+  if (card) card.classList.add('active');
+}
+
+function focusEmailByIndex(idx) {
+  const cards = Array.from(document.querySelectorAll('.email-card'));
+  if (idx < 0) idx = 0;
+  if (idx >= cards.length) idx = cards.length - 1;
+  focusedEmailIdx = idx;
+  cards[idx]?.scrollIntoView({ block: 'nearest' });
+  markCardActive(cards[idx]);
+}
+
+function openFocusedEmail() {
+  const cards = Array.from(document.querySelectorAll('.email-card'));
+  const card = cards[focusedEmailIdx];
+  if (card) {
+    const id = parseInt(card.dataset.id, 10);
+    openEmail(id);
+  }
+}
+
 function closeReader() {
   els.reader.classList.remove('open');
   currentEmailId = null;
   currentEmailData = null;
+  if (isDesktop()) {
+    markCardActive(null);
+  }
+}
+
+async function toggleStar(id) {
+  const e = currentEmails.find(em => em.id === id);
+  if (!e) return;
+  const newStar = e.is_starred ? 0 : 1;
+  try {
+    await API.updateEmail(id, { is_starred: newStar });
+    e.is_starred = newStar;
+    const card = document.querySelector(`.email-card[data-id="${id}"]`);
+    const star = card?.querySelector('.card-star');
+    if (star) star.classList.toggle('active', !!newStar);
+    showToast(newStar ? __('folder.starred') : __('folder.unstarred'));
+    loadStats();
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+}
+
+function showContextMenu(x, y, id) {
+  if (!els.contextMenu) return;
+  els.contextMenu.style.left = `${x}px`;
+  els.contextMenu.style.top = `${y}px`;
+  els.contextMenu.classList.add('open');
+  els.contextMenu.dataset.emailId = id;
+}
+
+function hideContextMenu() {
+  els.contextMenu?.classList.remove('open');
+}
+
+async function contextAction(action) {
+  const id = parseInt(els.contextMenu?.dataset.emailId || '', 10);
+  if (!id) return;
+  try {
+    if (action === 'read' || action === 'unread') {
+      await API.updateEmail(id, { is_read: action === 'read' ? 1 : 0 });
+    } else if (action === 'archive') {
+      await API.updateEmail(id, { folder: 'archive', is_spam: 0 });
+    } else if (action === 'delete') {
+      await API.updateEmail(id, { is_trash: 1 });
+    }
+    hideContextMenu();
+    loadEmails();
+    loadStats();
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
 }
 
 async function toggleStarFromReader() {
@@ -580,16 +688,29 @@ function initEventListeners() {
   document.querySelector('[data-action="clearCache"]')?.addEventListener('click', clearCache);
 
   // Bulk bar
-  els.bulkBar.querySelectorAll('button').forEach(btn => {
-    const action = btn.dataset.bulk;
-    if (action) btn.addEventListener('click', () => bulkAction(action));
-  });
+  if (els.bulkBar) {
+    els.bulkBar.querySelectorAll('button').forEach(btn => {
+      const action = btn.dataset.bulk;
+      if (action) btn.addEventListener('click', () => bulkAction(action));
+    });
+  }
 
   // Email list clicks
   els.emailList.addEventListener('click', (e) => {
+    const star = e.target.closest('.card-star');
+    if (star) {
+      const card = star.closest('.email-card');
+      const id = parseInt(card?.dataset.id, 10);
+      if (id) {
+        e.stopPropagation();
+        toggleStar(id);
+      }
+      return;
+    }
     const card = e.target.closest('.email-card');
     if (!card) return;
     const id = parseInt(card.dataset.id, 10);
+    focusedEmailIdx = Array.from(document.querySelectorAll('.email-card')).indexOf(card);
     if (selectMode) {
       const cb = card.querySelector('.checkbox');
       if (cb) {
@@ -599,6 +720,95 @@ function initEventListeners() {
       return;
     }
     openEmail(id);
+  });
+
+  // Context menu on desktop
+  els.emailList.addEventListener('contextmenu', (e) => {
+    if (!isDesktop()) return;
+    const card = e.target.closest('.email-card');
+    if (!card) return;
+    e.preventDefault();
+    const id = parseInt(card.dataset.id, 10);
+    showContextMenu(e.clientX, e.clientY, id);
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!els.contextMenu?.classList.contains('open')) return;
+    const item = e.target.closest('.context-item');
+    if (item) {
+      e.preventDefault();
+      contextAction(item.dataset.ctx);
+    } else if (!els.contextMenu.contains(e.target)) {
+      hideContextMenu();
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+  document.addEventListener('keydown', (e) => {
+    // Ignore if typing in an input/textarea
+    if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
+    if (els.composer?.classList.contains('open')) {
+      if (e.key === 'Escape') { e.preventDefault(); closeComposer(); }
+      return;
+    }
+    if (els.reader?.classList.contains('open') || isDesktop()) {
+      switch (e.key) {
+        case 'j':
+          e.preventDefault();
+          focusEmailByIndex(focusedEmailIdx + 1);
+          if (isDesktop()) openFocusedEmail();
+          break;
+        case 'k':
+          e.preventDefault();
+          focusEmailByIndex(focusedEmailIdx - 1);
+          if (isDesktop()) openFocusedEmail();
+          break;
+        case 'Enter':
+          e.preventDefault();
+          openFocusedEmail();
+          break;
+        case 'Delete':
+        case 'Backspace':
+          if (currentEmailId) {
+            e.preventDefault();
+            moveToTrash();
+          }
+          break;
+        case 'e':
+          if (currentEmailId) {
+            e.preventDefault();
+            // spam toggle
+            const cur = currentEmails.find(em => em.id === currentEmailId);
+            const newSpam = cur ? (cur.is_spam ? 0 : 1) : 1;
+            API.updateEmail(currentEmailId, { is_spam: newSpam }).then(() => {
+              showToast(newSpam ? __('folder.spam') : __('folder.inbox'));
+              loadEmails();
+              loadStats();
+            }).catch(err => showToast(err.message, 'error'));
+          }
+          break;
+        case 's':
+          if (currentEmailId) {
+            e.preventDefault();
+            toggleStarFromReader();
+          }
+          break;
+        case 'r':
+          e.preventDefault();
+          showToast(__('action.reply_placeholder') || 'Reply not yet implemented', 'error');
+          break;
+        case 'c':
+          e.preventDefault();
+          openComposer();
+          break;
+        case 'Escape':
+          if (els.reader?.classList.contains('open') && !isDesktop()) {
+            e.preventDefault();
+            closeReader();
+          }
+          break;
+      }
+    }
   });
 
   // Custom folders and delete buttons inside menu
@@ -668,11 +878,18 @@ function initEventListeners() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  cacheElements();
-  initEventListeners();
-  loadMe();
-  loadFolders();
-  setFolder('inbox');
+  try {
+    cacheElements();
+    initEventListeners();
+    loadMe();
+    loadFolders();
+    setFolder('inbox');
+    console.log('[openMail] app initialized');
+  } catch (err) {
+    console.error('[openMail] init failed:', err);
+    const list = document.getElementById('emailList');
+    if (list) list.innerHTML = `<div class="empty">Chyba inicializace: ${escapeHtml(err.message)}</div>`;
+  }
 });
 
 window.addEventListener('load', () => {

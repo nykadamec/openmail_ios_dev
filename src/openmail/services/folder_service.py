@@ -13,7 +13,7 @@ def list_folders() -> dict:
         (user_id,)
     ).fetchall()
     return {
-        "system": ["inbox", "sent", "starred", "spam", "trash"],
+        "system": ["inbox", "sent", "starred", "archive", "spam", "trash"],
         "custom": [dict(r) for r in custom]
     }
 

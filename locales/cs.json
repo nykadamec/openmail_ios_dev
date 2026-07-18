@@ -136,7 +136,12 @@
   "folder.starred": "Hvězdy",
   "folder.spam": "Spam",
   "folder.trash": "Koš",
+  "folder.archive": "Archiv",
 
+  "ctx.mark_read": "Označit jako přečtené",
+  "ctx.mark_unread": "Označit jako nepřečtené",
+  "ctx.archive": "Archivovat",
+  "ctx.delete": "Smazat",
   "search.placeholder": "Hledat...",
 
   "error.generic": "Chyba",

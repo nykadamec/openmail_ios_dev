@@ -2,7 +2,7 @@
 
 import { escapeHtml, formatDate, formatFullDate, avatarColor, initial, __, stripHtml, FROM_EMAIL } from './utils.js';
 
-export function renderEmailList(emails, currentFolder, listEl) {
+export function renderEmailList(emails, currentFolder, listEl, activeId = null) {
   if (!emails.length) {
     listEl.innerHTML = `<div class="empty">${__('emails.empty')}</div>`;
     return;
@@ -15,11 +15,11 @@ export function renderEmailList(emails, currentFolder, listEl) {
     const fromLabel = isSent ? (e.recipient || __('error.not_found')) : (e.sender_name || e.sender_email || __('error.not_found'));
 
     const card = document.createElement('div');
-    card.className = `email-card ${e.is_read ? '' : 'unread'} ${e.is_starred ? 'starred' : ''} ${e.is_spam ? 'spam' : ''}`;
+    card.className = `email-card ${e.is_read ? '' : 'unread'} ${e.is_starred ? 'starred' : ''} ${e.is_spam ? 'spam' : ''} ${activeId === e.id ? 'active' : ''}`;
     card.style.animationDelay = `${i * 0.04}s`;
     card.dataset.id = e.id;
     card.innerHTML = `
-      ${e.is_starred ? '<i class="hgi-stroke hgi-star star" aria-hidden="true"></i>' : ''}
+      <i class="hgi-stroke hgi-star card-star ${e.is_starred ? 'active' : ''}" aria-hidden="true"></i>
       ${e.is_spam ? '<span class="spam-badge">SPAM</span>' : ''}
       <div class="content-row">
         <div class="avatar" style="background: ${avatarColor(identifier)}">${escapeHtml(initial(identifier))}</div>
@@ -36,6 +36,11 @@ export function renderEmailList(emails, currentFolder, listEl) {
   }
   listEl.innerHTML = '';
   listEl.appendChild(frag);
+}
+
+export function updateEmailCardRead(id) {
+  const card = document.querySelector(`.email-card[data-id="${id}"]`);
+  if (card) card.classList.remove('unread');
 }
 
 export function renderReader(email, currentFolder, elements) {
