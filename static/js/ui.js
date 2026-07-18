@@ -20,7 +20,6 @@ export function renderEmailList(emails, currentFolder, listEl, activeId = null) 
     card.dataset.id = e.id;
     card.innerHTML = `
       <i class="hgi-stroke hgi-star card-star ${e.is_starred ? 'active' : ''}" aria-hidden="true"></i>
-      <span class="select-check">✓</span>
       ${e.is_spam ? '<span class="spam-badge">SPAM</span>' : ''}
       <div class="content-row">
         <div class="avatar" style="background: ${avatarColor(identifier)}">${escapeHtml(initial(identifier))}</div>
@@ -45,7 +44,7 @@ export function updateEmailCardRead(id) {
 }
 
 export function renderReader(email, currentFolder, elements) {
-  const { rSubject, rMetaBlock, rBody, readerEl, readerStarBtn } = elements;
+  const { rSubject, rMetaBlock, rBody, readerEl, readerStarBtn, htmlToggle } = elements;
   rSubject.textContent = email.subject || __('error.not_found');
 
   const isSent = currentFolder === 'sent';
@@ -64,22 +63,30 @@ export function renderReader(email, currentFolder, elements) {
 
   let bodyHtml = '';
   if (email.body_html) {
+    // Strip scripts to avoid sandbox warnings; iframe has no allow-scripts.
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(email.body_html, 'text/html');
+    doc.querySelectorAll('script').forEach(s => s.remove());
+    const safeBodyHtml = doc.body.innerHTML;
+
     const emailCss = `<style>
       :root { color-scheme: dark; }
-      html, body { margin: 0; min-height: 100vh; }
-      body { padding: 16px; font: 15px/1.5 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: rgba(255,255,255,0.92); background: transparent; overflow-y: auto; scrollbar-width: none; }
-      body::-webkit-scrollbar { display: none; }
-      a { color: #60a5fa; text-decoration: underline; }
+      html, body { margin: 0; min-height: 100vh; scrollbar-width: none; -ms-overflow-style: none; }
+      body { width: 100% !important; max-width: 100% !important; padding: 16px; font: 15px/1.5 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: rgba(255,255,255,0.92); background: transparent; overflow-x: hidden; overflow-y: auto; word-break: break-word; box-sizing: border-box; }
+      ::-webkit-scrollbar { width: 0; height: 0; background: transparent; }
+      a { color: #60a5fa; text-decoration: underline; word-break: break-word; }
       p, h1, h2, h3 { margin: 0 0 12px; }
-      img { max-width: 100%; height: auto; border-radius: 8px; }
+      img, video, svg { max-width: 100% !important; height: auto !important; }
+      table, td { max-width: 100% !important; word-break: break-word; overflow-wrap: anywhere; }
+      table { width: 100% !important; }
+      pre { white-space: pre-wrap; word-break: break-word; overflow-wrap: anywhere; }
       blockquote { border-left: 2px solid rgba(255,255,255,0.2); padding-left: 12px; margin-left: 0; color: rgba(255,255,255,0.7); }
     </style>`;
-    const wrappedHtml = emailCss + email.body_html;
+    const wrappedHtml = emailCss + safeBodyHtml;
     bodyHtml = `<div class="body-html"><iframe sandbox="allow-same-origin" srcdoc="${escapeHtml(wrappedHtml).replace(/"/g, '&quot;')}"></iframe></div>
-      <div class="body-plain" style="display:none">${escapeHtml(email.body_text || stripHtml(email.body_html))}</div>
-      <button class="html-toggle"><i class="hgi-stroke hgi-code" aria-hidden="true"></i> ${__('reader.html_toggle')}</button>`;
+      <div class="body-plain" style="display:none">${escapeHtml(email.body_text || stripHtml(email.body_html))}</div>`;
   } else {
-    bodyHtml = escapeHtml(email.body_text || __('error.not_found'));
+    bodyHtml = `<div class="body-plain">${escapeHtml(email.body_text || __('error.not_found'))}</div>`;
   }
 
   if (email.attachments?.length) {
@@ -91,14 +98,18 @@ export function renderReader(email, currentFolder, elements) {
   }
 
   rBody.innerHTML = bodyHtml;
-  const toggleBtn = rBody.querySelector('.html-toggle');
-  if (toggleBtn) {
-    toggleBtn.addEventListener('click', () => {
+
+  if (htmlToggle) {
+    const hasHtml = !!email.body_html;
+    htmlToggle.style.display = hasHtml ? '' : 'none';
+    htmlToggle.classList.toggle('active', false);
+    htmlToggle.onclick = () => {
       const htmlEl = rBody.querySelector('.body-html');
       const plainEl = rBody.querySelector('.body-plain');
       if (htmlEl) htmlEl.style.display = htmlEl.style.display === 'none' ? '' : 'none';
       if (plainEl) plainEl.style.display = plainEl.style.display === 'none' ? '' : 'none';
-    });
+      htmlToggle.classList.toggle('active', plainEl && plainEl.style.display !== 'none');
+    };
   }
 
   readerStarBtn.innerHTML = '<i class="hgi-stroke hgi-star" aria-hidden="true"></i>';

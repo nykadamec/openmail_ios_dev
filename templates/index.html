@@ -33,6 +33,9 @@
         <button class="icon-btn" data-action="selectMode" id="selectToggle" title="{{ _('action.select') }}">
           <i class="hgi-stroke hgi-square" aria-hidden="true"></i>
         </button>
+        <button class="icon-btn" data-action="openSettings" aria-label="{{ _('menu.settings') }}">
+          <i class="hgi-stroke hgi-settings-01" aria-hidden="true"></i>
+        </button>
       </div>
     </div>
 
@@ -146,6 +149,9 @@
             </button>
           </div>
           <div class="right">
+            <button class="icon-btn html-toggle" id="htmlToggle" data-action="htmlToggle" aria-label="{{ _('reader.html_toggle') }}" style="display:none">
+              <i class="hgi-stroke hgi-code" aria-hidden="true"></i>
+            </button>
             <button class="icon-btn" id="readerStarBtn" data-action="toggleStarFromReader" aria-label="{{ _('action.star') }}">
               <i class="hgi-stroke hgi-star" aria-hidden="true"></i>
             </button>

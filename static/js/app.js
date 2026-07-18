@@ -36,7 +36,7 @@ function cacheElements() {
     'menuDrawer', 'menuUsername', 'menuUser', 'settingsPanel', 'settingsUsername',
     'contactsPanel', 'contactsList', 'contactSearch', 'autocompleteList',
     'customFoldersList', 'headerTitle', 'headerSubtitle', 'rSubject', 'rMetaBlock',
-    'rBody', 'readerStarBtn', 'toField', 'subjectField', 'bodyField',
+    'rBody', 'readerStarBtn', 'htmlToggle', 'toField', 'subjectField', 'bodyField',
     'attachmentPreview', 'attachmentInput', 'selectToggle', 'modal', 'modalContent',
     'currentPassword', 'newPassword', 'contextMenu',
   ];
@@ -205,6 +205,7 @@ async function openEmail(id) {
       rBody: els.rBody,
       readerEl: els.reader,
       readerStarBtn: els.readerStarBtn,
+      htmlToggle: els.htmlToggle,
     });
   } catch (err) {
     showToast(err.message, 'error');
@@ -655,6 +656,9 @@ function initEventListeners() {
   });
   document.querySelector('[data-action="toggleMenu"]')?.addEventListener('click', toggleMenu);
   document.querySelector('[data-action="selectMode"]')?.addEventListener('click', toggleSelectMode);
+  document.querySelector('[data-action="htmlToggle"]')?.addEventListener('click', () => {
+    // handler lives in ui.renderReader via htmlToggle.onclick
+  });
   document.querySelector('[data-action="openComposer"]')?.addEventListener('click', openComposer);
   document.querySelector('[data-action="sync"]')?.addEventListener('click', syncEmails);
   document.querySelector('[data-action="openContacts"]')?.addEventListener('click', openContacts);
@@ -697,11 +701,8 @@ function initEventListeners() {
     const id = parseInt(card.dataset.id, 10);
     focusedEmailIdx = Array.from(document.querySelectorAll('.email-card')).indexOf(card);
     if (selectMode) {
-      const cb = card.querySelector('.checkbox');
-      if (cb) {
-        cb.checked = !cb.checked;
-        onSelectChange(id, cb.checked);
-      }
+      const isSelected = !selectedIds.has(id);
+      onSelectChange(id, isSelected);
       return;
     }
     openEmail(id);
