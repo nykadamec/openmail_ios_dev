@@ -20,13 +20,12 @@ export function renderEmailList(emails, currentFolder, listEl, activeId = null) 
     card.dataset.id = e.id;
     card.innerHTML = `
       <i class="hgi-stroke hgi-star card-star ${e.is_starred ? 'active' : ''}" aria-hidden="true"></i>
-      ${e.is_spam ? '<span class="spam-badge">SPAM</span>' : ''}
       <div class="content-row">
         <div class="avatar" style="background: ${avatarColor(identifier)}">${escapeHtml(initial(identifier))}</div>
         <div class="body">
           <div class="meta-row">
             <div class="from-name">${escapeHtml(fromLabel)}</div>
-            <div class="time">${formatDate(e.created_at)}</div>
+            <div class="time">${formatDate(e.received_at || e.created_at)}</div>
           </div>
           <div class="subject">${escapeHtml(e.subject || __('error.not_found'))}</div>
         </div>
@@ -58,7 +57,7 @@ export function renderReader(email, currentFolder, elements) {
       <div class="from">${escapeHtml(isSent ? email.recipient : from)}</div>
       <div class="to">${escapeHtml(isSent ? __('composer.to') + ': ' + FROM_EMAIL : fromEmail)}</div>
     </div>
-    <div class="time">${formatFullDate(email.created_at)}</div>
+    <div class="time">${formatFullDate(email.received_at || email.created_at)}</div>
   `;
 
   let bodyHtml = '';

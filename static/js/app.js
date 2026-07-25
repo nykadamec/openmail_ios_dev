@@ -38,7 +38,7 @@ function cacheElements() {
     'customFoldersList', 'headerTitle', 'headerSubtitle', 'rSubject', 'rMetaBlock',
     'rBody', 'readerStarBtn', 'htmlToggle', 'toField', 'subjectField', 'bodyField',
     'attachmentPreview', 'attachmentInput', 'selectToggle', 'modal', 'modalContent',
-    'currentPassword', 'newPassword', 'contextMenu',
+    'currentPassword', 'newPassword', 'contextMenu', 'content',
   ];
   for (const id of ids) els[id] = document.getElementById(id);
 }
@@ -58,6 +58,10 @@ async function loadEmails(reset = true) {
     params.is_trash = 0;
     params.is_spam = 0;
   } else if (currentFolder === 'starred') {
+    params.direction = 'inbound';
+    params.starred = 1;
+    params.is_trash = 0;
+  } else if (currentFolder === 'spam') {
     params.direction = 'inbound';
     params.is_spam = 1;
     params.is_trash = 0;
@@ -82,7 +86,11 @@ async function loadEmails(reset = true) {
   }
   try {
     const data = await API.emails(params);
-    const emails = data.emails || [];
+    const emails = (data.emails || []).sort((a, b) => {
+      const ta = new Date(a.received_at || a.created_at || 0).getTime();
+      const tb = new Date(b.received_at || b.created_at || 0).getTime();
+      return tb - ta;
+    });
     emailTotal = data.total || emails.length;
     currentEmails = reset ? emails : currentEmails.concat(emails);
 
@@ -160,10 +168,15 @@ async function loadFolders() {
 function setFolder(folder, customFolderId = null) {
   currentFolder = folder;
   currentCustomFolderId = customFolderId;
+  hideContextMenu();
+  closeReader();
+  // Preserve tab bar minimal state across folder changes
+  const wasMinimal = els.tabBar?.classList.contains('minimal');
   if (els.tabBar) {
     els.tabBar.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
     const active = els.tabBar.querySelector(`.tab[data-folder="${folder}"]`);
     if (active) active.classList.add('active');
+    if (wasMinimal) els.tabBar.classList.add('minimal');
   }
   if (els.menuDrawer) {
     els.menuDrawer.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
@@ -263,14 +276,155 @@ async function toggleStar(id) {
 
 function showContextMenu(x, y, id) {
   if (!els.contextMenu) return;
-  els.contextMenu.style.left = `${x}px`;
-  els.contextMenu.style.top = `${y}px`;
+  // Measure using a temporary visible clone so the real element keeps display:none until positioned
+  const clone = els.contextMenu.cloneNode(true);
+  clone.style.visibility = 'hidden';
+  clone.style.position = 'fixed';
+  clone.style.left = '-9999px';
+  clone.style.top = '-9999px';
+  clone.classList.add('open');
+  document.body.appendChild(clone);
+  const rect = clone.getBoundingClientRect();
+  document.body.removeChild(clone);
+
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const menuW = rect.width || 220;
+  const menuH = rect.height || 160;
+
+  // Keep fully inside viewport with small margin
+  const safeX = Math.max(12, Math.min(x, vw - menuW - 12));
+  const safeY = Math.max(12, Math.min(y, vh - menuH - 12));
+
+  els.contextMenu.style.left = `${safeX}px`;
+  els.contextMenu.style.top = `${safeY}px`;
   els.contextMenu.classList.add('open');
   els.contextMenu.dataset.emailId = id;
 }
 
 function hideContextMenu() {
   els.contextMenu?.classList.remove('open');
+}
+
+let suppressNextCardClick = false;
+let suppressNextMenuClick = false;
+
+function initLongPressContextMenu() {
+  if (isDesktop()) return;
+  const LONG_PRESS_MS = 450;
+  let timer = null;
+  let startX = 0;
+  let startY = 0;
+  let targetCard = null;
+  let longPressFired = false;
+  const appEl = document.getElementById('app');
+
+  function clearLongPressState() {
+    if (timer) {
+      clearTimeout(timer);
+      timer = null;
+    }
+    if (targetCard) {
+      targetCard.style.webkitUserSelect = '';
+      targetCard.style.userSelect = '';
+    }
+    targetCard = null;
+    appEl?.classList.remove('long-press-active');
+  }
+
+  els.emailList.addEventListener('touchstart', (e) => {
+    if (selectMode || els.contextMenu?.classList.contains('open')) return;
+    const touch = e.touches[0];
+    const card = e.target.closest('.email-card');
+    if (!card) return;
+    startX = touch.clientX;
+    startY = touch.clientY;
+    targetCard = card;
+    longPressFired = false;
+    suppressNextCardClick = false;
+    suppressNextMenuClick = false;
+    appEl?.classList.add('long-press-active');
+
+    timer = setTimeout(() => {
+      timer = null;
+      longPressFired = true;
+      const id = parseInt(targetCard?.dataset.id || '', 10);
+      if (!id) return;
+      // Use the touch point, but keep inside viewport
+      const x = Math.min(Math.max(startX, 16), window.innerWidth - 180);
+      const y = Math.min(Math.max(startY, 16), window.innerHeight - 200);
+      // Haptic feedback if available
+      if (navigator.vibrate) navigator.vibrate(40);
+      suppressNextCardClick = true;
+      suppressNextMenuClick = true;
+      showContextMenu(x, y, id);
+    }, LONG_PRESS_MS);
+  }, { passive: true });
+
+  els.emailList.addEventListener('touchmove', (e) => {
+    if (!timer) return;
+    const touch = e.touches[0];
+    const delta = Math.hypot(touch.clientX - startX, touch.clientY - startY);
+    // Cancel long-press if finger moves more than 12px
+    if (delta > 12) {
+      clearLongPressState();
+    }
+  }, { passive: true });
+
+  els.emailList.addEventListener('touchend', () => {
+    clearLongPressState();
+  });
+
+  els.emailList.addEventListener('touchcancel', () => {
+    clearLongPressState();
+  });
+
+  // Prevent the first click/tap after a long-press from activating a context-item
+  els.contextMenu?.addEventListener('click', (e) => {
+    if (suppressNextMenuClick) {
+      e.preventDefault();
+      e.stopPropagation();
+      suppressNextMenuClick = false;
+    }
+  }, true);
+
+  // Hide context menu on any scroll
+  els.content?.addEventListener('scroll', () => hideContextMenu(), { passive: true });
+}
+
+function initTabBarScrollBehavior() {
+  if (isDesktop() || !els.content || !els.tabBar) return;
+  let lastScrollY = 0;
+  let ticking = false;
+  const SCROLL_DOWN_THRESHOLD = 18;
+  const SCROLL_UP_THRESHOLD = 8;
+
+  function resetScrollState() {
+    lastScrollY = els.content.scrollTop;
+  }
+  // Reset scroll tracking after folder changes so old scrollTop doesn't force un-minimize
+  const originalSetFolder = setFolder;
+  setFolder = function(folder, customFolderId = null) {
+    const result = originalSetFolder(folder, customFolderId);
+    requestAnimationFrame(resetScrollState);
+    return result;
+  };
+
+  els.content.addEventListener('scroll', () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => {
+      const y = els.content.scrollTop;
+      const delta = y - lastScrollY;
+      if (delta > SCROLL_DOWN_THRESHOLD && y > 20) {
+        els.tabBar.classList.add('minimal');
+      } else if (delta < -SCROLL_UP_THRESHOLD) {
+        els.tabBar.classList.remove('minimal');
+      }
+      lastScrollY = y;
+      ticking = false;
+    });
+  }, { passive: true });
 }
 
 async function contextAction(action) {
@@ -324,11 +478,21 @@ async function moveToTrash() {
 function openComposer() {
   els.composer.classList.add('open');
   els.autocompleteList.innerHTML = '';
+  // Highlight compose button in tab bar
+  els.tabBar?.querySelectorAll('.tab, .compose-wrap .compose').forEach(el => el.classList.remove('active'));
+  const composeBtn = els.tabBar?.querySelector('.compose-wrap .compose');
+  if (composeBtn) composeBtn.classList.add('active');
   setTimeout(() => els.toField.focus(), 100);
 }
 
 function closeComposer() {
   els.composer.classList.remove('open');
+  // Restore active folder tab
+  const composeBtn = els.tabBar?.querySelector('.compose-wrap .compose');
+  if (composeBtn) composeBtn.classList.remove('active');
+  els.tabBar?.querySelectorAll('.tab[data-folder]').forEach(el => {
+    el.classList.toggle('active', el.dataset.folder === currentFolder);
+  });
   els.toField.value = '';
   els.subjectField.value = '';
   els.bodyField.value = '';
@@ -628,6 +792,138 @@ function onAttachmentsChange() {
   }
 }
 
+// ---- Swipe navigation ----
+const SWIPE_THRESHOLD = 100;
+const SWIPE_LOCK_ANGLE = 0.55; // radians; ~31 degrees
+const SWIPE_TABS = ['inbox', 'starred', 'spam'];
+
+function initSwipeNavigation() {
+  if (isDesktop()) return;
+  const surface = document.getElementById('content') || document.body;
+  const appEl = document.getElementById('app');
+  let startX = 0;
+  let startY = 0;
+  let currentX = 0;
+  let currentY = 0;
+  let isTracking = false;
+  let gestureLocked = false; // 'horizontal' | 'vertical' | false
+  let didSwipe = false;
+
+  surface.addEventListener('touchstart', (e) => {
+    if (shouldBlockSwipe()) return;
+    const touch = e.touches[0];
+    startX = touch.clientX;
+    startY = touch.clientY;
+    currentX = startX;
+    currentY = startY;
+    isTracking = true;
+    gestureLocked = false;
+    didSwipe = false;
+  }, { passive: true });
+
+  surface.addEventListener('touchmove', (e) => {
+    if (!isTracking) return;
+    const touch = e.touches[0];
+    currentX = touch.clientX;
+    currentY = touch.clientY;
+    const deltaX = currentX - startX;
+    const deltaY = currentY - startY;
+
+    // Until the gesture is locked, decide whether this is horizontal or vertical
+    if (!gestureLocked) {
+      const absX = Math.abs(deltaX);
+      const absY = Math.abs(deltaY);
+      const minLock = 14;
+      if (absX < minLock && absY < minLock) return;
+      // Angle from horizontal; smaller means more horizontal
+      const angle = Math.atan2(absY, absX);
+      if (angle < SWIPE_LOCK_ANGLE) {
+        gestureLocked = 'horizontal';
+        appEl?.classList.add('swipe-active');
+        // Prevent vertical scroll during the horizontal swipe
+        if (els.content) els.content.style.overflowY = 'hidden';
+      } else {
+        gestureLocked = 'vertical';
+        // Let the browser handle the scroll; stop tracking this touch for swipe
+        isTracking = false;
+      }
+      return;
+    }
+
+    if (gestureLocked === 'horizontal') {
+      didSwipe = true;
+      applySwipeTransform(deltaX);
+    }
+  }, { passive: true });
+
+  surface.addEventListener('touchend', () => {
+    if (!isTracking) return;
+    isTracking = false;
+    appEl?.classList.remove('swipe-active');
+    if (els.content) els.content.style.overflowY = '';
+    const deltaX = currentX - startX;
+    const deltaY = currentY - startY;
+    resetSwipeTransform();
+
+    // Only trigger if the gesture was locked horizontally and passed threshold
+    if (gestureLocked !== 'horizontal' || Math.abs(deltaX) < SWIPE_THRESHOLD) {
+      didSwipe = false;
+      return;
+    }
+
+    const idx = SWIPE_TABS.indexOf(currentFolder);
+    if (idx === -1) return;
+    if (deltaX < 0 && idx < SWIPE_TABS.length - 1) {
+      setFolder(SWIPE_TABS[idx + 1]);
+    } else if (deltaX > 0 && idx > 0) {
+      setFolder(SWIPE_TABS[idx - 1]);
+    }
+  });
+
+  surface.addEventListener('touchcancel', () => {
+    isTracking = false;
+    gestureLocked = false;
+    appEl?.classList.remove('swipe-active');
+    if (els.content) els.content.style.overflowY = '';
+    resetSwipeTransform();
+  });
+
+  // Prevent accidental click after a horizontal swipe gesture
+  surface.addEventListener('click', (e) => {
+    if (didSwipe) {
+      e.preventDefault();
+      e.stopPropagation();
+      didSwipe = false;
+    }
+  }, true);
+}
+
+function shouldBlockSwipe() {
+  return (
+    selectMode ||
+    els.reader?.classList.contains('open') ||
+    els.composer?.classList.contains('open') ||
+    els.menuDrawer?.classList.contains('open') ||
+    els.settingsPanel?.classList.contains('open') ||
+    els.contactsPanel?.classList.contains('open') ||
+    document.getElementById('modal')?.classList.contains('open')
+  );
+}
+
+function applySwipeTransform(deltaX) {
+  const list = els.emailList;
+  if (!list) return;
+  list.style.transform = `translateX(${deltaX * 0.4}px)`;
+  list.style.opacity = String(Math.max(0.5, 1 - Math.abs(deltaX) / 600));
+}
+
+function resetSwipeTransform() {
+  const list = els.emailList;
+  if (!list) return;
+  list.style.transform = '';
+  list.style.opacity = '';
+}
+
 // ---- Global event delegation ----
 function onGlobalClick(e) {
   const target = e.target.closest('[data-action]') || e.target;
@@ -651,7 +947,10 @@ function initEventListeners() {
   document.querySelectorAll('[data-folder]').forEach(btn => {
     btn.addEventListener('click', () => {
       const folder = btn.dataset.folder;
-      if (folder) setFolder(folder);
+      if (folder) {
+        if (els.composer?.classList.contains('open')) closeComposer();
+        setFolder(folder);
+      }
     });
   });
   document.querySelector('[data-action="toggleMenu"]')?.addEventListener('click', toggleMenu);
@@ -686,6 +985,12 @@ function initEventListeners() {
 
   // Email list clicks
   els.emailList.addEventListener('click', (e) => {
+    if (suppressNextCardClick) {
+      e.preventDefault();
+      e.stopPropagation();
+      suppressNextCardClick = false;
+      return;
+    }
     const star = e.target.closest('.card-star');
     if (star) {
       const card = star.closest('.email-card');
@@ -708,7 +1013,7 @@ function initEventListeners() {
     openEmail(id);
   });
 
-  // Context menu on desktop
+  // Context menu on desktop (right click)
   els.emailList.addEventListener('contextmenu', (e) => {
     if (!isDesktop()) return;
     const card = e.target.closest('.email-card');
@@ -717,6 +1022,9 @@ function initEventListeners() {
     const id = parseInt(card.dataset.id, 10);
     showContextMenu(e.clientX, e.clientY, id);
   });
+
+  // Context menu on mobile (long press)
+  initLongPressContextMenu();
 
   document.addEventListener('click', (e) => {
     if (!els.contextMenu?.classList.contains('open')) return;
@@ -848,6 +1156,12 @@ function initEventListeners() {
       acSelectedIdx = -1;
     }
   });
+
+  // Swipe navigation between tabs on mobile
+  initSwipeNavigation();
+
+  // Minimize tab bar on scroll down / restore on scroll up
+  initTabBarScrollBehavior();
 
   // Language switch
   document.querySelectorAll('[data-lang]').forEach(btn => {

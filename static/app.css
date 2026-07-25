@@ -184,6 +184,14 @@ html, body {
   overflow: hidden;
 }
 
+.desktop-panes {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
 .header {
   position: sticky;
   top: 0;
@@ -240,9 +248,11 @@ html, body {
 
 .content {
   flex: 1;
+  min-height: 0;
   padding: 0 16px calc(var(--safe-bottom) + 140px);
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
   position: relative;
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -257,6 +267,28 @@ html, body {
   flex-direction: column;
   gap: 10px;
   padding-top: 4px;
+  transition: transform 0.15s ease-out, opacity 0.15s ease-out;
+}
+
+#app.swipe-active #emailList {
+  transition: none;
+}
+
+#app.swipe-active {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+@media (max-width: 1023px) {
+  #app.long-press-active,
+  #app.long-press-active * {
+    -webkit-user-select: none !important;
+    user-select: none !important;
+    -webkit-touch-callout: none !important;
+  }
+  .email-card {
+    -webkit-touch-callout: none;
+  }
 }
 
 .empty, .loading {
@@ -294,13 +326,20 @@ html, body {
   min-height: 72px;
   max-height: 72px;
   cursor: pointer;
-  transition: background 0.12s, border-color 0.12s, transform 0.08s;
+  transition: background 0.12s, border-color 0.12s, transform 0.08s, opacity 0.2s;
   overflow: hidden;
+  animation: cardEnter 0.25s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  will-change: transform;
 }
 
 .email-card:hover { background: var(--surface-hover); border-color: var(--border-strong); }
 .email-card:active { transform: scale(0.995); }
 .email-card.selected { background: var(--success-subtle); border-color: rgba(52, 199, 89, 0.25); }
+
+@keyframes cardEnter {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 
 .email-card .content-row {
   display: flex;
@@ -458,6 +497,17 @@ html, body {
   background: var(--error-subtle);
 }
 
+@media (max-width: 1023px) {
+  .context-menu {
+    min-width: 220px;
+    border-radius: var(--radius-lg);
+    font-size: 16px;
+  }
+  .context-item {
+    padding: 16px 18px;
+  }
+}
+
 .email-card .spam-badge {
   position: absolute;
   top: 6px;
@@ -513,14 +563,73 @@ html, body {
   box-shadow: var(--shadow-float);
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: space-evenly;
+  gap: 2px;
   height: 64px;
-  padding: 0 12px;
+  padding: 0 8px;
   pointer-events: auto;
+  transition: transform 0.25s cubic-bezier(0.22, 0.61, 0.36, 1), height 0.25s cubic-bezier(0.22, 0.61, 0.36, 1), padding 0.25s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.tab-bar > * {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tab-bar.minimal > * {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: none;
+}
+
+.tab-bar.minimal {
+  height: 44px;
+  padding: 0 8px;
+  transform: scale(0.92);
+}
+
+.tab-bar.minimal .tab span {
+  display: none;
+}
+
+.tab-bar.minimal .tab i,
+.tab-bar.minimal .compose-wrap .compose i {
+  font-size: 22px;
+}
+
+.tab-bar.minimal .compose-wrap .compose {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  box-shadow: none;
+  background: transparent;
+  color: var(--text-tertiary);
+}
+
+.tab-bar.minimal .compose-wrap .compose i {
+  font-size: 20px;
+}
+
+.tab-bar.minimal .compose-wrap .compose.active {
+  background: var(--accent-subtle);
+  color: var(--accent);
+  box-shadow: inset 0 0 0 1.5px var(--accent);
+}
+
+.tab-bar.minimal .tab.active {
+  height: 32px;
+  border-radius: var(--radius-sm);
 }
 
 .tab {
-  flex: 1;
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: none;
+  width: 100%;
   height: 48px;
   border: none;
   border-radius: var(--radius-md);
@@ -536,14 +645,21 @@ html, body {
 }
 
 .tab i { font-size: 22px; }
-.tab span { font-size: 10px; font-weight: 500; }
+.tab span { font-size: 10px; font-weight: 500; transition: opacity 0.15s; }
 .tab.active {
   color: var(--accent);
   background: var(--accent-subtle);
 }
 .tab:active { opacity: 0.7; }
 
-.compose-wrap { padding: 0 6px; }
+.compose-wrap {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
 .compose {
   width: 48px;
@@ -562,6 +678,11 @@ html, body {
 
 .compose i { font-size: 22px; }
 .compose:active { transform: scale(0.95); }
+.compose.active {
+  background: var(--accent-subtle);
+  color: var(--accent);
+  box-shadow: inset 0 0 0 1.5px var(--accent);
+}
 
 /* ============================================================
    Bulk action bar

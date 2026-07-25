@@ -57,8 +57,8 @@ def list_emails(
 
     select_sql = (
         "SELECT id, folder, custom_folder_id, sender_name, sender_email, recipient, subject, preview, "
-        "is_starred, is_read, is_spam, is_trash, created_at FROM emails WHERE "
-        f"{where_sql} ORDER BY created_at DESC LIMIT ? OFFSET ?"
+        "is_starred, is_read, is_spam, is_trash, created_at, received_at FROM emails WHERE "
+        f"{where_sql} ORDER BY COALESCE(received_at, created_at) DESC LIMIT ? OFFSET ?"
     )
     rows = conn.execute(select_sql, params + [limit, offset]).fetchall()
 
