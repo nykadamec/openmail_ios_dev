@@ -7,7 +7,7 @@ from flask import Blueprint, render_template, request, make_response, redirect, 
 
 from openmail.config import FROM_EMAIL
 from openmail.db import get_db
-from openmail.auth.users import has_users, create_user, verify_user
+from openmail.auth.users import has_users, create_user, verify_user, get_user_by_id
 from openmail.auth.session import create_session, delete_session
 from openmail.auth.current_user import current_user, login_required
 from openmail.crypto.dek import clear_user_dek
@@ -106,7 +106,15 @@ def me():
         resp = jsonify({'error': 'Locked', 'code': 'dek_missing'})
         resp.delete_cookie('session_id')
         return resp, 401
-    return jsonify(user)
+    full = get_user_by_id(user['id'])
+    if not full:
+        return jsonify({"error": "User not found"}), 404
+    return jsonify({
+        "id": full['id'],
+        "username": full['username'],
+        "email": full['email'],
+        "from_name": full['from_name'],
+    })
 
 
 @bp.route("/email/<int:email_id>")

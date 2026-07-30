@@ -3,14 +3,18 @@ from __future__ import annotations
 
 import base64
 import json
+import logging
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any
 
 import requests
 
+logger = logging.getLogger(__name__)
+
 from openmail.config import RESEND_API_KEY, FROM_EMAIL, FROM_NAME
 from openmail.db import get_db
 from openmail.auth.current_user import current_user_id
+from openmail.auth.users import get_user_by_email, get_user_from_address
 from openmail.crypto.dek import encrypt_email_field
 from openmail.utils.email import (
     parse_inbound_event,
@@ -96,11 +100,26 @@ def _process_inbound_email(payload: dict, user_id: int) -> dict | None:
     return {"id": email_row_id, "is_spam": spam, "subject": parsed["subject"]}
 
 
+def _resolve_recipient(payload: dict) -> str | None:
+    """Extract the first To address from a Resend webhook payload."""
+    data = payload.get("data", {})
+    to = data.get("to", [])
+    if isinstance(to, list) and to:
+        return to[0]
+    if isinstance(to, str):
+        return to
+    return None
+
+
 def process_inbound_webhook(payload: dict) -> dict:
     """Synchronous webhook handler. Runs in request thread."""
     if payload.get("type") != "email.received":
         return {"ok": True, "id": None, "new": False}
-    user_id = current_user_id() or 1
+
+    recipient = _resolve_recipient(payload)
+    user = get_user_by_email(recipient) if recipient else None
+    user_id = user["id"] if user else (current_user_id() or 1)
+
     try:
         conn = get_db()
         result = _process_inbound_email(payload, user_id)
@@ -110,16 +129,18 @@ def process_inbound_webhook(payload: dict) -> dict:
             return {"ok": True, "id": result["id"], "new": True}
         return {"ok": True, "id": None, "new": False}
     except RuntimeError:
-        from flask import current_app
-        current_app.logger.error(f"DEK missing for user {user_id}, cannot store inbound email")
-        return {"error": "Server locked"}, 503
+        logger.error(f"DEK missing for user {user_id}, cannot store inbound email")
+        return {"error": "Server locked", "code": "dek_missing"}
 
 
-def send_email(to: str, subject: str, body: str, attachments: list[dict]) -> dict:
+def send_email(to: str, subject: str, body: str, attachments: list[dict], user_id: int | None = None) -> dict:
     if not RESEND_API_KEY:
         return {"error": "RESEND_API_KEY not configured"}
 
-    from_header = FROM_EMAIL if not FROM_NAME else f"{FROM_NAME} <{FROM_EMAIL}>"
+    if user_id is None:
+        user_id = current_user_id() or 1
+    from_email, from_name = get_user_from_address(user_id)
+    from_header = from_email if not from_name else f"{from_name} <{from_email}>"
     resend_attachments = []
     for att in attachments:
         filename = att.get("filename", "attachment.bin")
@@ -142,10 +163,17 @@ def send_email(to: str, subject: str, body: str, attachments: list[dict]) -> dic
         params["attachments"] = resend_attachments
 
     import resend
+    resend.api_key = RESEND_API_KEY
     result = resend.Emails.send(params)
 
+    # Resend SDK may return an object with attributes instead of a dict.
+    if not isinstance(result, dict):
+        result = {"id": getattr(result, "id", None)}
+
+    if not result.get("id"):
+        raise RuntimeError(f"Resend send failed or returned no id: {result!r}")
+
     # Persist outbound copy
-    user_id = current_user_id() or 1
     preview = (body or "")[:300]
     attachments_json = json.dumps([
         {"filename": a["filename"], "content_type": a["content_type"]}
@@ -155,13 +183,14 @@ def send_email(to: str, subject: str, body: str, attachments: list[dict]) -> dic
     conn = get_db()
     conn.execute(
         """INSERT INTO emails
-        (user_id, resend_id, direction, folder, sender_email, recipient, subject, preview,
+        (user_id, resend_id, direction, folder, sender_email, sender_name, recipient, subject, preview,
          body_text, is_read, created_at)
-        VALUES (?, ?, 'outbound', 'sent', ?, ?, ?, ?, ?, 1, datetime('now'))""",
+        VALUES (?, ?, 'outbound', 'sent', ?, ?, ?, ?, ?, ?, 1, datetime('now'))""",
         (
             user_id,
             result.get("id"),
-            FROM_EMAIL,
+            encrypt_email_field(from_email, user_id),
+            encrypt_email_field(from_name, user_id),
             to,
             encrypt_email_field(subject, user_id),
             encrypt_email_field(preview, user_id),
@@ -191,12 +220,16 @@ def sync_emails() -> dict:
     resp.raise_for_status()
     data = resp.json().get("data", [])
     imported = 0
-    user_id = current_user_id() or 1
     conn = get_db()
     for item in data:
         email_id = item.get("id")
         if not email_id:
             continue
+        to_list = item.get("to", [])
+        recipient = to_list[0] if isinstance(to_list, list) and to_list else (to_list if isinstance(to_list, str) else None)
+        user = get_user_by_email(recipient) if recipient else None
+        user_id = user["id"] if user else (current_user_id() or 1)
+
         webhook_payload = {
             "type": "email.received",
             "data": {
@@ -213,8 +246,7 @@ def sync_emails() -> dict:
             if result:
                 imported += 1
         except RuntimeError:
-            from flask import current_app
-            current_app.logger.error(f"DEK missing during sync for email {email_id}")
+            logger.error(f"DEK missing during sync for email {email_id}")
             continue
     conn.commit()
     return {"imported": imported}
@@ -222,13 +254,14 @@ def sync_emails() -> dict:
 
 def send_email_async(to: str, subject: str, body: str, attachments: list[dict]) -> None:
     """Fire-and-forget background send. Result pushed via SSE."""
+    # Capture user_id in the request thread before spawning the worker.
+    user_id = current_user_id() or 1
     def _send():
         try:
-            result = send_email(to, subject, body, attachments)
+            result = send_email(to, subject, body, attachments, user_id=user_id)
             sse.notify("email_sent", result)
         except Exception as e:
-            from flask import current_app
-            current_app.logger.error(f"Background send failed: {e}")
+            logger.exception(f"Background send failed for {to}: {e}")
             sse.notify("email_sent", {"error": str(e)})
     get_executor().submit(_send)
 
@@ -239,7 +272,6 @@ def sync_emails_async() -> None:
             result = sync_emails()
             sse.notify("sync_complete", result)
         except Exception as e:
-            from flask import current_app
-            current_app.logger.error(f"Background sync failed: {e}")
+            logger.exception(f"Background sync failed: {e}")
             sse.notify("sync_complete", {"error": str(e)})
     get_executor().submit(_sync)

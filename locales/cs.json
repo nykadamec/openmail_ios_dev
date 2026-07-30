@@ -47,6 +47,7 @@
   "composer.new": "Nová zpráva",
   "composer.cancel": "Zrušit",
   "composer.send": "Odeslat",
+  "composer.from": "Od",
   "composer.to": "Komu",
   "composer.subject": "Předmět",
   "composer.attach": "Přidat přílohu",

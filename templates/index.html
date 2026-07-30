@@ -16,6 +16,7 @@
   <script data-cfasync="false">
     window.__OPENMAIL_FROM_EMAIL = {{ from_email | tojson }};
     window.__OPENMAIL_LOCALE = {{ locale_json | tojson | safe }};
+    window.__CURRENT_USER_EMAIL = window.__OPENMAIL_FROM_EMAIL;
   </script>
 </head>
 <body>
@@ -88,7 +89,7 @@
           <button class="menu-item" data-action="openSettings">
             <i class="hgi-stroke hgi-settings-01 icon" aria-hidden="true"></i><span>{{ _("menu.settings") }}</span>
           </button>
-          <button class="menu-item" onclick="document.getElementById('logoutForm').submit()">
+          <button class="menu-item" data-action="logout">
             <i class="hgi-stroke hgi-logout-01 icon" aria-hidden="true"></i><span>{{ _("menu.logout") }}</span>
           </button>
         </div>
@@ -176,6 +177,10 @@
         <button class="text-btn primary" data-action="sendEmail">{{ _("composer.send") }}</button>
       </div>
       <div class="form">
+        <div class="row">
+          <span class="label">{{ _("composer.from") }}</span>
+          <span class="from-value" id="composerFrom">{{ from_email }}</span>
+        </div>
         <div class="row" style="position: relative;">
           <span class="label">{{ _("composer.to") }}</span>
           <input type="email" id="toField" placeholder="{{ _('composer.placeholder.to') }}" autocomplete="email">
@@ -238,7 +243,7 @@
         </button>
 
         <div style="margin-top:16px;">
-          <button class="secondary-btn danger" onclick="document.getElementById('logoutForm').submit()">
+          <button class="secondary-btn danger" data-action="logout">
             <i class="hgi-stroke hgi-logout-01" aria-hidden="true"></i> {{ _("settings.logout_btn") }}
           </button>
         </div>

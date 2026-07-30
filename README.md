@@ -14,8 +14,30 @@ Jednoduchý lokální e-mailový klient pro `dominik@adamec.pro`, běžící na 
 
 | Akce | Provider | Adresa |
 |---|---|---|
-| Příjem | iCloud Mail (IMAP) | `dominik@adamec.pro` |
-| Odesílání | Resend (SMTP relay) | `dominik@adamec.pro` |
+| Příjem | Resend inbound / webhook | `dominik@adamec.pro`, `info@adamec.pro` |
+| Odesílání | Resend (SMTP relay) | podle přihlášeného uživatele |
+
+## Uživatelé
+
+Aplikace podporuje více lokálních uživatelů. Každý uživatel má vlastní e-mailovou adresu a vidí jen svou poštu.
+
+Výchozí uživatel:
+- `dominik` / `adamec` → `dominik@adamec.pro`
+
+Přidání nového uživatele (jednorázový skript):
+
+```bash
+source .venv/bin/activate
+PYTHONPATH=src:. python scripts/add_user.py <username> <password> <email> --from-name "Jméno"
+```
+
+Příklad:
+
+```bash
+PYTHONPATH=src:. python scripts/add_user.py info adamec info@adamec.pro --from-name "Info Adamec"
+```
+
+**Důležité:** Resend musí mít v doméně `adamec.pro` nastavenou a směrovatelnou adresu, kterou nový uživatel používá.
 
 ## Spuštění
 

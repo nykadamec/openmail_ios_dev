@@ -1,6 +1,6 @@
 "use strict";
 
-import { __, showToast, debounce, setText, escapeHtml, FROM_EMAIL } from './utils.js';
+import { __, showToast, debounce, setText, escapeHtml, FROM_EMAIL, currentUserDisplayFrom, currentUserEmail } from './utils.js';
 import { API } from './api.js';
 import * as ui from './ui.js';
 import { connectSSE } from './sse.js';
@@ -150,9 +150,13 @@ async function loadStats() {
 async function loadMe() {
   try {
     const user = await API.me();
-    els.menuUsername.textContent = '@' + user.username;
-    els.menuUser.textContent = user.username[0].toUpperCase();
-    els.settingsUsername.textContent = user.username;
+    window.__CURRENT_USER_EMAIL = user.email || '';
+    window.__CURRENT_USER_FROM_NAME = user.from_name || '';
+    els.menuUsername.textContent = user.email || ('@' + user.username);
+    els.menuUser.textContent = (user.username ? user.username[0].toUpperCase() : '?');
+    els.settingsUsername.textContent = user.email || user.username;
+    const composerFrom = document.getElementById('composerFrom');
+    if (composerFrom) composerFrom.textContent = currentUserDisplayFrom();
   } catch (e) {}
 }
 
@@ -510,6 +514,8 @@ async function moveToTrash() {
 function openComposer() {
   els.composer.classList.add('open');
   els.autocompleteList.innerHTML = '';
+  const composerFrom = document.getElementById('composerFrom');
+  if (composerFrom) composerFrom.textContent = currentUserDisplayFrom();
   // Highlight compose button in tab bar
   els.tabBar?.querySelectorAll('.tab, .compose-wrap .compose').forEach(el => el.classList.remove('active'));
   const composeBtn = els.tabBar?.querySelector('.compose-wrap .compose');
@@ -802,6 +808,12 @@ function toggleMenu() {
 function closeMenu() {
   els.menuDrawer.classList.remove('open');
 }
+async function logout() {
+  try {
+    await API.logout();
+  } catch {}
+  window.location.href = '/login';
+}
 
 // ---- Attachments ----
 function onAttachmentsChange() {
@@ -995,6 +1007,7 @@ function initEventListeners() {
   document.querySelector('[data-action="openContacts"]')?.addEventListener('click', openContacts);
   document.querySelector('[data-action="openSettings"]')?.addEventListener('click', openSettings);
   document.querySelector('[data-action="closeMenu"]')?.addEventListener('click', closeMenu);
+  document.querySelector('[data-action="logout"]')?.addEventListener('click', logout);
   document.querySelector('[data-action="closeContacts"]')?.addEventListener('click', closeContacts);
   document.querySelector('[data-action="closeSettings"]')?.addEventListener('click', closeSettings);
   document.querySelector('[data-action="closeReader"]')?.addEventListener('click', closeReader);

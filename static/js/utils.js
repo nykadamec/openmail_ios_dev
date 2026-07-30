@@ -3,6 +3,21 @@
 export const FROM_EMAIL = window.__OPENMAIL_FROM_EMAIL || '';
 export const LOCALE = window.__OPENMAIL_LOCALE || {};
 
+export function currentUserEmail() {
+  return window.__CURRENT_USER_EMAIL || window.__OPENMAIL_FROM_EMAIL || '';
+}
+
+export function currentUserFromName() {
+  return window.__CURRENT_USER_FROM_NAME || '';
+}
+
+export function currentUserDisplayFrom() {
+  const email = currentUserEmail();
+  const name = currentUserFromName();
+  if (!email) return '';
+  return name ? `${name} <${email}>` : email;
+}
+
 export function __(key, ...args) {
   let val = LOCALE[key];
   if (!val) return '??' + key + '??';

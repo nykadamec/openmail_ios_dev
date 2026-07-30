@@ -24,7 +24,7 @@ def has_users() -> bool:
     return row['c'] > 0
 
 
-def create_user(username: str, password: str) -> int:
+def create_user(username: str, password: str, email: str | None = None, from_name: str | None = None) -> int:
     """Create a new user, generate a DEK encrypted by password, and cache the DEK."""
     pw_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
     dek = AESGCM.generate_key(bit_length=256)
@@ -32,13 +32,43 @@ def create_user(username: str, password: str) -> int:
     encrypted_dek = encrypt_dek(dek, password, salt)
     conn = get_db()
     cur = conn.execute(
-        "INSERT INTO users (username, password_hash, dek_salt, encrypted_dek) VALUES (?, ?, ?, ?)",
-        (username, pw_hash, base64.urlsafe_b64encode(salt).decode(), encrypted_dek)
+        "INSERT INTO users (username, password_hash, dek_salt, encrypted_dek, email, from_name) VALUES (?, ?, ?, ?, ?, ?)",
+        (username, pw_hash, base64.urlsafe_b64encode(salt).decode(), encrypted_dek, email, from_name)
     )
     conn.commit()
     user_id = cur.lastrowid
+    assert user_id is not None
     set_user_dek(user_id, dek)
     return user_id
+
+
+def get_user_by_id(user_id: int) -> dict | None:
+    """Return user dict by id, or None."""
+    conn = get_db()
+    row = conn.execute(
+        "SELECT id, username, email, from_name FROM users WHERE id = ?",
+        (user_id,)
+    ).fetchone()
+    return dict(row) if row else None
+
+
+def get_user_by_email(email: str) -> dict | None:
+    """Return user dict by email address, or None."""
+    conn = get_db()
+    row = conn.execute(
+        "SELECT id, username, email, from_name FROM users WHERE LOWER(email) = LOWER(?)",
+        (email,)
+    ).fetchone()
+    return dict(row) if row else None
+
+
+def get_user_from_address(user_id: int) -> tuple[str, str]:
+    """Return (email, from_name) for a user, falling back to global config."""
+    from openmail.config import FROM_EMAIL, FROM_NAME
+    user = get_user_by_id(user_id)
+    email = (user.get('email') or FROM_EMAIL) if user else FROM_EMAIL
+    name = (user.get('from_name') or FROM_NAME) if user else FROM_NAME
+    return email, name
 
 
 def verify_user(username: str, password: str) -> Optional[int]:

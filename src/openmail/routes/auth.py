@@ -9,11 +9,13 @@ from flask import Blueprint, request, jsonify, make_response
 
 from openmail.auth.current_user import current_user, login_required
 from openmail.auth.users import verify_user
+from openmail.auth.session import delete_session, current_session_id
 from openmail.db import get_db
 from openmail.crypto.dek import (
     encrypt_dek,
     decrypt_dek_with_fallback,
     set_user_dek,
+    clear_user_dek,
 )
 from openmail.i18n import t, get_locale, set_locale, get_all_keys
 
@@ -69,3 +71,15 @@ def change_password():
     conn.commit()
     set_user_dek(user_id, dek)
     return jsonify({"status": "changed"})
+
+
+@bp.route("/logout", methods=["POST"])
+def api_logout():
+    user = current_user()
+    if user:
+        clear_user_dek(user['id'])
+    sid = current_session_id()
+    delete_session(sid)
+    resp = make_response(jsonify({"status": "logged_out"}))
+    resp.delete_cookie('session_id')
+    return resp

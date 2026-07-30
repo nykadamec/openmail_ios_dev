@@ -47,6 +47,7 @@
   "composer.new": "New message",
   "composer.cancel": "Cancel",
   "composer.send": "Send",
+  "composer.from": "From",
   "composer.to": "To",
   "composer.subject": "Subject",
   "composer.attach": "Add attachment",

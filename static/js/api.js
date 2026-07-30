@@ -65,5 +65,6 @@ export const API = {
   send: (body) => postJSON('/api/send', body),
   sync: () => postJSON('/api/sync', {}),
   changePassword: (body) => postJSON('/api/change_password', body),
+  logout: () => postJSON('/api/logout', {}),
   setLocale: (lang) => postJSON('/api/locale', { locale: lang }),
 };
