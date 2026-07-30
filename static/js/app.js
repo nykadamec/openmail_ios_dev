@@ -220,6 +220,10 @@ async function openEmail(id) {
       readerStarBtn: els.readerStarBtn,
       htmlToggle: els.htmlToggle,
     });
+    bodyScrollY = window.scrollY || window.pageYOffset || document.documentElement.scrollTop || 0;
+    document.body.style.top = `-${bodyScrollY}px`;
+    document.documentElement.classList.add('reader-open');
+    document.body.classList.add('reader-open');
   } catch (err) {
     showToast(err.message, 'error');
   }
@@ -250,6 +254,20 @@ function openFocusedEmail() {
 
 function closeReader() {
   els.reader.classList.remove('open');
+  document.documentElement.classList.remove('reader-open');
+  document.body.classList.remove('reader-open');
+  document.body.style.top = '';
+  document.documentElement.style.scrollBehavior = 'auto';
+  window.scrollTo(0, bodyScrollY);
+  // Force Safari to recalculate the document height / viewport
+  const app = document.getElementById('app');
+  if (app) {
+    app.style.minHeight = '100dvh';
+    requestAnimationFrame(() => {
+      app.style.minHeight = '';
+      document.documentElement.style.scrollBehavior = '';
+    });
+  }
   currentEmailId = null;
   currentEmailData = null;
   if (isDesktop()) {
@@ -308,6 +326,7 @@ function hideContextMenu() {
 
 let suppressNextCardClick = false;
 let suppressNextMenuClick = false;
+let bodyScrollY = 0;
 
 function initLongPressContextMenu() {
   if (isDesktop()) return;
@@ -393,14 +412,27 @@ function initLongPressContextMenu() {
 }
 
 function initTabBarScrollBehavior() {
-  if (isDesktop() || !els.content || !els.tabBar) return;
+  if (isDesktop() || !els.tabBar) return;
   let lastScrollY = 0;
   let ticking = false;
   const SCROLL_DOWN_THRESHOLD = 18;
   const SCROLL_UP_THRESHOLD = 8;
 
+  function getScrollY() {
+    return window.scrollY || window.pageYOffset || document.documentElement.scrollTop || 0;
+  }
   function resetScrollState() {
-    lastScrollY = els.content.scrollTop;
+    lastScrollY = getScrollY();
+  }
+  function shouldIgnoreScroll() {
+    return (
+      els.reader?.classList.contains('open') ||
+      els.composer?.classList.contains('open') ||
+      els.menuDrawer?.classList.contains('open') ||
+      els.settingsPanel?.classList.contains('open') ||
+      els.contactsPanel?.classList.contains('open') ||
+      document.getElementById('modal')?.classList.contains('open')
+    );
   }
   // Reset scroll tracking after folder changes so old scrollTop doesn't force un-minimize
   const originalSetFolder = setFolder;
@@ -410,11 +442,11 @@ function initTabBarScrollBehavior() {
     return result;
   };
 
-  els.content.addEventListener('scroll', () => {
-    if (ticking) return;
+  window.addEventListener('scroll', () => {
+    if (ticking || shouldIgnoreScroll()) return;
     ticking = true;
     requestAnimationFrame(() => {
-      const y = els.content.scrollTop;
+      const y = getScrollY();
       const delta = y - lastScrollY;
       if (delta > SCROLL_DOWN_THRESHOLD && y > 20) {
         els.tabBar.classList.add('minimal');
@@ -1010,7 +1042,11 @@ function initEventListeners() {
       onSelectChange(id, isSelected);
       return;
     }
-    openEmail(id);
+    if (isDesktop()) {
+      openEmail(id);
+    } else {
+      window.location.href = `/email/${id}`;
+    }
   });
 
   // Context menu on desktop (right click)

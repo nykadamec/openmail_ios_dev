@@ -9,8 +9,9 @@ from openmail.config import FROM_EMAIL
 from openmail.db import get_db
 from openmail.auth.users import has_users, create_user, verify_user
 from openmail.auth.session import create_session, delete_session
-from openmail.auth.current_user import current_user
+from openmail.auth.current_user import current_user, login_required
 from openmail.crypto.dek import clear_user_dek
+from openmail.services import email_service
 
 
 bp = Blueprint('public', __name__)
@@ -94,7 +95,6 @@ def index():
 
 @bp.route("/api/me")
 def me():
-    from openmail.auth.current_user import current_user, login_required
     from openmail.crypto.dek import user_unlocked
     user = current_user()
     if not user:
@@ -107,3 +107,12 @@ def me():
         resp.delete_cookie('session_id')
         return resp, 401
     return jsonify(user)
+
+
+@bp.route("/email/<int:email_id>")
+@login_required
+def email_detail(email_id: int):
+    email = email_service.get_email(email_id)
+    if not email:
+        return redirect(url_for('public.index'))
+    return render_template("email.html", email=email, from_email=FROM_EMAIL)
