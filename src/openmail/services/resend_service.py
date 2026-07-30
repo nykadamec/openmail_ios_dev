@@ -41,7 +41,13 @@ def _resolve_email_id(payload: dict) -> str | None:
 
 
 def _process_inbound_email(payload: dict, user_id: int) -> dict | None:
-    """Parse, fetch, classify and insert inbound email. Caller must commit."""
+    """Parse, fetch, classify and insert inbound email. Caller must commit.
+
+    Inbound emails are stored as plain text because the webhook is not
+    authenticated as the recipient user, so the per-user DEK is unavailable.
+    The decrypt_email_field helper already falls back to plaintext on failure,
+    so the email displays correctly once the user logs in.
+    """
     conn = get_db()
     parsed = parse_inbound_event(payload)
     email_id = parsed["resend_id"]
@@ -49,10 +55,11 @@ def _process_inbound_email(payload: dict, user_id: int) -> dict | None:
         return None
 
     existing = conn.execute(
-        "SELECT id FROM emails WHERE resend_id = ? AND user_id = ?",
-        (email_id, user_id)
+        "SELECT id, user_id FROM emails WHERE resend_id = ?",
+        (email_id,)
     ).fetchone()
     if existing:
+        # Already imported by webhook or a previous sync; skip duplicate.
         return None
 
     full_email = fetch_resend_email(email_id, RESEND_API_KEY) if RESEND_API_KEY else {}
@@ -75,13 +82,13 @@ def _process_inbound_email(payload: dict, user_id: int) -> dict | None:
             parsed["resend_id"],
             parsed["direction"],
             folder,
-            encrypt_email_field(parsed["sender_name"], user_id),
-            encrypt_email_field(parsed["sender_email"], user_id),
-            encrypt_email_field(parsed["recipient"], user_id),
-            encrypt_email_field(parsed["subject"], user_id),
-            encrypt_email_field(preview, user_id),
-            encrypt_email_field(body_text or None, user_id),
-            encrypt_email_field(body_html or None, user_id),
+            parsed["sender_name"],
+            parsed["sender_email"],
+            parsed["recipient"],
+            parsed["subject"],
+            preview,
+            body_text or None,
+            body_html or None,
             1 if spam else 0,
             parsed["created_at"],
         ),
@@ -101,14 +108,19 @@ def _process_inbound_email(payload: dict, user_id: int) -> dict | None:
 
 
 def _resolve_recipient(payload: dict) -> str | None:
-    """Extract the first To address from a Resend webhook payload."""
+    """Extract the first clean To email address from a Resend webhook payload."""
+    from email.utils import parseaddr
     data = payload.get("data", {})
     to = data.get("to", [])
+    raw = None
     if isinstance(to, list) and to:
-        return to[0]
-    if isinstance(to, str):
-        return to
-    return None
+        raw = to[0]
+    elif isinstance(to, str):
+        raw = to
+    if not raw:
+        return None
+    _, email = parseaddr(raw)
+    return email or raw
 
 
 def process_inbound_webhook(payload: dict) -> dict:
@@ -252,12 +264,4 @@ def sync_emails() -> dict:
     return {"imported": imported}
 
 
-def sync_emails_async() -> None:
-    def _sync():
-        try:
-            result = sync_emails()
-            sse.notify("sync_complete", result)
-        except Exception as e:
-            logger.exception(f"Background sync failed: {e}")
-            sse.notify("sync_complete", {"error": str(e)})
-    get_executor().submit(_sync)
+

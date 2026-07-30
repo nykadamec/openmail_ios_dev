@@ -97,8 +97,10 @@ def send_email_route():
 @bp.route("/sync", methods=["POST"])
 @login_required
 def sync_emails_route():
-    resend_service.sync_emails_async()
-    return jsonify({"status": "accepted"}), 202
+    result = resend_service.sync_emails()
+    if result.get("error"):
+        return jsonify({"error": result["error"]}), 500
+    return jsonify(result)
 
 
 @bp.route("/inbound", methods=["POST"])
