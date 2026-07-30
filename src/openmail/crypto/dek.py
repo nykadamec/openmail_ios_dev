@@ -95,10 +95,14 @@ def decrypt_email_field(token: str | None, user_id: int | None = None) -> str | 
         # If DEK is missing, the server was restarted; caller should require re-login.
         raise RuntimeError('Server locked: encryption key not available.')
     aes = AESGCM(dek)
-    pad = 4 - (len(token) % 4)
-    if pad != 4:
-        token += '=' * pad
-    data = base64.urlsafe_b64decode(token.encode())
-    nonce = data[:12]
-    ct = data[12:]
-    return aes.decrypt(nonce, ct, None).decode('utf-8')
+    try:
+        pad = 4 - (len(token) % 4)
+        if pad != 4:
+            token += '=' * pad
+        data = base64.urlsafe_b64decode(token.encode())
+        nonce = data[:12]
+        ct = data[12:]
+        return aes.decrypt(nonce, ct, None).decode('utf-8')
+    except Exception:
+        # If decryption fails, assume the value is an old plaintext entry.
+        return token

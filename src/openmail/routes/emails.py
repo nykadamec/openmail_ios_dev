@@ -88,8 +88,10 @@ def send_email_route():
     body = data.get("body", "")
     if not to or not subject:
         return jsonify({"error": "Missing recipient or subject"}), 400
-    resend_service.send_email_async(to, subject, body, data.get("attachments", []))
-    return jsonify({"status": "accepted"}), 202
+    result = resend_service.send_email(to, subject, body, data.get("attachments", []))
+    if result.get("error"):
+        return jsonify({"error": result["error"]}), 500
+    return jsonify(result)
 
 
 @bp.route("/sync", methods=["POST"])

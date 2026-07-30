@@ -191,7 +191,7 @@ def send_email(to: str, subject: str, body: str, attachments: list[dict], user_i
             result.get("id"),
             encrypt_email_field(from_email, user_id),
             encrypt_email_field(from_name, user_id),
-            to,
+            encrypt_email_field(to, user_id),
             encrypt_email_field(subject, user_id),
             encrypt_email_field(preview, user_id),
             encrypt_email_field(body or None, user_id),
@@ -250,20 +250,6 @@ def sync_emails() -> dict:
             continue
     conn.commit()
     return {"imported": imported}
-
-
-def send_email_async(to: str, subject: str, body: str, attachments: list[dict]) -> None:
-    """Fire-and-forget background send. Result pushed via SSE."""
-    # Capture user_id in the request thread before spawning the worker.
-    user_id = current_user_id() or 1
-    def _send():
-        try:
-            result = send_email(to, subject, body, attachments, user_id=user_id)
-            sse.notify("email_sent", result)
-        except Exception as e:
-            logger.exception(f"Background send failed for {to}: {e}")
-            sse.notify("email_sent", {"error": str(e)})
-    get_executor().submit(_send)
 
 
 def sync_emails_async() -> None:

@@ -551,7 +551,11 @@ async function sendEmail() {
     return;
   }
   try {
-    await API.send(payload);
+    const result = await API.send(payload);
+    if (result.error) {
+      showToast(result.error, 'error');
+      return;
+    }
     showToast(__('toast.email_sent'));
     closeComposer();
     loadEmails();
