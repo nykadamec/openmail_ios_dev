@@ -2568,3 +2568,199 @@ body.reader-open .tab-bar-wrap,
     display: flex;
   }
 }
+
+/* ============================================================
+   Mobile inbox refresh
+   A calmer, layered reading surface with deliberate touch targets.
+   Kept below the desktop rules so the existing desktop workspace is
+   unchanged. The DOM hooks and interaction states remain the same.
+   ============================================================ */
+@media (max-width: 1023px) {
+  :root {
+    --bg: #0d1018;
+    --surface: #161b27;
+    --surface-hover: #1d2432;
+    --border: rgba(214, 224, 255, 0.10);
+    --border-strong: rgba(214, 224, 255, 0.18);
+    --text: #f4f6ff;
+    --text-secondary: #a4aec6;
+    --text-tertiary: #68738d;
+    --accent: #8da8ff;
+    --accent-subtle: rgba(141, 168, 255, 0.14);
+    --shadow-float: 0 18px 46px rgba(0, 0, 0, 0.46);
+  }
+
+  body {
+    background:
+      radial-gradient(110% 38% at 50% -4%, rgba(90, 115, 205, 0.22), transparent 70%),
+      var(--bg);
+  }
+
+  #app {
+    min-height: 100dvh;
+    background: linear-gradient(180deg, rgba(13, 16, 24, 0.28), var(--bg) 28%);
+  }
+
+  .header {
+    padding: calc(var(--safe-top) + 18px) 20px 15px;
+    border-bottom: 0;
+    background: linear-gradient(180deg, rgba(13, 16, 24, 0.94), rgba(13, 16, 24, 0.72));
+  }
+
+  .header-content { min-width: 0; }
+
+  .header h1 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: clamp(29px, 8vw, 36px);
+    font-weight: 600;
+    letter-spacing: -0.045em;
+    line-height: 1;
+  }
+
+  .subtitle {
+    margin-top: 8px;
+    color: #8290ae;
+    font-size: 12px;
+    letter-spacing: 0.01em;
+  }
+
+  .header-actions.control-cluster {
+    min-height: 44px;
+    padding: 3px;
+    border: 1px solid rgba(214, 224, 255, 0.14);
+    border-radius: 15px;
+    background: rgba(27, 34, 49, 0.72);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.20);
+  }
+
+  .header-actions.control-cluster .icon-btn[data-action="toggleMenu"] {
+    width: 38px;
+    height: 38px;
+    color: var(--text);
+  }
+
+  .header-actions.control-cluster .icon-btn[aria-pressed="true"] {
+    color: var(--accent);
+    background: var(--accent-subtle);
+  }
+
+  .content {
+    padding: 2px 16px calc(124px + var(--safe-bottom));
+    overflow: visible;
+  }
+
+  #emailList {
+    gap: 8px;
+    padding: 4px 0 0;
+  }
+
+  .email-card {
+    min-height: 82px;
+    padding: 15px 14px 14px 16px;
+    background: rgba(22, 27, 39, 0.78);
+    border: 1px solid rgba(214, 224, 255, 0.075);
+    border-radius: 18px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.14);
+    transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+  }
+
+  .email-card::before {
+    content: '';
+    position: absolute;
+    inset: 12px auto 12px 0;
+    width: 3px;
+    border-radius: 0 3px 3px 0;
+    background: transparent;
+    transition: background 0.18s ease;
+  }
+
+  .email-card:hover { background: rgba(29, 36, 50, 0.92); }
+  .email-card:active { transform: scale(0.985); opacity: 1; }
+  .email-card.unread {
+    background: linear-gradient(105deg, rgba(141, 168, 255, 0.12), rgba(22, 27, 39, 0.88) 42%);
+    border-color: rgba(141, 168, 255, 0.20);
+  }
+  .email-card.unread::before { background: var(--accent); }
+  .email-card.active { border-color: rgba(141, 168, 255, 0.40); box-shadow: 0 0 0 1px rgba(141, 168, 255, 0.12), 0 12px 30px rgba(0, 0, 0, 0.20); }
+  .email-card.selected { background: rgba(91, 200, 150, 0.14) !important; border-color: rgba(91, 200, 150, 0.34); }
+
+  .email-card .content-row { gap: 13px; }
+
+  .email-card .avatar {
+    width: 42px;
+    height: 42px;
+    margin-top: 0;
+    border: 2px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.20);
+    font-size: 14px;
+  }
+
+  .email-card .body { gap: 5px; }
+  .email-card .from-name { font-size: 14px; letter-spacing: -0.01em; }
+  .email-card.unread .from-name { color: #f7f8ff; }
+  .email-card .subject { font-size: 14px; line-height: 1.25; }
+  .email-card.unread .subject { font-weight: 700; }
+  .email-card .preview { color: #75809a; font-size: 12px; line-height: 1.25; }
+  .email-card .time { font-size: 11px; }
+  .email-card .card-star { top: 13px; right: 13px; font-size: 16px; padding: 8px; margin: -8px; }
+
+  .mobile-action-panel {
+    top: calc(var(--safe-top) + 78px);
+    right: 16px;
+    width: min(300px, calc(100vw - 32px));
+    padding: 9px;
+    border: 1px solid rgba(214, 224, 255, 0.16);
+    border-radius: 22px;
+    background: rgba(25, 31, 45, 0.96);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.52);
+  }
+
+  .mobile-action-panel__eyebrow { padding: 7px 12px 9px; color: #8190b1; }
+  .mobile-action { min-height: 54px; padding: 0 12px; border-radius: 15px; font-size: 15px; }
+  .mobile-action > i:first-child { color: var(--accent); font-size: 20px; }
+
+  .mobile-search-row.open { padding-top: 3px; padding-bottom: 12px; }
+  .mobile-search-field { min-height: 52px; border-radius: 17px; background: rgba(22, 27, 39, 0.94); }
+  .mobile-search-field input { font-size: 16px; }
+
+  .tab-bar-wrap { bottom: max(12px, var(--safe-bottom)); }
+  .tab-bar {
+    width: calc(100% - 28px);
+    max-width: 430px;
+    height: 70px;
+    padding: 0 9px;
+    border: 1px solid rgba(214, 224, 255, 0.16);
+    border-radius: 24px;
+    background: rgba(22, 27, 39, 0.90);
+    box-shadow: 0 18px 46px rgba(0, 0, 0, 0.48), inset 0 1px 0 rgba(255,255,255,0.04);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+  }
+
+  .tab { height: 54px; border-radius: 16px; gap: 4px; color: #79849d; }
+  .tab i { font-size: 21px; }
+  .tab span { font-size: 10px; font-weight: 650; }
+  .tab.active { color: var(--accent); background: rgba(141, 168, 255, 0.14); }
+  .compose { width: 52px; height: 52px; border-radius: 18px; background: #9bb2ff; color: #15203f; box-shadow: 0 8px 24px rgba(141, 168, 255, 0.34); }
+  .compose i { font-size: 23px; }
+
+  .reader { padding-top: var(--safe-top); background: #0d1018; }
+  .reader-top { padding: 11px 16px; background: rgba(22, 27, 39, 0.90); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+  .reader-scroll { padding: 22px 18px calc(44px + var(--safe-bottom)); }
+  .reader h2 { font-family: Georgia, 'Times New Roman', serif; font-size: 26px; line-height: 1.18; letter-spacing: -0.035em; }
+  .reader .meta-block { padding: 14px 0 18px; margin-bottom: 20px; }
+  .reader .body { font-size: 16px; line-height: 1.68; }
+  .reader .body .body-plain { padding: 2px 1px; }
+  .reader .attachment-card { padding: 13px; border-radius: 16px; background: rgba(22, 27, 39, 0.82); }
+  .attachment-action { min-height: 40px; display: inline-flex; align-items: center; padding: 0 10px; border-radius: 10px; background: rgba(141, 168, 255, 0.10); }
+
+  .bulk-bar { bottom: calc(94px + var(--safe-bottom)); border-radius: 18px; padding: 11px 12px; background: rgba(25, 31, 45, 0.96); }
+  .bulk-bar button { min-height: 38px; padding: 0 10px; }
+
+  .menu-panel { width: min(88%, 360px); padding: calc(var(--safe-top) + 20px) 18px var(--safe-bottom); background: #151b28; }
+  .menu-item, .menu-item-add { min-height: 50px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .email-card, .tab-bar, .mobile-action-panel { transition: none; animation: none; }
+  }
+}
