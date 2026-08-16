@@ -4,12 +4,31 @@ from __future__ import annotations
 import base64
 import json
 import logging
+import re
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any
 
 import requests
 
 logger = logging.getLogger(__name__)
+
+_ASCII_EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[A-Za-z0-9-]+$")
+
+
+def _validate_email_address(addr: str) -> str | None:
+    """Return normalized ASCII email or None if invalid."""
+    if not addr:
+        return None
+    addr = addr.strip()
+    if not addr:
+        return None
+    if not addr.isascii():
+        return None
+    if "@" not in addr or " " in addr:
+        return None
+    if not _ASCII_EMAIL_RE.match(addr):
+        return None
+    return addr
 
 from openmail.config import RESEND_API_KEY, FROM_EMAIL, FROM_NAME
 from openmail.db import get_db
@@ -72,11 +91,14 @@ def _process_inbound_email(payload: dict, user_id: int) -> dict | None:
     folder = "spam" if spam else "inbox"
     preview = (body_text or "")[:300]
 
+    from openmail.services.contact_service import is_starred_address
+    auto_starred = 1 if (not spam and parsed["sender_email"] and is_starred_address(user_id, parsed["sender_email"])) else 0
+
     conn.execute(
         """INSERT INTO emails
         (user_id, resend_id, direction, folder, sender_name, sender_email, recipient,
-         subject, preview, body_text, body_html, is_spam, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+         subject, preview, body_text, body_html, is_spam, is_starred, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         (
             user_id,
             parsed["resend_id"],
@@ -90,6 +112,7 @@ def _process_inbound_email(payload: dict, user_id: int) -> dict | None:
             body_text or None,
             body_html or None,
             1 if spam else 0,
+            auto_starred,
             parsed["created_at"],
         ),
     )

@@ -44,3 +44,40 @@ def update_contact_route(contact_id: int):
 def delete_contact_route(contact_id: int):
     contact_service.delete_contact(contact_id)
     return jsonify({"deleted": True})
+
+
+@bp.route("/starred-addresses", methods=["GET"])
+@login_required
+def list_starred_addresses_route():
+    return jsonify({"addresses": contact_service.list_starred_addresses()})
+
+
+@bp.route("/starred-addresses", methods=["POST"])
+@login_required
+def add_starred_address_route():
+    data = request.json or {}
+    email = (data.get("email") or "").strip().lower()
+    if not email:
+        return jsonify({"error": "Email required"}), 400
+    result, status = contact_service.add_starred_address(email)
+    return jsonify(result), status
+
+
+@bp.route("/starred-addresses", methods=["DELETE"])
+@login_required
+def remove_starred_address_route():
+    data = request.json or {}
+    email = (data.get("email") or "").strip().lower()
+    if not email:
+        return jsonify({"error": "Email required"}), 400
+    result, status = contact_service.remove_starred_address(email)
+    return jsonify(result), status
+
+
+@bp.route("/contacts/exists", methods=["GET"])
+@login_required
+def contact_exists_route():
+    email = (request.args.get("email") or "").strip().lower()
+    if not email:
+        return jsonify({"error": "Email required"}), 400
+    return jsonify({"exists": contact_service.contact_exists(email)})

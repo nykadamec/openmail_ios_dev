@@ -41,8 +41,10 @@ export async function patchJSON(url, body) {
   return data;
 }
 
-export async function deleteJSON(url) {
-  const res = await _fetch(url, { method: 'DELETE' });
+export async function deleteJSON(url, body) {
+  const opts = { method: 'DELETE' };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await _fetch(url, opts);
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.error || __('error.generic'));
   return data;
@@ -67,4 +69,8 @@ export const API = {
   changePassword: (body) => postJSON('/api/change_password', body),
   logout: () => postJSON('/api/logout', {}),
   setLocale: (lang) => postJSON('/api/locale', { locale: lang }),
+  starredAddresses: () => getJSON('/api/starred-addresses'),
+  addStarredAddress: (email) => postJSON('/api/starred-addresses', { email }),
+  removeStarredAddress: (email) => deleteJSON('/api/starred-addresses', { email }),
+  contactExists: (email) => getJSON('/api/contacts/exists?' + new URLSearchParams({ email }).toString()),
 };

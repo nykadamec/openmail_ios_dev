@@ -11,6 +11,9 @@
   "login.footer": "Session: 15 min · Automatické odhlášení",
   "login.error.required": "Přístup vyžaduje Cloudflare Access autentizaci.",
   "login.error.invalid": "Neplatné přihlašovací údaje",
+  "login.remember_me": "Zůstat přihlášený",
+  "login.remember_me_hint": "Zůstaň přihlášený na 30 dní na tomto zařízení.",
+  "login.remember_username": "Zapamatovat uživatelské jméno",
 
   "setup.title": "Nastavení — openMail",
   "setup.heading": "Vítej",
@@ -57,9 +60,15 @@
   "composer.placeholder.body": "Napište zprávu...",
 
   "reader.back": "←",
+  "reader.empty": "Vyberte e-mail",
   "reader.attachments": "Přílohy",
+  "reader.preview": "Náhled",
   "reader.download": "Stáhnout",
   "reader.html_toggle": "HTML / Plain",
+  "reader.add_to_contacts": "Přidat do kontaktů",
+  "reader.contact_exists": "Kontakt již existuje",
+  "reader.star_address": "Hvězda pro adresu",
+  "reader.unstar_address": "Zrušit hvězdu pro adresu",
 
   "date.today": "dnes",
   "date.yesterday": "včera",
@@ -144,6 +153,7 @@
   "ctx.archive": "Archivovat",
   "ctx.delete": "Smazat",
   "search.placeholder": "Hledat...",
+  "search.emails": "Hledat e-maily...",
 
   "error.generic": "Chyba",
   "error.not_found": "Nenalezeno",

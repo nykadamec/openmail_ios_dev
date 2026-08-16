@@ -2,11 +2,69 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 from typing import Any
 
 from openmail.db import get_db
 from openmail.crypto.dek import decrypt_email_field
 from openmail.auth.current_user import current_user_id
+
+
+def get_attachment(email_id: int, filename: str) -> dict | None:
+    """Return a verified attachment for the current user.
+
+    The file name must be present in the email's persisted attachment metadata;
+    the email lookup is also scoped to the authenticated user.  Returning the
+    resolved path only after both checks keeps the attachment route from being
+    used to probe another user's mail or arbitrary files on disk.
+    """
+    user_id = current_user_id()
+    conn = get_db()
+    row = conn.execute(
+        "SELECT attachments FROM emails WHERE id = ? AND user_id = ?",
+        (email_id, user_id),
+    ).fetchone()
+    if row is None:
+        return None
+
+    try:
+        attachments = json.loads(row['attachments'] or '[]')
+    except (json.JSONDecodeError, TypeError):
+        return None
+    if not isinstance(attachments, list):
+        return None
+
+    metadata = next(
+        (item for item in attachments
+         if isinstance(item, dict) and item.get('filename') == filename),
+        None,
+    )
+    if metadata is None:
+        return None
+
+    # Reject absolute paths and traversal before resolving the candidate.
+    requested = Path(filename)
+    if requested.is_absolute() or '..' in requested.parts:
+        return None
+
+    from openmail.config import ATTACHMENTS_DIR
+    attachment_dir = (ATTACHMENTS_DIR / str(email_id)).resolve()
+    file_path = (attachment_dir / requested).resolve()
+    try:
+        file_path.relative_to(attachment_dir)
+    except ValueError:
+        return None
+    if not file_path.is_file():
+        return None
+
+    content_type = metadata.get('content_type')
+    if not isinstance(content_type, str) or not content_type:
+        content_type = 'application/octet-stream'
+    return {
+        'path': file_path,
+        'filename': filename,
+        'content_type': content_type,
+    }
 
 
 def _decrypt_email_dict(row: dict, user_id: int) -> dict:
@@ -24,6 +82,7 @@ def list_emails(
     is_spam: int | None = None,
     is_trash: int | None = None,
     custom_folder_id: int | None = None,
+    q: str | None = None,
     limit: int = 50,
     offset: int = 0,
 ) -> dict:
@@ -32,37 +91,75 @@ def list_emails(
     params: list[Any] = [user_id]
     where = ['user_id = ?']
 
-    where.append('direction = ?')
-    params.append(direction)
+    # Search must be performed after decryption: email fields are encrypted at
+    # rest and therefore cannot be searched with SQL LIKE.  In search mode the
+    # folder filters are deliberately omitted so Spam and Trash are included.
+    global_search = q is not None
 
-    if folder and not custom_folder_id:
+    if not global_search:
+        where.append('direction = ?')
+        params.append(direction)
+
+    if folder and not custom_folder_id and not global_search:
         where.append('folder = ?')
         params.append(folder)
-    if starred is not None:
+    if starred is not None and not global_search:
         where.append('is_starred = ?')
         params.append(starred)
-    if is_spam is not None:
+    if is_spam is not None and not global_search:
         where.append('is_spam = ?')
         params.append(is_spam)
-    if is_trash is not None:
+    if is_trash is not None and not global_search:
         where.append('is_trash = ?')
         params.append(is_trash)
-    if custom_folder_id:
+    if custom_folder_id and not global_search:
         where.append('custom_folder_id = ?')
         params.append(custom_folder_id)
 
     where_sql = ' AND '.join(where)
-    count_sql = f"SELECT COUNT(*) FROM emails WHERE {where_sql}"
-    total = conn.execute(count_sql, params).fetchone()[0]
+    if global_search:
+        # Fetch in the same order as the ordinary listing, then filter the
+        # decrypted values and paginate the matching rows.  Searching body_text
+        # and body_html is intentional even though those fields are not part of
+        # the listing response.
+        select_sql = (
+            "SELECT id, folder, custom_folder_id, sender_name, sender_email, recipient, subject, preview, "
+            "body_text, body_html, is_starred, is_read, is_spam, is_trash, created_at, received_at "
+            "FROM emails WHERE "
+            f"{where_sql} ORDER BY COALESCE(received_at, created_at) DESC"
+        )
+        rows = conn.execute(select_sql, params).fetchall()
+        term = q.casefold()
+        matching_rows = []
+        for row in rows:
+            decrypted = _decrypt_email_dict(dict(row), user_id)
+            searchable = (
+                decrypted.get('sender_name'), decrypted.get('sender_email'),
+                decrypted.get('recipient'), decrypted.get('subject'),
+                decrypted.get('preview'), decrypted.get('body_text'),
+                decrypted.get('body_html'),
+            )
+            if any(term in value.casefold() for value in searchable if isinstance(value, str)):
+                matching_rows.append(decrypted)
+        total = len(matching_rows)
+        result = matching_rows[offset:offset + limit]
+    else:
+        count_sql = f"SELECT COUNT(*) FROM emails WHERE {where_sql}"
+        total = conn.execute(count_sql, params).fetchone()[0]
 
-    select_sql = (
-        "SELECT id, folder, custom_folder_id, sender_name, sender_email, recipient, subject, preview, "
-        "is_starred, is_read, is_spam, is_trash, created_at, received_at FROM emails WHERE "
-        f"{where_sql} ORDER BY COALESCE(received_at, created_at) DESC LIMIT ? OFFSET ?"
-    )
-    rows = conn.execute(select_sql, params + [limit, offset]).fetchall()
+        select_sql = (
+            "SELECT id, folder, custom_folder_id, sender_name, sender_email, recipient, subject, preview, "
+            "is_starred, is_read, is_spam, is_trash, created_at, received_at FROM emails WHERE "
+            f"{where_sql} ORDER BY COALESCE(received_at, created_at) DESC LIMIT ? OFFSET ?"
+        )
+        rows = conn.execute(select_sql, params + [limit, offset]).fetchall()
+        result = [_decrypt_email_dict(dict(row), user_id) for row in rows]
 
-    result = [_decrypt_email_dict(dict(row), user_id) for row in rows]
+    # Body fields are only loaded for searching and must not become part of the
+    # existing list response contract.
+    for email in result:
+        email.pop('body_text', None)
+        email.pop('body_html', None)
     return {"emails": result, "total": total, "limit": limit, "offset": offset}
 
 

@@ -22,7 +22,9 @@ let emailTotal = 0;
 let loadingMore = false;
 let scrollObserver = null;
 let focusedEmailIdx = -1;
+let searchQuery = '';
 const PAGE_SIZE = 50;
+const reloadSearch = debounce(() => loadEmails(), 250);
 
 function isDesktop() {
   return window.matchMedia('(min-width: 1024px)').matches;
@@ -33,7 +35,7 @@ const els = {};
 function cacheElements() {
   const ids = [
     'app', 'emailList', 'reader', 'composer', 'toast', 'tabBar', 'bulkBar', 'bulkCount',
-    'menuDrawer', 'menuUsername', 'menuUser', 'settingsPanel', 'settingsUsername',
+    'menuDrawer', 'menuUsername', 'menuUser', 'mobileActionPanel', 'settingsPanel', 'settingsUsername',
     'contactsPanel', 'contactsList', 'contactSearch', 'autocompleteList',
     'customFoldersList', 'headerTitle', 'headerSubtitle', 'rSubject', 'rMetaBlock',
     'rBody', 'readerStarBtn', 'htmlToggle', 'toField', 'subjectField', 'bodyField',
@@ -52,6 +54,7 @@ async function loadEmails(reset = true) {
     markCardActive(null);
   }
   const params = { limit: PAGE_SIZE, offset: emailOffset };
+  if (searchQuery) params.q = searchQuery;
   if (currentFolder === 'archive') {
     params.folder = 'archive';
     params.direction = 'inbound';
@@ -94,11 +97,11 @@ async function loadEmails(reset = true) {
     emailTotal = data.total || emails.length;
     currentEmails = reset ? emails : currentEmails.concat(emails);
 
-    if (reset && emails.length === 0) {
+    if (reset && emails.length === 0 && !searchQuery) {
       els.emailList.innerHTML = `<div class="empty">${__('emails.empty')}</div>`;
       return;
     }
-    ui.renderEmailList(currentEmails, currentFolder, els.emailList, currentEmailId);
+    renderEmailListWithFilter();
     setupInfiniteScroll();
   } catch (err) {
     if (reset) els.emailList.innerHTML = `<div class="empty">${__('error.generic')}: ${escapeHtml(err.message)}</div>`;
@@ -111,6 +114,14 @@ async function loadMore() {
   emailOffset += PAGE_SIZE;
   await loadEmails(false);
   loadingMore = false;
+}
+
+function renderEmailListWithFilter() {
+  if (currentEmails.length === 0 && searchQuery) {
+    els.emailList.innerHTML = `<div class="empty">${__('emails.empty')}</div>`;
+    return;
+  }
+  ui.renderEmailList(currentEmails, currentFolder, els.emailList, currentEmailId);
 }
 
 function setupInfiniteScroll() {
@@ -224,10 +235,12 @@ async function openEmail(id) {
       readerStarBtn: els.readerStarBtn,
       htmlToggle: els.htmlToggle,
     });
-    bodyScrollY = window.scrollY || window.pageYOffset || document.documentElement.scrollTop || 0;
-    document.body.style.top = `-${bodyScrollY}px`;
-    document.documentElement.classList.add('reader-open');
-    document.body.classList.add('reader-open');
+    if (!isDesktop()) {
+      bodyScrollY = window.scrollY || window.pageYOffset || document.documentElement.scrollTop || 0;
+      document.body.style.top = `-${bodyScrollY}px`;
+      document.documentElement.classList.add('reader-open');
+      document.body.classList.add('reader-open');
+    }
   } catch (err) {
     showToast(err.message, 'error');
   }
@@ -258,19 +271,23 @@ function openFocusedEmail() {
 
 function closeReader() {
   els.reader.classList.remove('open');
-  document.documentElement.classList.remove('reader-open');
-  document.body.classList.remove('reader-open');
-  document.body.style.top = '';
-  document.documentElement.style.scrollBehavior = 'auto';
-  window.scrollTo(0, bodyScrollY);
-  // Force Safari to recalculate the document height / viewport
-  const app = document.getElementById('app');
-  if (app) {
-    app.style.minHeight = '100dvh';
-    requestAnimationFrame(() => {
-      app.style.minHeight = '';
-      document.documentElement.style.scrollBehavior = '';
-    });
+  if (!isDesktop()) {
+    document.documentElement.classList.remove('reader-open');
+    document.body.classList.remove('reader-open');
+    document.body.style.top = '';
+    document.documentElement.style.scrollBehavior = 'auto';
+    window.scrollTo(0, bodyScrollY);
+    // Force Safari to recalculate the document height / viewport
+    const app = document.getElementById('app');
+    if (app) {
+      app.style.minHeight = '100dvh';
+      requestAnimationFrame(() => {
+        app.style.minHeight = '';
+        document.documentElement.style.scrollBehavior = '';
+      });
+    }
+  } else {
+    document.documentElement.style.scrollBehavior = '';
   }
   currentEmailId = null;
   currentEmailData = null;
@@ -576,14 +593,26 @@ async function syncEmails() {
 }
 
 // ---- Contacts ----
+function showPanelBackdrop() {
+  const bd = document.getElementById('panelBackdrop');
+  if (bd) bd.classList.add('show');
+}
+
+function hidePanelBackdrop() {
+  const bd = document.getElementById('panelBackdrop');
+  if (bd) bd.classList.remove('show');
+}
+
 function openContacts() {
   closeMenu();
   els.contactsPanel.classList.add('open');
+  showPanelBackdrop();
   loadContacts();
 }
 
 function closeContacts() {
   els.contactsPanel.classList.remove('open');
+  hidePanelBackdrop();
 }
 
 async function loadContacts() {
@@ -723,6 +752,8 @@ function toggleSelectMode() {
     ? '<i class="hgi-stroke hgi-checkmark-square-01" aria-hidden="true"></i>'
     : '<i class="hgi-stroke hgi-square" aria-hidden="true"></i>';
   els.selectToggle.innerHTML = icon;
+  els.selectToggle.setAttribute('aria-pressed', String(selectMode));
+  document.getElementById('mobileSelectToggle')?.setAttribute('aria-pressed', String(selectMode));
   document.querySelectorAll('.email-card').forEach(card => card.classList.remove('selected'));
   updateBulkBar();
 }
@@ -764,10 +795,12 @@ async function bulkAction(action) {
 function openSettings() {
   closeMenu();
   els.settingsPanel.classList.add('open');
+  showPanelBackdrop();
 }
 
 function closeSettings() {
   els.settingsPanel.classList.remove('open');
+  hidePanelBackdrop();
 }
 
 async function changePassword() {
@@ -806,11 +839,35 @@ async function clearCache() {
 }
 
 // ---- Menu ----
+function toggleMobileActions() {
+  const panel = els.mobileActionPanel;
+  if (!panel) return;
+  const isOpen = panel.classList.toggle('open');
+  panel.setAttribute('aria-hidden', String(!isOpen));
+  document.getElementById('menuToggle')?.setAttribute('aria-expanded', String(isOpen));
+  document.getElementById('menuToggle')?.setAttribute('aria-pressed', String(isOpen));
+}
+
+function closeMobileActions() {
+  if (!els.mobileActionPanel) return;
+  els.mobileActionPanel.classList.remove('open');
+  els.mobileActionPanel.setAttribute('aria-hidden', 'true');
+  document.getElementById('menuToggle')?.setAttribute('aria-expanded', 'false');
+  document.getElementById('menuToggle')?.setAttribute('aria-pressed', 'false');
+}
+
 function toggleMenu() {
+  closeMobileActions();
   els.menuDrawer.classList.add('open');
+  const toggle = document.getElementById('menuToggle');
+  toggle?.setAttribute('aria-expanded', 'true');
+  toggle?.setAttribute('aria-pressed', 'true');
 }
 function closeMenu() {
   els.menuDrawer.classList.remove('open');
+  const toggle = document.getElementById('menuToggle');
+  toggle?.setAttribute('aria-expanded', 'false');
+  toggle?.setAttribute('aria-pressed', 'false');
 }
 async function logout() {
   try {
@@ -972,6 +1029,99 @@ function resetSwipeTransform() {
   list.style.opacity = '';
 }
 
+let metaPopover = null;
+
+function initMetaBlockPopover() {
+  const metaBlock = document.getElementById('rMetaBlock');
+  if (!metaBlock) return;
+  metaBlock.addEventListener('click', async (e) => {
+    if (!metaBlock.classList.contains('interactive')) return;
+    const email = metaBlock.dataset.senderEmail;
+    const name = metaBlock.dataset.senderName || email;
+    if (!email) return;
+    if (metaPopover) { closeMetaPopover(); return; }
+    openMetaPopover(metaBlock, email, name);
+  });
+}
+
+async function openMetaPopover(anchor, email, name) {
+  let contactExists = false;
+  let isStarred = false;
+  try {
+    const ce = await API.contactExists(email);
+    contactExists = ce.exists;
+  } catch {}
+  try {
+    const sa = await API.starredAddresses();
+    isStarred = (sa.addresses || []).includes(email.toLowerCase());
+  } catch {}
+
+  const popover = document.createElement('div');
+  popover.className = 'meta-popover';
+  popover.innerHTML = `
+    <button class="meta-popover-item" data-action="addContact" ${contactExists ? 'disabled' : ''}>
+      <i class="hgi-stroke hgi-user-add-01" aria-hidden="true"></i>
+      <span>${contactExists ? __('reader.contact_exists') : __('reader.add_to_contacts')}</span>
+    </button>
+    <button class="meta-popover-item" data-action="toggleStarAddress">
+      <i class="hgi-stroke hgi-star" aria-hidden="true"></i>
+      <span>${isStarred ? __('reader.unstar_address') : __('reader.star_address')}</span>
+    </button>
+  `;
+  document.body.appendChild(popover);
+
+  const rect = anchor.getBoundingClientRect();
+  popover.style.top = `${rect.bottom + 6}px`;
+  popover.style.left = `${rect.left}px`;
+
+  metaPopover = popover;
+
+  popover.querySelectorAll('.meta-popover-item').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const action = btn.dataset.action;
+      closeMetaPopover();
+      if (action === 'addContact') handleAddContactFromReader(email, name);
+      if (action === 'toggleStarAddress') handleToggleStarAddress(email, isStarred);
+    });
+  });
+
+  setTimeout(() => {
+    document.addEventListener('click', closeMetaPopoverOnOutside, { once: true });
+  }, 0);
+}
+
+function closeMetaPopover() {
+  if (metaPopover) { metaPopover.remove(); metaPopover = null; }
+}
+
+function closeMetaPopoverOnOutside(e) {
+  if (metaPopover && !metaPopover.contains(e.target)) closeMetaPopover();
+  else if (metaPopover) document.addEventListener('click', closeMetaPopoverOnOutside, { once: true });
+}
+
+async function handleAddContactFromReader(email, name) {
+  try {
+    await API.createContact({ name, email });
+    showToast(__('toast.contact_added'));
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+}
+
+async function handleToggleStarAddress(email, currentlyStarred) {
+  try {
+    if (currentlyStarred) {
+      await API.removeStarredAddress(email);
+      showToast(__('toast.address_unstarred'));
+    } else {
+      await API.addStarredAddress(email);
+      showToast(__('toast.address_starred'));
+    }
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+}
+
 // ---- Global event delegation ----
 function onGlobalClick(e) {
   const target = e.target.closest('[data-action]') || e.target;
@@ -984,10 +1134,41 @@ function onGlobalClick(e) {
   }
 }
 
+// Mobilní řádek pouze ovládá existující searchQuery filtr.
+function toggleMobileSearch() {
+  closeMobileActions();
+  const row = document.getElementById('mobileSearchRow');
+  const input = document.getElementById('mobileEmailSearch');
+  if (!row) return;
+
+  const isOpen = row.classList.toggle('open');
+  row.setAttribute('aria-hidden', String(!isOpen));
+  if (isOpen && input) {
+    input.value = document.getElementById('emailSearch')?.value || searchQuery;
+    requestAnimationFrame(() => input.focus());
+  }
+}
+
+function handleEmailSearchInput(input) {
+  searchQuery = input.value.trim();
+  const desktopInput = document.getElementById('emailSearch');
+  const mobileInput = document.getElementById('mobileEmailSearch');
+  if (desktopInput && desktopInput !== input) desktopInput.value = input.value;
+  if (mobileInput && mobileInput !== input) mobileInput.value = input.value;
+  reloadSearch();
+}
+
 // ---- Init ----
 function initEventListeners() {
   document.getElementById('menuDrawer')?.addEventListener('click', (e) => {
     if (e.target.id === 'menuDrawer') closeMenu();
+  });
+  document.addEventListener('click', (e) => {
+    if (els.mobileActionPanel?.classList.contains('open') &&
+        !els.mobileActionPanel.contains(e.target) &&
+        !e.target.closest('#menuToggle')) {
+      closeMobileActions();
+    }
   });
   document.getElementById('logoutForm')?.addEventListener('submit', () => {});
 
@@ -1001,15 +1182,30 @@ function initEventListeners() {
       }
     });
   });
-  document.querySelector('[data-action="toggleMenu"]')?.addEventListener('click', toggleMenu);
-  document.querySelector('[data-action="selectMode"]')?.addEventListener('click', toggleSelectMode);
+  document.getElementById('menuToggle')?.addEventListener('click', toggleMobileActions);
+  document.querySelectorAll('#mobileActionPanel [data-action="toggleMenu"]').forEach(btn => {
+    btn.addEventListener('click', toggleMenu);
+  });
+  document.querySelectorAll('[data-action="toggleMobileSearch"]').forEach(btn => {
+    btn.addEventListener('click', toggleMobileSearch);
+  });
+  document.querySelectorAll('[data-action="selectMode"]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      closeMobileActions();
+      toggleSelectMode();
+    });
+  });
   document.querySelector('[data-action="htmlToggle"]')?.addEventListener('click', () => {
     // handler lives in ui.renderReader via htmlToggle.onclick
   });
   document.querySelector('[data-action="openComposer"]')?.addEventListener('click', openComposer);
-  document.querySelector('[data-action="sync"]')?.addEventListener('click', syncEmails);
+  document.querySelectorAll('[data-action="sync"]').forEach(btn => {
+    btn.addEventListener('click', syncEmails);
+  });
   document.querySelector('[data-action="openContacts"]')?.addEventListener('click', openContacts);
-  document.querySelector('[data-action="openSettings"]')?.addEventListener('click', openSettings);
+  document.querySelectorAll('[data-action="openSettings"]').forEach(btn => {
+    btn.addEventListener('click', openSettings);
+  });
   document.querySelector('[data-action="closeMenu"]')?.addEventListener('click', closeMenu);
   document.querySelector('[data-action="logout"]')?.addEventListener('click', logout);
   document.querySelector('[data-action="closeContacts"]')?.addEventListener('click', closeContacts);
@@ -1093,6 +1289,12 @@ function initEventListeners() {
   document.addEventListener('keydown', (e) => {
     // Ignore if typing in an input/textarea
     if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
+    if (e.key === 'Escape' && els.mobileActionPanel?.classList.contains('open')) {
+      e.preventDefault();
+      closeMobileActions();
+      document.getElementById('menuToggle')?.focus();
+      return;
+    }
     if (els.composer?.classList.contains('open')) {
       if (e.key === 'Escape') { e.preventDefault(); closeComposer(); }
       return;
@@ -1148,7 +1350,7 @@ function initEventListeners() {
           openComposer();
           break;
         case 'Escape':
-          if (els.reader?.classList.contains('open') && !isDesktop()) {
+          if (els.reader?.classList.contains('open')) {
             e.preventDefault();
             closeReader();
           }
@@ -1227,6 +1429,31 @@ function initEventListeners() {
 
   // Contact search
   els.contactSearch.addEventListener('input', debounce(loadContacts, 150));
+
+  // Desktop email search
+  const emailSearch = document.getElementById('emailSearch');
+  if (emailSearch) {
+    emailSearch.addEventListener('input', () => handleEmailSearchInput(emailSearch));
+  }
+  const mobileEmailSearch = document.getElementById('mobileEmailSearch');
+  if (mobileEmailSearch) {
+    mobileEmailSearch.addEventListener('input', () => handleEmailSearchInput(mobileEmailSearch));
+    mobileEmailSearch.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') toggleMobileSearch();
+    });
+  }
+
+  // Panel backdrop click-to-close
+  const backdrop = document.getElementById('panelBackdrop');
+  if (backdrop) {
+    backdrop.addEventListener('click', () => {
+      if (els.settingsPanel?.classList.contains('open')) closeSettings();
+      if (els.contactsPanel?.classList.contains('open')) closeContacts();
+    });
+  }
+
+  // Meta-block popover in reader
+  initMetaBlockPopover();
 }
 
 document.addEventListener('DOMContentLoaded', () => {

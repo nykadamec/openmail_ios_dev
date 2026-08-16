@@ -11,6 +11,9 @@
   "login.footer": "Session: 15 min · Auto logout",
   "login.error.required": "Access requires Cloudflare Access authentication.",
   "login.error.invalid": "Invalid credentials",
+  "login.remember_me": "Stay signed in",
+  "login.remember_me_hint": "Stay signed in for 30 days on this device.",
+  "login.remember_username": "Remember username",
 
   "setup.title": "Setup — openMail",
   "setup.heading": "Welcome",
@@ -58,6 +61,7 @@
 
   "reader.back": "←",
   "reader.attachments": "Attachments",
+  "reader.preview": "Preview",
   "reader.download": "Download",
   "reader.html_toggle": "HTML / Plain",
 
@@ -144,6 +148,7 @@
   "ctx.archive": "Archive",
   "ctx.delete": "Delete",
   "search.placeholder": "Search...",
+  "search.emails": "Search emails...",
 
   "error.generic": "Error",
   "error.not_found": "Not found",

@@ -27,15 +27,47 @@
         <h1 id="headerTitle">Inbox</h1>
         <div class="subtitle" id="headerSubtitle">{{ _("index.header.subtitle") }}</div>
       </div>
-      <div class="header-actions">
-        <button class="icon-btn" data-action="toggleMenu" aria-label="{{ _('menu.open') }}">
-          <i class="hgi-stroke hgi-menu-01" aria-hidden="true"></i>
-        </button>
-        <button class="icon-btn" data-action="selectMode" id="selectToggle" title="{{ _('action.select') }}">
-          <i class="hgi-stroke hgi-square" aria-hidden="true"></i>
-        </button>
-        <button class="icon-btn" data-action="openSettings" aria-label="{{ _('menu.settings') }}">
-          <i class="hgi-stroke hgi-settings-01" aria-hidden="true"></i>
+      <div class="header-search desktop-only">
+        <i class="hgi-stroke hgi-search-01" aria-hidden="true"></i>
+        <input type="search" id="emailSearch" placeholder="{{ _('search.emails') }}" autocomplete="off">
+      </div>
+         <div class="header-actions control-cluster">
+          <button class="icon-btn" data-action="toggleMenu" id="menuToggle" aria-label="{{ _('menu.open') }}" aria-expanded="false" aria-controls="mobileActionPanel menuDrawer" aria-haspopup="dialog" aria-pressed="false">
+            <i class="hgi-stroke hgi-menu-01" aria-hidden="true"></i>
+          </button>
+          <button class="icon-btn desktop-only" data-action="selectMode" id="selectToggle" title="{{ _('action.select') }}" aria-label="{{ _('action.select') }}" aria-pressed="false">
+            <i class="hgi-stroke hgi-square" aria-hidden="true"></i>
+          </button>
+       </div>
+     </div>
+
+     <!-- Mobile header actions -->
+     <div class="mobile-action-panel" id="mobileActionPanel" role="dialog" aria-label="{{ _('menu.open') }}" aria-hidden="true">
+       <div class="mobile-action-panel__eyebrow">openMail</div>
+       <button class="mobile-action" data-action="toggleMobileSearch">
+         <i class="hgi-stroke hgi-search-01" aria-hidden="true"></i>
+         <span>{{ _('search.emails') }}</span>
+         <i class="hgi-stroke hgi-arrow-right-01 mobile-action__chevron" aria-hidden="true"></i>
+       </button>
+       <button class="mobile-action" data-action="toggleMenu">
+         <i class="hgi-stroke hgi-menu-01" aria-hidden="true"></i>
+         <span>{{ _('menu.open') }}</span>
+         <i class="hgi-stroke hgi-arrow-right-01 mobile-action__chevron" aria-hidden="true"></i>
+       </button>
+       <button class="mobile-action" data-action="selectMode" id="mobileSelectToggle" aria-pressed="false">
+         <i class="hgi-stroke hgi-square" aria-hidden="true"></i>
+         <span>{{ _('action.select') }}</span>
+         <i class="hgi-stroke hgi-arrow-right-01 mobile-action__chevron" aria-hidden="true"></i>
+       </button>
+     </div>
+
+    <!-- Search row (mobile only) -->
+    <div class="mobile-search-row" id="mobileSearchRow" aria-hidden="true">
+      <div class="mobile-search-field">
+        <i class="hgi-stroke hgi-search-01" aria-hidden="true"></i>
+        <input type="search" id="mobileEmailSearch" placeholder="{{ _('search.emails') }}" autocomplete="off">
+        <button class="mobile-search-close" data-action="toggleMobileSearch" aria-label="{{ _('action.close') }}">
+          <i class="hgi-stroke hgi-cancel-01" aria-hidden="true"></i>
         </button>
       </div>
     </div>
@@ -74,6 +106,12 @@
           <div id="customFoldersList"></div>
           <button class="menu-item-add" data-action="newFolder">
             <i class="hgi-stroke hgi-add-01 icon" aria-hidden="true"></i><span>{{ _("menu.folder.new") }}</span>
+          </button>
+          <button class="menu-item desktop-only" data-action="openComposer">
+            <i class="hgi-stroke hgi-edit-01 icon" aria-hidden="true"></i><span>{{ _("tab.compose") }}</span>
+          </button>
+          <button class="menu-item desktop-only" data-action="sync">
+            <i class="hgi-stroke hgi-refresh icon" aria-hidden="true"></i><span>{{ _("tab.sync") }}</span>
           </button>
         </div>
 
@@ -142,7 +180,7 @@
       </div>
 
       <!-- Reader -->
-      <div class="reader" id="reader" data-empty="">
+      <div class="reader" id="reader" data-empty="{{ _('reader.empty') }}">
         <div class="reader-top">
           <div class="left">
             <button class="icon-btn mobile-only" data-action="closeReader" aria-label="{{ _('action.back') }}">
@@ -158,6 +196,9 @@
             </button>
             <button class="icon-btn" data-action="moveToTrash" aria-label="{{ _('action.trash') }}">
               <i class="hgi-stroke hgi-delete-01" aria-hidden="true"></i>
+            </button>
+            <button class="icon-btn desktop-only" data-action="closeReader" aria-label="{{ _('action.close') }}">
+              <i class="hgi-stroke hgi-cancel-01" aria-hidden="true"></i>
             </button>
           </div>
         </div>
@@ -201,52 +242,68 @@
       </div>
     </div>
 
+    <!-- Panel backdrop (desktop only) -->
+    <div class="panel-backdrop desktop-only" id="panelBackdrop" data-action="closePanelBackdrop"></div>
+
     <!-- Settings panel -->
-    <div class="side-panel" id="settingsPanel">
-      <div class="panel-top">
+    <div class="side-panel settings-panel" id="settingsPanel">
+      <div class="panel-top settings-top">
         <button class="icon-btn" data-action="closeSettings" aria-label="{{ _('action.back') }}">
           <i class="hgi-stroke hgi-arrow-left-01" aria-hidden="true"></i>
         </button>
-        <h2>{{ _("settings.title") }}</h2>
+        <div>
+          <span class="settings-eyebrow">openMail</span>
+          <h2>{{ _("settings.title") }}</h2>
+        </div>
       </div>
-      <div class="panel-body">
-        <div class="panel-section-title">{{ _("settings.account") }}</div>
-        <div class="panel-row">
-          <div class="left">
-            <i class="hgi-stroke hgi-user" aria-hidden="true"></i>
-            <span class="label">{{ _("settings.username") }}</span>
+      <div class="panel-body settings-body">
+        <div class="settings-intro">
+          <h3>{{ _("settings.title") }}</h3>
+          <p>{{ _("settings.session_info") }}</p>
+        </div>
+
+        <section class="settings-section">
+          <div class="panel-section-title">{{ _("settings.account") }}</div>
+          <div class="panel-row settings-account-card">
+            <div class="left">
+              <span class="settings-avatar"><i class="hgi-stroke hgi-user" aria-hidden="true"></i></span>
+              <span class="label">{{ _("settings.username") }}</span>
+            </div>
+            <span class="value" id="settingsUsername">-</span>
           </div>
-          <span class="value" id="settingsUsername">-</span>
-        </div>
+        </section>
 
-        <div class="panel-section-title">{{ _("settings.change_password") }}</div>
-        <div class="field">
-          <label>{{ _("settings.current_password") }}</label>
-          <input type="password" id="currentPassword" autocomplete="current-password">
-        </div>
-        <div class="field">
-          <label>{{ _("settings.new_password") }}</label>
-          <input type="password" id="newPassword" autocomplete="new-password">
-        </div>
-        <button class="primary-btn" data-action="changePassword">{{ _("settings.change_password_btn") }}</button>
+        <section class="settings-section settings-card">
+          <div class="panel-section-title">{{ _("settings.change_password") }}</div>
+          <div class="field">
+            <label for="currentPassword">{{ _("settings.current_password") }}</label>
+            <input type="password" id="currentPassword" autocomplete="current-password">
+          </div>
+          <div class="field">
+            <label for="newPassword">{{ _("settings.new_password") }}</label>
+            <input type="password" id="newPassword" autocomplete="new-password">
+          </div>
+          <button class="primary-btn" data-action="changePassword">{{ _("settings.change_password_btn") }}</button>
+        </section>
 
-        <div class="panel-section-title">{{ _("settings.language") }}</div>
-        <div class="lang-switch">
-          <button data-lang="cs">{{ _("settings.language.cs") }}</button>
-          <button data-lang="en">{{ _("settings.language.en") }}</button>
-        </div>
+        <section class="settings-section settings-card settings-preferences">
+          <div class="panel-section-title">{{ _("settings.language") }}</div>
+          <div class="lang-switch" role="group" aria-label="{{ _("settings.language") }}">
+            <button data-lang="cs">{{ _("settings.language.cs") }}</button>
+            <button data-lang="en">{{ _("settings.language.en") }}</button>
+          </div>
+        </section>
 
-        <div class="panel-section-title">{{ _("settings.session") }}</div>
-        <p style="font-size:13px;color:var(--text-secondary);margin-bottom:12px;">{{ _("settings.session_info") }}</p>
-        <button class="secondary-btn" data-action="clearCache">
-          <i class="hgi-stroke hgi-refresh" aria-hidden="true"></i> {{ _("settings.clear_cache") }}
-        </button>
-
-        <div style="margin-top:16px;">
+        <section class="settings-section settings-card settings-session">
+          <div class="panel-section-title">{{ _("settings.session") }}</div>
+          <p class="settings-description">{{ _("settings.session_info") }}</p>
+          <button class="secondary-btn" data-action="clearCache">
+            <i class="hgi-stroke hgi-refresh" aria-hidden="true"></i> {{ _("settings.clear_cache") }}
+          </button>
           <button class="secondary-btn danger" data-action="logout">
             <i class="hgi-stroke hgi-logout-01" aria-hidden="true"></i> {{ _("settings.logout_btn") }}
           </button>
-        </div>
+        </section>
       </div>
     </div>
 

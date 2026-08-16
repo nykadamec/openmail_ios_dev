@@ -71,3 +71,62 @@ def delete_contact(contact_id: int) -> bool:
     )
     conn.commit()
     return cur.rowcount > 0
+
+
+# ---- Starred addresses ----
+
+def add_starred_address(email: str) -> tuple[dict, int]:
+    user_id = current_user_id()
+    conn = get_db()
+    existing = conn.execute(
+        "SELECT 1 FROM starred_addresses WHERE user_id = ? AND email = ?",
+        (user_id, email.lower())
+    ).fetchone()
+    if existing:
+        return {"status": "exists"}, 200
+    conn.execute(
+        "INSERT OR IGNORE INTO starred_addresses (user_id, email) VALUES (?, ?)",
+        (user_id, email.lower())
+    )
+    conn.commit()
+    return {"status": "added"}, 201
+
+
+def remove_starred_address(email: str) -> tuple[dict, int]:
+    user_id = current_user_id()
+    conn = get_db()
+    conn.execute(
+        "DELETE FROM starred_addresses WHERE user_id = ? AND email = ?",
+        (user_id, email.lower())
+    )
+    conn.commit()
+    return {"status": "removed"}, 200
+
+
+def list_starred_addresses() -> list[str]:
+    user_id = current_user_id()
+    conn = get_db()
+    rows = conn.execute(
+        "SELECT email FROM starred_addresses WHERE user_id = ? ORDER BY email",
+        (user_id,)
+    ).fetchall()
+    return [r['email'] for r in rows]
+
+
+def is_starred_address(user_id: int, email: str) -> bool:
+    conn = get_db()
+    row = conn.execute(
+        "SELECT 1 FROM starred_addresses WHERE user_id = ? AND email = ?",
+        (user_id, (email or '').lower())
+    ).fetchone()
+    return row is not None
+
+
+def contact_exists(email: str) -> bool:
+    user_id = current_user_id()
+    conn = get_db()
+    row = conn.execute(
+        "SELECT 1 FROM contacts WHERE user_id = ? AND LOWER(email) = LOWER(?)",
+        (user_id, email)
+    ).fetchone()
+    return row is not None

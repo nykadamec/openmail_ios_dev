@@ -2,6 +2,29 @@
 
 import { escapeHtml, formatDate, formatFullDate, avatarColor, initial, __, stripHtml, FROM_EMAIL } from './utils.js';
 
+function formatAttachmentSize(bytes) {
+  const size = Number(bytes);
+  if (!Number.isFinite(size) || size < 0) return '—';
+  if (size < 1024) return `${size} B`;
+  const units = ['KB', 'MB', 'GB'];
+  let value = size / 1024;
+  let unit = 0;
+  while (value >= 1024 && unit < units.length - 1) {
+    value /= 1024;
+    unit += 1;
+  }
+  return `${value < 10 ? value.toFixed(1) : Math.round(value)} ${units[unit]}`;
+}
+
+function attachmentCanPreview(attachment) {
+  const type = String(attachment.content_type || '').toLowerCase();
+  // HTML and SVG are deliberately excluded: opening them on the same origin
+  // would give an untrusted attachment an opportunity to run active content.
+  return type === 'application/pdf'
+    || (type.startsWith('image/') && type !== 'image/svg+xml')
+    || ['text/plain', 'text/csv', 'text/markdown', 'text/tab-separated-values'].includes(type);
+}
+
 export function renderEmailList(emails, currentFolder, listEl, activeId = null) {
   if (!emails.length) {
     listEl.innerHTML = `<div class="empty">${__('emails.empty')}</div>`;
@@ -28,6 +51,7 @@ export function renderEmailList(emails, currentFolder, listEl, activeId = null) 
             <div class="time">${formatDate(e.received_at || e.created_at)}</div>
           </div>
           <div class="subject">${escapeHtml(e.subject || __('error.not_found'))}</div>
+          <div class="preview">${escapeHtml(e.preview || '')}</div>
         </div>
       </div>
     `;
@@ -50,15 +74,26 @@ export function renderReader(email, currentFolder, elements) {
   const identifier = isSent ? (email.recipient || '') : (email.sender_email || email.sender_name || '?');
   const from = email.sender_name || email.sender_email || __('error.not_found');
   const fromEmail = email.sender_email ? `<${email.sender_email}>` : '';
+  const senderAddress = email.sender_email || '';
 
   rMetaBlock.innerHTML = `
     <div class="avatar" style="background: ${avatarColor(identifier)}">${escapeHtml(initial(identifier))}</div>
     <div class="info">
-      <div class="from">${escapeHtml(isSent ? email.recipient : from)}</div>
-      <div class="to">${escapeHtml(isSent ? __('composer.to') + ': ' + FROM_EMAIL : fromEmail)}</div>
+      <div class="from">${escapeHtml(isSent ? email.recipient : from)} <span class="from-email">${escapeHtml(fromEmail)}</span></div>
+      <div class="to">${escapeHtml(isSent ? __('composer.to') + ': ' + FROM_EMAIL : '')}</div>
     </div>
     <div class="time">${formatFullDate(email.received_at || email.created_at)}</div>
   `;
+
+  if (!isSent && senderAddress) {
+    rMetaBlock.classList.add('interactive');
+    rMetaBlock.dataset.senderEmail = senderAddress;
+    rMetaBlock.dataset.senderName = from;
+  } else {
+    rMetaBlock.classList.remove('interactive');
+    delete rMetaBlock.dataset.senderEmail;
+    delete rMetaBlock.dataset.senderName;
+  }
 
   let bodyHtml = '';
   if (email.body_html) {
@@ -89,11 +124,26 @@ export function renderReader(email, currentFolder, elements) {
   }
 
   if (email.attachments?.length) {
-    bodyHtml += `<div class="attachments"><div class="attachments-title">${__('reader.attachments')}</div>`;
+    bodyHtml += `<div class="attachments"><div class="attachments-title">${__('reader.attachments')}</div><div class="attachment-list">`;
     for (const a of email.attachments) {
-      bodyHtml += `<div class="attachment-item"><a href="/api/attachments/${email.id}/${encodeURIComponent(a.filename)}" download>${escapeHtml(a.filename)}</a></div>`;
+      const filename = String(a.filename || __('error.not_found'));
+      const url = `/api/attachments/${encodeURIComponent(email.id)}/${encodeURIComponent(filename)}`;
+      const type = String(a.content_type || 'application/octet-stream');
+      const size = a.size ?? a.bytes ?? a.file_size;
+      const preview = attachmentCanPreview(a);
+      bodyHtml += `<article class="attachment-card">
+        <div class="attachment-icon"><i class="hgi-stroke hgi-attachment-01" aria-hidden="true"></i></div>
+        <div class="attachment-info">
+          <div class="attachment-name" title="${escapeHtml(filename)}">${escapeHtml(filename)}</div>
+          <div class="attachment-meta"><span>${escapeHtml(type)}</span><span>${formatAttachmentSize(size)}</span></div>
+        </div>
+        <div class="attachment-actions">
+          ${preview ? `<a class="attachment-action" href="${url}" target="_blank" rel="noopener noreferrer">${__('reader.preview')}</a>` : ''}
+          <a class="attachment-action attachment-download" href="${url}?download=1" download>${__('reader.download')}</a>
+        </div>
+      </article>`;
     }
-    bodyHtml += '</div>';
+    bodyHtml += '</div></div>';
   }
 
   rBody.innerHTML = bodyHtml;

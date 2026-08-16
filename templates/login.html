@@ -26,12 +26,21 @@
 
     <div class="field">
       <label>{{ _("login.username") }}</label>
-      <input type="text" name="username" autofocus required>
+      <input type="text" name="username" value="{{ remember_username }}" autofocus required>
     </div>
     <div class="field">
       <label>{{ _("login.password") }}</label>
       <input type="password" name="password" required>
     </div>
+
+    <label class="checkbox-row" title="{{ _("login.remember_me_hint") }}">
+      <input type="checkbox" name="remember_me" value="1">
+      <span>{{ _("login.remember_me") }}</span>
+    </label>
+    <label class="checkbox-row">
+      <input type="checkbox" name="remember_username" value="1" {{ 'checked' if remember_username else '' }}>
+      <span>{{ _("login.remember_username") }}</span>
+    </label>
 
     <button type="submit" class="primary-btn">{{ _("login.submit") }}</button>
 

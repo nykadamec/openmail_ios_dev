@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 from flask import Blueprint, request, jsonify, send_file
-from pathlib import Path
 
 from openmail.auth.current_user import login_required
 from openmail.services import email_service, resend_service
@@ -27,10 +26,11 @@ def list_emails_route():
     is_spam = request.args.get("is_spam", type=int)
     is_trash = request.args.get("is_trash", type=int)
     custom_folder_id = request.args.get("custom_folder_id", type=int)
+    q = request.args.get("q")
     limit = request.args.get("limit", 50, type=int)
     offset = request.args.get("offset", 0, type=int)
     # Default to inbox only when no special filter is active
-    if folder is None and starred is None and is_spam is None and is_trash is None and custom_folder_id is None:
+    if q is None and folder is None and starred is None and is_spam is None and is_trash is None and custom_folder_id is None:
         folder = "inbox"
     return jsonify(email_service.list_emails(
         folder=folder or '',
@@ -39,6 +39,7 @@ def list_emails_route():
         is_spam=is_spam,
         is_trash=is_trash,
         custom_folder_id=custom_folder_id,
+        q=q,
         limit=limit,
         offset=offset,
     ))
@@ -115,8 +116,26 @@ def inbound_webhook_route():
 @bp.route("/attachments/<int:email_id>/<path:filename>")
 @login_required
 def get_attachment_route(email_id: int, filename: str):
-    att_dir = Path("data/attachments") / str(email_id)
-    file_path = att_dir / filename
-    if not file_path.exists():
+    attachment = email_service.get_attachment(email_id, filename)
+    if attachment is None:
         return jsonify({"error": "Attachment not found"}), 404
-    return send_file(str(file_path), as_attachment=True, download_name=filename)
+
+    content_type = attachment['content_type']
+    base_content_type = content_type.split(';', 1)[0].strip().lower()
+    force_download = request.args.get('download') == '1'
+    inline_types = (
+        base_content_type == 'application/pdf'
+        or (base_content_type.startswith('image/') and base_content_type != 'image/svg+xml')
+        or base_content_type in {
+            'text/plain',
+            'text/csv',
+            'text/markdown',
+            'text/tab-separated-values',
+        }
+    )
+    return send_file(
+        str(attachment['path']),
+        mimetype=content_type,
+        as_attachment=force_download or not inline_types,
+        download_name=attachment['filename'],
+    )

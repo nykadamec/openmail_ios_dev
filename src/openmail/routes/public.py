@@ -5,7 +5,7 @@ from pathlib import Path
 
 from flask import Blueprint, render_template, request, make_response, redirect, url_for, send_from_directory, jsonify
 
-from openmail.config import FROM_EMAIL
+from openmail.config import FROM_EMAIL, REMEMBER_ME_DAYS, REMEMBER_USERNAME_DAYS, FLASK_DEBUG
 from openmail.db import get_db
 from openmail.auth.users import has_users, create_user, verify_user, get_user_by_id
 from openmail.auth.session import create_session, delete_session
@@ -19,8 +19,24 @@ bp = Blueprint('public', __name__)
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent.parent
 
 
-def _set_session_cookie(resp, sid: str) -> None:
-    resp.set_cookie('session_id', sid, httponly=True, samesite='Lax', max_age=15*60)
+def _set_session_cookie(resp, sid: str, remember: bool = False) -> None:
+    max_age = REMEMBER_ME_DAYS * 24 * 3600 if remember else 15 * 60
+    resp.set_cookie(
+        'session_id', sid,
+        httponly=True, samesite='Lax', secure=not FLASK_DEBUG,
+        max_age=max_age,
+    )
+
+
+def _set_remember_username_cookie(resp, username: str | None) -> None:
+    if username:
+        resp.set_cookie(
+            'remember_username', username,
+            httponly=True, samesite='Lax', secure=not FLASK_DEBUG,
+            max_age=REMEMBER_USERNAME_DAYS * 24 * 3600,
+        )
+    else:
+        resp.delete_cookie('remember_username')
 
 
 @bp.route("/sw.js")
@@ -39,9 +55,9 @@ def setup():
         if not username or len(password) < 6:
             return render_template("setup.html", error="Username required, password min 6 chars"), 400
         user_id = create_user(username, password)
-        sid = create_session(user_id)
+        sid = create_session(user_id, remember=False)
         resp = make_response(redirect(url_for('public.index')))
-        _set_session_cookie(resp, sid)
+        _set_session_cookie(resp, sid, remember=False)
         return resp
     return render_template("setup.html")
 
@@ -52,20 +68,28 @@ def login_page():
     if user:
         resp = make_response(redirect(url_for('public.index')))
         if hasattr(request, '_cf_session_id'):
-            _set_session_cookie(resp, request._cf_session_id)
+            _set_session_cookie(resp, request._cf_session_id, remember=False)
         return resp
+    remember_username = request.cookies.get('remember_username') or ""
     if request.method == "POST":
         data = request.form if request.form else (request.json or {})
         username = (data.get("username") or "").strip()
         password = data.get("password") or ""
+        remember_me = bool(data.get("remember_me"))
+        remember_username_flag = bool(data.get("remember_username"))
         user_id = verify_user(username, password)
         if not user_id:
-            return render_template("login.html", error="Invalid credentials"), 401
-        sid = create_session(user_id)
+            return render_template(
+                "login.html",
+                error="Invalid credentials",
+                remember_username=remember_username,
+            ), 401
+        sid = create_session(user_id, remember=remember_me)
         resp = make_response(redirect(url_for('public.index')))
-        _set_session_cookie(resp, sid)
+        _set_session_cookie(resp, sid, remember=remember_me)
+        _set_remember_username_cookie(resp, username if remember_username_flag else None)
         return resp
-    return render_template("login.html")
+    return render_template("login.html", remember_username=remember_username)
 
 
 @bp.route("/logout", methods=["POST", "GET"])
