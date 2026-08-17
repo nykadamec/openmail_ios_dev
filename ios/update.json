@@ -1,9 +1,9 @@
 {
-  "version": "0.0.14",
-  "build": 14,
-  "title": "openMail 0.0.14",
-  "releaseURL": "https://github.com/nykadamec/openmail_ios_dev/releases/tag/v0.0.14",
-  "ipaURL": "https://github.com/nykadamec/openmail_ios_dev/releases/download/v0.0.14/openMail-unsigned.ipa",
+  "version": "0.0.15",
+  "build": 15,
+  "title": "openMail 0.0.15",
+  "releaseURL": "https://github.com/nykadamec/openmail_ios_dev/releases/tag/v0.0.15",
+  "ipaURL": "https://github.com/nykadamec/openmail_ios_dev/releases/download/v0.0.15/openMail-unsigned.ipa",
   "minimumSupportedVersion": "0.0.9",
   "changelog": [
     "HTML e-mailové tělo se zobrazuje přes celý viewport",
@@ -17,6 +17,7 @@
     "Session cookie se nyní předává i při přesměrování po loginu",
     "Opraveno předávání session cookie do následného API requestu",
     "Robustnější ukládání Remember Me session do Keychainu",
-    "Opraven závod při obnově session během nového loginu"
+    "Opraven závod při obnově session během nového loginu",
+    "Obnova session se po úspěšném loginu nespouští duplicitně"
   ]
 }

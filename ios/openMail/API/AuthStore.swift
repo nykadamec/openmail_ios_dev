@@ -35,6 +35,11 @@ final class AuthStore {
     /// Transport errors are retained so the UI can offer a retry without
     /// pretending that the user has signed out.
     func restoreSession() async {
+        // The root view's task can be recreated when the login view is
+        // replaced by the main shell.  Never validate (or clear) a session
+        // that has already been established by a successful login.
+        guard !isAuthenticated else { return }
+
         sessionGeneration += 1
         let generation = sessionGeneration
 

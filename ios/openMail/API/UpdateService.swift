@@ -43,7 +43,7 @@ enum UpdateState: Equatable {
 final class UpdateService {
     static let shared = UpdateService()
 
-    /// Release notes bundled with the currently installed 0.0.14 (build 14)
+    /// Release notes bundled with the currently installed 0.0.15 (build 15)
     /// release.  These remain available when the remote update manifest cannot
     /// be reached, and can be displayed directly by SettingsView.
     static let currentChangelog: [String] = [
@@ -55,7 +55,8 @@ final class UpdateService {
         "Session cookie se nyní předává i při přesměrování po loginu",
         "Opraveno předávání session cookie do následného API requestu",
         "Robustnější ukládání Remember Me session do Keychainu",
-        "Opraven závod při obnově session během nového loginu"
+        "Opraven závod při obnově session během nového loginu",
+        "Obnova session se po úspěšném loginu nespouští duplicitně"
     ]
 
     /// Readable alias for callers that refer to the bundled changelog as

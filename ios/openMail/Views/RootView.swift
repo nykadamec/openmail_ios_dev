@@ -5,6 +5,7 @@ import SwiftUI
 struct RootView: View {
     @Environment(AuthStore.self) private var authStore
     @State private var restoreState: RestoreState = .restoring
+    @State private var hasAttemptedInitialRestore = false
 
     private enum RestoreState {
         case restoring
@@ -27,6 +28,8 @@ struct RootView: View {
         }
         .animation(.easeInOut(duration: 0.25), value: authStore.isAuthenticated)
         .task {
+            guard !hasAttemptedInitialRestore else { return }
+            hasAttemptedInitialRestore = true
             await restoreSession()
         }
     }
