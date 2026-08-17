@@ -43,6 +43,23 @@ enum UpdateState: Equatable {
 final class UpdateService {
     static let shared = UpdateService()
 
+    /// Release notes bundled with the currently installed 0.0.8 (build 8)
+    /// release.  These remain available when the remote update manifest cannot
+    /// be reached, and can be displayed directly by SettingsView.
+    static let currentChangelog: [String] = [
+        "HTML e-mailové tělo se zobrazuje přes celý viewport",
+        "Spolehlivější scrollování dlouhých e-mailů",
+        "Stabilnější načítání e-mailů",
+        "Zachování scroll pozice Inboxu a jemné zaoblení HTML obsahu"
+    ]
+
+    /// Readable alias for callers that refer to the bundled changelog as
+    /// release notes.
+    static var currentReleaseNotes: [String] { currentChangelog }
+
+    /// Instance-level access for views that already hold the shared service.
+    var bundledReleaseNotes: [String] { Self.currentChangelog }
+
     static let manifestURL = URL(string:
         "https://raw.githubusercontent.com/nykadamec/openmail_ios_dev/main/ios/update.json"
     )!

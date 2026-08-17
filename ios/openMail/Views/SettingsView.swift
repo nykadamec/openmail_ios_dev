@@ -75,6 +75,25 @@ struct SettingsView: View {
             .accessibilityLabel(Text("settings.appVersionAccessibility"))
             .accessibilityValue(Text("\(updateService.currentVersion), \(updateService.currentBuild)"))
 
+            if !UpdateService.currentReleaseNotes.isEmpty {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Co je nového v této verzi")
+                        .font(.subheadline.weight(.semibold))
+
+                    ForEach(Array(UpdateService.currentReleaseNotes.enumerated()), id: \.offset) { _, entry in
+                        HStack(alignment: .firstTextBaseline, spacing: 8) {
+                            Text("•")
+                                .foregroundStyle(.secondary)
+                            Text(entry)
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
+                .padding(.top, 4)
+                .accessibilityElement(children: .contain)
+            }
+
             updateStatus
 
             if let lastCheckDate = updateService.lastCheckDate {
