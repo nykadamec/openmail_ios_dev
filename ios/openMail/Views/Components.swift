@@ -39,7 +39,7 @@ struct AvatarView: View {
 
 // MARK: - WebView
 
-/// A lightweight, non-scrolling WKWebView used to render HTML-only
+/// A lightweight WKWebView used to render HTML-only
 /// messages. The document owns its typography and colours so an email cannot
 /// accidentally render white text on a white web view. JavaScript remains
 /// disabled because this view only needs to display already downloaded HTML.
@@ -47,39 +47,79 @@ struct EmailWebView: UIViewRepresentable {
     let html: String
     var onLoadFailure: (() -> Void)? = nil
 
+    // A real initial frame is important here. SwiftUI's outer ScrollView can
+    // otherwise offer UIViewRepresentable only a small fraction of its height
+    // before WebKit has reported the document's size.
     private static let minimumHeight: CGFloat = 120
+    private static let fallbackHeight: CGFloat = 600
+    private static let maximumMeasuredHeight: CGFloat = 20_000
 
     private var document: String {
-        """
-        <!doctype html>
-        <html>
-        <head>
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <style>
-            :root { color-scheme: light dark; }
-            html, body {
-              margin: 0;
-              padding: 0;
-              background: transparent;
-              color: #1c1c1e;
-              font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
-              font-size: 17px;
-              line-height: 1.45;
-              overflow-wrap: anywhere;
-              word-wrap: break-word;
-            }
-            body { min-height: 120px; }
-            img, video, table { max-width: 100%; height: auto; }
-            pre { white-space: pre-wrap; overflow-wrap: anywhere; }
-            a { color: -apple-system-link; }
-            @media (prefers-color-scheme: dark) {
-              html, body { color: #f2f2f7; }
-            }
-          </style>
-        </head>
-        <body>\(html)</body>
-        </html>
-        """
+        Self.normalizedDocument(from: html)
+    }
+
+    private static let responsiveHead = """
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <style data-openmail="responsive">
+        :root { color-scheme: light dark; }
+        html, body {
+          margin: 0;
+          padding: 0;
+          max-width: 100%;
+          background: transparent;
+          color: #1c1c1e;
+          font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+          font-size: 17px;
+          line-height: 1.45;
+          overflow-wrap: anywhere;
+          word-wrap: break-word;
+        }
+        body { min-height: 120px; overflow-x: hidden; }
+        img, video { max-width: 100%; height: auto; }
+        table { max-width: 100%; }
+        td, th { overflow-wrap: anywhere; word-wrap: break-word; }
+        pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+        a { color: -apple-system-link; }
+        @media (prefers-color-scheme: dark) {
+          html, body { color: #f2f2f7; }
+        }
+      </style>
+    """
+
+    /// Email bodies are not necessarily fragments. In particular, newsletters
+    /// commonly include their own doctype, head, and style elements. Wrapping
+    /// such a body in another body creates an invalid document and changes how
+    /// WebKit applies the newsletter's CSS, so only fragments are wrapped here.
+    private static func normalizedDocument(from html: String) -> String {
+        let lowercased = html.lowercased()
+        let isCompleteDocument = lowercased.contains("<!doctype") ||
+            lowercased.range(of: "<html(?:\\s|>)", options: .regularExpression) != nil
+
+        guard isCompleteDocument else {
+            return """
+            <!doctype html>
+            <html>
+            <head>
+            \(responsiveHead)
+            </head>
+            <body>\(html)</body>
+            </html>
+            """
+        }
+
+        var document = html
+        // Put the compatibility rules before the email's own styles. This
+        // keeps the original selectors and inline styles authoritative.
+        if let headStart = document.range(of: "<head", options: .caseInsensitive),
+           let openingTagEnd = document.range(of: ">", range: headStart.upperBound..<document.endIndex) {
+            document.insert(contentsOf: responsiveHead, at: openingTagEnd.upperBound)
+        } else if let bodyStart = document.range(of: "<body", options: .caseInsensitive) {
+            document.insert(contentsOf: "<head>\(responsiveHead)</head>", at: bodyStart.lowerBound)
+        } else {
+            document = "<!doctype html><html><head>\(responsiveHead)</head><body>\(document)</body></html>"
+        }
+
+        return document
     }
 
     func makeUIView(context: Context) -> WKWebView {
@@ -89,9 +129,15 @@ struct EmailWebView: UIViewRepresentable {
         webView.isOpaque = false
         webView.backgroundColor = .clear
         webView.scrollView.backgroundColor = .clear
-        webView.scrollView.isScrollEnabled = false
+        // Auto-height is preferred, but scrolling is the safe fallback for
+        // documents whose height cannot be measured (or which are unusually
+        // large). This also prevents an HTML body from being clipped.
+        webView.scrollView.isScrollEnabled = true
+        webView.scrollView.alwaysBounceVertical = false
+        webView.scrollView.contentInsetAdjustmentBehavior = .never
         webView.navigationDelegate = context.coordinator
-        webView.heightAnchor.constraint(equalToConstant: Self.minimumHeight).isActive = true
+        webView.heightAnchor.constraint(equalToConstant: Self.fallbackHeight).isActive = true
+        context.coordinator.lastAppliedHeight = Self.fallbackHeight
         webView.loadHTMLString(document, baseURL: nil)
         context.coordinator.lastLoadedHTML = document
         return webView
@@ -101,7 +147,7 @@ struct EmailWebView: UIViewRepresentable {
         context.coordinator.onLoadFailure = onLoadFailure
         if context.coordinator.lastLoadedHTML != document {
             context.coordinator.lastLoadedHTML = document
-            Self.setHeight(Self.minimumHeight, for: uiView)
+            context.coordinator.applyHeight(Self.fallbackHeight, to: uiView)
             uiView.loadHTMLString(document, baseURL: nil)
         }
     }
@@ -116,6 +162,7 @@ struct EmailWebView: UIViewRepresentable {
     final class Coordinator: NSObject, WKNavigationDelegate {
         var lastLoadedHTML: String?
         var onLoadFailure: (() -> Void)?
+        var lastAppliedHeight: CGFloat?
 
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
             measureHeight(of: webView)
@@ -124,6 +171,14 @@ struct EmailWebView: UIViewRepresentable {
                 guard let self, let webView else { return }
                 self.measureHeight(of: webView)
                 self.validateContent(of: webView)
+            }
+            // Images and late-running layout work can change the DOM after
+            // didFinish. A second pass catches those changes without using a
+            // continuous layout observer (which would loop in SwiftUI's
+            // enclosing ScrollView).
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { [weak self, weak webView] in
+                guard let self, let webView else { return }
+                self.measureHeight(of: webView)
             }
         }
 
@@ -141,12 +196,18 @@ struct EmailWebView: UIViewRepresentable {
 
         private func measureHeight(of webView: WKWebView) {
             let script = """
-            Math.max(
-                document.body ? document.body.scrollHeight : 0,
-                document.documentElement ? document.documentElement.scrollHeight : 0,
-                document.body ? document.body.offsetHeight : 0,
-                document.documentElement ? document.documentElement.offsetHeight : 0
-            )
+            (() => {
+                const body = document.body;
+                const root = document.documentElement;
+                return Math.max(
+                    body ? body.scrollHeight : 0,
+                    root ? root.scrollHeight : 0,
+                    body ? body.offsetHeight : 0,
+                    root ? root.offsetHeight : 0,
+                    body ? body.getBoundingClientRect().height : 0,
+                    root ? root.getBoundingClientRect().height : 0
+                );
+            })()
             """
 
             webView.evaluateJavaScript(script) { [weak self] result, error in
@@ -160,9 +221,29 @@ struct EmailWebView: UIViewRepresentable {
                     return
                 }
                 DispatchQueue.main.async {
-                    EmailWebView.setHeight(CGFloat(measuredHeight), for: webView)
+                    let domHeight = min(CGFloat(measuredHeight), EmailWebView.maximumMeasuredHeight)
+                    // DOM height is authoritative when JavaScript returns a
+                    // valid value. WebKit's contentSize is useful as a native
+                    // safety net for the small/partially laid-out documents.
+                    let nativeHeight = webView.scrollView.contentSize.height
+                    let height = domHeight >= EmailWebView.minimumHeight
+                        ? domHeight
+                        : max(domHeight, min(nativeHeight, EmailWebView.maximumMeasuredHeight))
+                    self?.applyHeight(height, to: webView)
                 }
             }
+        }
+
+        /// Change the constraint only when the result is materially different.
+        /// This makes the representable settle instead of feeding every SwiftUI
+        /// layout pass back into WebKit.
+        fileprivate func applyHeight(_ height: CGFloat, to webView: WKWebView) {
+            let safeHeight = min(max(height, EmailWebView.minimumHeight), EmailWebView.maximumMeasuredHeight)
+            if let lastAppliedHeight, abs(lastAppliedHeight - safeHeight) < 1 {
+                return
+            }
+            lastAppliedHeight = safeHeight
+            EmailWebView.setHeight(safeHeight, for: webView)
         }
 
         private func validateContent(of webView: WKWebView) {
