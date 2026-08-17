@@ -94,7 +94,7 @@ struct EmailDetailView: View {
                     EmailWebView(html: html) {
                         htmlDidFailToLoad = true
                     }
-                    .frame(minHeight: 120, alignment: .topLeading)
+                    .frame(maxWidth: .infinity, minHeight: 600, alignment: .topLeading)
                 } else if let text = nonEmptyBodyText(email.body_text) {
                     Text(text)
                         .font(.body)
