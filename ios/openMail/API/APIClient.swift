@@ -36,10 +36,27 @@ enum APIClientError: Error, LocalizedError {
 private final class CookieCaptureDelegate: NSObject, URLSessionDataDelegate {
     private let storage: HTTPCookieStorage
     private let baseHost: String
+    private let lock = NSLock()
+    private var lastCapturedSessionCookie: HTTPCookie?
 
     init(storage: HTTPCookieStorage, baseHost: String) {
         self.storage = storage
         self.baseHost = baseHost.lowercased()
+    }
+
+    /// The last valid session cookie captured from the openMail host.  Access
+    /// is synchronized because URLSession delegate callbacks are not required
+    /// to run on the caller's thread.
+    var capturedSessionCookie: HTTPCookie? {
+        lock.lock()
+        defer { lock.unlock() }
+        return lastCapturedSessionCookie
+    }
+
+    func clearCapturedSessionCookie() {
+        lock.lock()
+        lastCapturedSessionCookie = nil
+        lock.unlock()
     }
 
     func urlSession(
@@ -59,7 +76,7 @@ private final class CookieCaptureDelegate: NSObject, URLSessionDataDelegate {
         newRequest request: URLRequest,
         completionHandler: @escaping (URLRequest?) -> Void
     ) {
-        let capturedCookie = capture(from: response)
+        let capturedCookie = capture(from: response) ?? capturedSessionCookie
         guard request.url?.host?.lowercased() == baseHost,
               let capturedCookie,
               let cookieHeader = HTTPCookie.requestHeaderFields(with: [capturedCookie])["Cookie"] else {
@@ -84,16 +101,29 @@ private final class CookieCaptureDelegate: NSObject, URLSessionDataDelegate {
             withResponseHeaderFields: ["Set-Cookie": setCookie],
             for: responseURL
         )
-        var capturedCookie: HTTPCookie?
-        for cookie in cookies where cookie.name == "session_id" {
-            let domain = cookie.domain
-                .trimmingCharacters(in: CharacterSet(charactersIn: "."))
-                .lowercased()
-            guard domain == baseHost || baseHost.hasSuffix("." + domain) else { continue }
-            storage.setCookie(cookie)
-            capturedCookie = cookie
+        let validCookies = cookies.filter { cookie in
+            cookie.name == "session_id" && cookieDomainMatches(cookie) && !cookie.value.isEmpty
         }
+        guard let capturedCookie = validCookies.last else { return nil }
+
+        // Remove older domain/path variants so sessionCookie() cannot select a
+        // stale cookie instead of the one just issued by the server.
+        for cookie in storage.cookies ?? [] where cookie.name == "session_id" && cookieDomainMatches(cookie) {
+            storage.deleteCookie(cookie)
+        }
+        storage.setCookie(capturedCookie)
+
+        lock.lock()
+        lastCapturedSessionCookie = capturedCookie
+        lock.unlock()
         return capturedCookie
+    }
+
+    private func cookieDomainMatches(_ cookie: HTTPCookie) -> Bool {
+        let domain = cookie.domain
+            .trimmingCharacters(in: CharacterSet(charactersIn: "."))
+            .lowercased()
+        return domain == baseHost || baseHost.hasSuffix("." + domain)
     }
 }
 
@@ -183,13 +213,19 @@ final class APIClient {
         }
         guard let value = storedValue, !value.isEmpty,
               let cookie = makeCookie(value: value) else { return false }
+        for storedCookie in cookieStorage.cookies ?? [] where storedCookie.name == "session_id" && cookieDomainMatches(storedCookie) {
+            cookieStorage.deleteCookie(storedCookie)
+        }
         cookieStorage.setCookie(cookie)
         return true
     }
 
     /// Removes only the openMail session cookie and its persisted copy.
     func clearSession() {
-        if let cookie = sessionCookie() { cookieStorage.deleteCookie(cookie) }
+        for cookie in cookieStorage.cookies ?? [] where cookie.name == "session_id" && cookieDomainMatches(cookie) {
+            cookieStorage.deleteCookie(cookie)
+        }
+        cookieCaptureDelegate.clearCapturedSessionCookie()
         try? keychain.delete()
     }
 
@@ -338,9 +374,15 @@ final class APIClient {
     }
 
     private func sessionCookie() -> HTTPCookie? {
-        cookieStorage.cookies?.first { cookie in
+        if let cookie = cookieStorage.cookies?.first(where: { cookie in
             cookie.name == "session_id" && cookieDomainMatches(cookie)
+        }) {
+            return cookie
         }
+        guard let capturedCookie = cookieCaptureDelegate.capturedSessionCookie,
+              capturedCookie.name == "session_id",
+              cookieDomainMatches(capturedCookie) else { return nil }
+        return capturedCookie
     }
 
     private func cookieDomainMatches(_ cookie: HTTPCookie) -> Bool {
@@ -403,6 +445,20 @@ final class APIClient {
     /// One boundary for transport diagnostics. We deliberately never log
     /// request headers, cookies, query values or response bodies.
     private func perform(_ request: URLRequest) async throws -> (Data, URLResponse) {
+        var request = request
+        let isBaseHostRequest = request.url?.host?.lowercased() == base.host?.lowercased()
+        let isLoginRequest = request.url?.path == "/login"
+        if isBaseHostRequest && isLoginRequest {
+            // Do not let URLSession attach an old cookie to a new login.  The
+            // delegate still captures and forwards the newly issued cookie on
+            // redirects.
+            request.httpShouldHandleCookies = false
+        } else if isBaseHostRequest,
+                  let cookie = sessionCookie(),
+                  let cookieHeader = HTTPCookie.requestHeaderFields(with: [cookie])["Cookie"] {
+            request.setValue(cookieHeader, forHTTPHeaderField: "Cookie")
+        }
+
         do {
             let result = try await session.data(for: request)
             #if DEBUG
