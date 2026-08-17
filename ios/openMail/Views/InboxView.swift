@@ -81,42 +81,72 @@ struct InboxView: View {
     @State private var searchText = ""
     @State private var searchTask: Task<Void, Never>?
 
+    /// The row that was visible when the user opened a detail view. The flag
+    /// keeps restoration opt-in, so the initial list appearance never jumps.
+    @State private var lastVisibleEmailID: Int?
+    @State private var shouldRestoreScroll = false
+
     private var allFolders: [FolderFilter] {
         [.inbox, .starred, .sent, .spam, .trash] + customFolders.map { FolderFilter.custom($0) }
     }
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                LazyVStack(spacing: 0) {
-                    statsHeader
+            ScrollViewReader { proxy in
+                ScrollView {
+                    LazyVStack(spacing: 0) {
+                        statsHeader
 
-                    Color.clear.frame(height: 8)
+                        Color.clear.frame(height: 8)
 
-                    if emails.isEmpty && isLoading {
-                        ProgressView()
-                            .frame(maxWidth: .infinity)
-                            .padding(.top, 80)
-                    } else if emails.isEmpty && hasLoadedSuccessfully {
-                        emptyState
-                    } else if emails.isEmpty && initialLoadFailed {
-                        Text(LocalizedStringKey(refreshFailureMessageKey ?? "errors.generic"))
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                            .frame(maxWidth: .infinity)
-                            .padding(.top, 90)
-                    } else {
-                        ForEach(Array(emails.enumerated()), id: \.element.id) { index, email in
-                            row(for: email)
-                            if index == emails.count - 1 {
-                                loadMoreFooter
+                        if emails.isEmpty && isLoading {
+                            ProgressView()
+                                .frame(maxWidth: .infinity)
+                                .padding(.top, 80)
+                        } else if emails.isEmpty && hasLoadedSuccessfully {
+                            emptyState
+                        } else if emails.isEmpty && initialLoadFailed {
+                            Text(LocalizedStringKey(refreshFailureMessageKey ?? "errors.generic"))
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                                .frame(maxWidth: .infinity)
+                                .padding(.top, 90)
+                        } else {
+                            ForEach(Array(emails.enumerated()), id: \.element.id) { index, email in
+                                row(for: email)
+                                    .id(email.id)
+                                    .simultaneousGesture(TapGesture().onEnded {
+                                        // The tapped row is necessarily visible and
+                                        // is a more reliable anchor than LazyVStack's
+                                        // prefetch-driven onAppear callbacks.
+                                        lastVisibleEmailID = email.id
+                                        shouldRestoreScroll = true
+                                    })
+                                if index == emails.count - 1 {
+                                    loadMoreFooter
+                                }
                             }
                         }
                     }
+                    .padding(.bottom, 24)
                 }
-                .padding(.bottom, 24)
+                .background(Color(.systemBackground))
+                .onAppear {
+                    guard shouldRestoreScroll, let id = lastVisibleEmailID,
+                          !emails.isEmpty else { return }
+                    // Wait for LazyVStack to materialize the anchor. A single
+                    // deferred, non-animated scroll avoids a layout feedback loop.
+                    DispatchQueue.main.async {
+                        guard shouldRestoreScroll, emails.contains(where: { $0.id == id }) else { return }
+                        var transaction = Transaction()
+                        transaction.animation = nil
+                        withTransaction(transaction) {
+                            proxy.scrollTo(id, anchor: .center)
+                        }
+                        shouldRestoreScroll = false
+                    }
+                }
             }
-            .background(Color(.systemBackground))
             .overlay(alignment: .top) {
                 if let refreshFeedback {
                     RefreshFeedbackView(feedback: refreshFeedback) {
@@ -169,10 +199,14 @@ struct InboxView: View {
             await fetch(reset: true, isRefresh: false)
             }
             .onChange(of: currentFolder) {
+                lastVisibleEmailID = nil
+                shouldRestoreScroll = false
                 searchTask?.cancel()
                 Task { await fetch(reset: true, isRefresh: false) }
             }
             .onChange(of: searchText) {
+                lastVisibleEmailID = nil
+                shouldRestoreScroll = false
                 searchTask?.cancel()
                 searchTask = Task {
                     try? await Task.sleep(nanoseconds: 350_000_000)

@@ -1,13 +1,14 @@
 {
-  "version": "0.0.7",
-  "build": 7,
-  "title": "openMail 0.0.7",
-  "releaseURL": "https://github.com/nykadamec/openmail_ios_dev/releases/tag/v0.0.7",
-  "ipaURL": "https://github.com/nykadamec/openmail_ios_dev/releases/download/v0.0.7/openMail-unsigned.ipa",
-  "minimumSupportedVersion": "0.0.7",
+  "version": "0.0.8",
+  "build": 8,
+  "title": "openMail 0.0.8",
+  "releaseURL": "https://github.com/nykadamec/openmail_ios_dev/releases/tag/v0.0.8",
+  "ipaURL": "https://github.com/nykadamec/openmail_ios_dev/releases/download/v0.0.8/openMail-unsigned.ipa",
+  "minimumSupportedVersion": "0.0.8",
   "changelog": [
     "HTML e-mailové tělo se zobrazuje přes celý viewport",
     "Spolehlivější scrollování dlouhých e-mailů",
-    "Stabilnější načítání e-mailů"
+    "Stabilnější načítání e-mailů",
+    "Zachování scroll pozice Inboxu a jemné zaoblení HTML obsahu"
   ]
 }

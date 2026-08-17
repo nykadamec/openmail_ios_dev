@@ -95,6 +95,12 @@ struct EmailDetailView: View {
                         htmlDidFailToLoad = true
                     }
                     .frame(maxWidth: .infinity, minHeight: 600, alignment: .topLeading)
+                    .background(Color(.secondarySystemBackground))
+                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .stroke(Color.primary.opacity(0.09), lineWidth: 1)
+                    }
                 } else if let text = nonEmptyBodyText(email.body_text) {
                     Text(text)
                         .font(.body)
