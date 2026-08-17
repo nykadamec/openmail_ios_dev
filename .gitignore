@@ -10,6 +10,7 @@ logs/
 # iOS build artifacts
 ios/build/
 ios/build-sim/
+ios/device-build/
 ios/Payload/
 ios/dist/
 ios/openMail.xcodeproj/

@@ -50,7 +50,6 @@ struct EmailWebView: UIViewRepresentable {
     // A real initial frame is important here. SwiftUI's outer ScrollView can
     // otherwise offer UIViewRepresentable only a small fraction of its height
     // before WebKit has reported the document's size.
-    private static let minimumHeight: CGFloat = 120
     private static let fallbackHeight: CGFloat = 600
     private static let maximumMeasuredHeight: CGFloat = 20_000
 
@@ -156,7 +155,7 @@ struct EmailWebView: UIViewRepresentable {
         for constraint in webView.constraints where constraint.firstAttribute == .height {
             constraint.isActive = false
         }
-        webView.heightAnchor.constraint(equalToConstant: max(height, minimumHeight)).isActive = true
+        webView.heightAnchor.constraint(equalToConstant: max(height, fallbackHeight)).isActive = true
     }
 
     final class Coordinator: NSObject, WKNavigationDelegate {
@@ -222,13 +221,14 @@ struct EmailWebView: UIViewRepresentable {
                 }
                 DispatchQueue.main.async {
                     let domHeight = min(CGFloat(measuredHeight), EmailWebView.maximumMeasuredHeight)
-                    // DOM height is authoritative when JavaScript returns a
-                    // valid value. WebKit's contentSize is useful as a native
-                    // safety net for the small/partially laid-out documents.
+                    // Use both measurements: a partially laid-out DOM can be
+                    // smaller than WebKit's native content size. Neither
+                    // measurement may reduce the safe initial viewport.
                     let nativeHeight = webView.scrollView.contentSize.height
-                    let height = domHeight >= EmailWebView.minimumHeight
-                        ? domHeight
-                        : max(domHeight, min(nativeHeight, EmailWebView.maximumMeasuredHeight))
+                    let height = max(
+                        domHeight,
+                        min(nativeHeight, EmailWebView.maximumMeasuredHeight)
+                    )
                     self?.applyHeight(height, to: webView)
                 }
             }
@@ -238,7 +238,7 @@ struct EmailWebView: UIViewRepresentable {
         /// This makes the representable settle instead of feeding every SwiftUI
         /// layout pass back into WebKit.
         fileprivate func applyHeight(_ height: CGFloat, to webView: WKWebView) {
-            let safeHeight = min(max(height, EmailWebView.minimumHeight), EmailWebView.maximumMeasuredHeight)
+            let safeHeight = min(max(height, EmailWebView.fallbackHeight), EmailWebView.maximumMeasuredHeight)
             if let lastAppliedHeight, abs(lastAppliedHeight - safeHeight) < 1 {
                 return
             }
