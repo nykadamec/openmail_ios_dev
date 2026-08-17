@@ -88,20 +88,20 @@ struct EmailDetailView: View {
 
                 Divider()
 
-                // Prefer plain text. It is the canonical, reliable body on
-                // iOS and avoids depending on WKWebView sizing on a device.
-                if let text = nonEmptyBodyText(email.body_text) {
-                    Text(text)
-                        .font(.body)
-                        .textSelection(.enabled)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                } else if let html = nonEmptyBodyHTML(email.body_html), !htmlDidFailToLoad {
+                // HTML is the primary representation. Plain text is only shown
+                // when HTML is absent or WKWebView cannot render it.
+                if let html = nonEmptyBodyHTML(email.body_html), !htmlDidFailToLoad {
                     EmailWebView(html: html) {
                         htmlDidFailToLoad = true
                     }
                     .frame(minHeight: 120, alignment: .topLeading)
+                } else if let text = nonEmptyBodyText(email.body_text) {
+                    Text(text)
+                        .font(.body)
+                        .textSelection(.enabled)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                 } else {
-                    Text(noBodyText)
+                    Text("empty.inbox")
                         .foregroundStyle(.secondary)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
@@ -187,12 +187,6 @@ struct EmailDetailView: View {
     private func nonEmptyBodyHTML(_ value: String?) -> String? {
         guard let value else { return nil }
         return value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : value
-    }
-
-    private var noBodyText: String {
-        Locale.current.language.languageCode?.identifier == "cs"
-            ? "Tento e-mail nemá textový obsah"
-            : "This email has no text content"
     }
 
     // MARK: - Actions

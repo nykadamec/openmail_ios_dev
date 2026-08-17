@@ -39,7 +39,7 @@ struct AvatarView: View {
 
 // MARK: - WebView
 
-/// A lightweight, non-scrolling WKWebView used as a fallback for HTML-only
+/// A lightweight, non-scrolling WKWebView used to render HTML-only
 /// messages. The document owns its typography and colours so an email cannot
 /// accidentally render white text on a white web view. JavaScript remains
 /// disabled because this view only needs to display already downloaded HTML.
@@ -98,6 +98,7 @@ struct EmailWebView: UIViewRepresentable {
     }
 
     func updateUIView(_ uiView: WKWebView, context: Context) {
+        context.coordinator.onLoadFailure = onLoadFailure
         if context.coordinator.lastLoadedHTML != document {
             context.coordinator.lastLoadedHTML = document
             Self.setHeight(Self.minimumHeight, for: uiView)
@@ -148,10 +149,16 @@ struct EmailWebView: UIViewRepresentable {
             )
             """
 
-            webView.evaluateJavaScript(script) { result, _ in
-                guard let number = result as? NSNumber else { return }
+            webView.evaluateJavaScript(script) { [weak self] result, error in
+                guard error == nil, let number = result as? NSNumber else {
+                    self?.notifyLoadFailure()
+                    return
+                }
                 let measuredHeight = number.doubleValue
-                guard measuredHeight.isFinite, measuredHeight > 0 else { return }
+                guard measuredHeight.isFinite, measuredHeight > 0 else {
+                    self?.notifyLoadFailure()
+                    return
+                }
                 DispatchQueue.main.async {
                     EmailWebView.setHeight(CGFloat(measuredHeight), for: webView)
                 }
@@ -168,11 +175,24 @@ struct EmailWebView: UIViewRepresentable {
                 document.body.querySelector('img, video, table, svg') !== null
             ))
             """
-            webView.evaluateJavaScript(script) { result, _ in
-                guard let hasContent = (result as? NSNumber)?.boolValue, !hasContent else { return }
-                DispatchQueue.main.async { [weak self] in
-                    self?.onLoadFailure?()
+            webView.evaluateJavaScript(script) { [weak self] result, error in
+                guard error == nil else {
+                    self?.notifyLoadFailure()
+                    return
                 }
+                guard let hasContent = (result as? NSNumber)?.boolValue else {
+                    self?.notifyLoadFailure()
+                    return
+                }
+                if !hasContent {
+                    self?.notifyLoadFailure()
+                }
+            }
+        }
+
+        private func notifyLoadFailure() {
+            DispatchQueue.main.async { [weak self] in
+                self?.onLoadFailure?()
             }
         }
     }
