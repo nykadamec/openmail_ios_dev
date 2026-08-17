@@ -39,14 +39,48 @@ struct AvatarView: View {
 
 // MARK: - WebView
 
-/// A lightweight, non-scrolling WKWebView used to render the HTML body of an
-/// email. It disables JavaScript and auto-sizes its height to the content so
-/// it can live inside the surrounding `ScrollView`.
+/// A lightweight, non-scrolling WKWebView used as a fallback for HTML-only
+/// messages. The document owns its typography and colours so an email cannot
+/// accidentally render white text on a white web view. JavaScript remains
+/// disabled because this view only needs to display already downloaded HTML.
 struct EmailWebView: UIViewRepresentable {
     let html: String
     var onLoadFailure: (() -> Void)? = nil
 
     private static let minimumHeight: CGFloat = 120
+
+    private var document: String {
+        """
+        <!doctype html>
+        <html>
+        <head>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <style>
+            :root { color-scheme: light dark; }
+            html, body {
+              margin: 0;
+              padding: 0;
+              background: transparent;
+              color: #1c1c1e;
+              font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+              font-size: 17px;
+              line-height: 1.45;
+              overflow-wrap: anywhere;
+              word-wrap: break-word;
+            }
+            body { min-height: 120px; }
+            img, video, table { max-width: 100%; height: auto; }
+            pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+            a { color: -apple-system-link; }
+            @media (prefers-color-scheme: dark) {
+              html, body { color: #f2f2f7; }
+            }
+          </style>
+        </head>
+        <body>\(html)</body>
+        </html>
+        """
+    }
 
     func makeUIView(context: Context) -> WKWebView {
         let configuration = WKWebViewConfiguration()
@@ -58,16 +92,16 @@ struct EmailWebView: UIViewRepresentable {
         webView.scrollView.isScrollEnabled = false
         webView.navigationDelegate = context.coordinator
         webView.heightAnchor.constraint(equalToConstant: Self.minimumHeight).isActive = true
-        webView.loadHTMLString(html, baseURL: nil)
-        context.coordinator.lastLoadedHTML = html
+        webView.loadHTMLString(document, baseURL: nil)
+        context.coordinator.lastLoadedHTML = document
         return webView
     }
 
     func updateUIView(_ uiView: WKWebView, context: Context) {
-        if context.coordinator.lastLoadedHTML != html {
-            context.coordinator.lastLoadedHTML = html
+        if context.coordinator.lastLoadedHTML != document {
+            context.coordinator.lastLoadedHTML = document
             Self.setHeight(Self.minimumHeight, for: uiView)
-            uiView.loadHTMLString(html, baseURL: nil)
+            uiView.loadHTMLString(document, baseURL: nil)
         }
     }
 
@@ -84,9 +118,11 @@ struct EmailWebView: UIViewRepresentable {
 
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
             measureHeight(of: webView)
+            validateContent(of: webView)
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self, weak webView] in
                 guard let self, let webView else { return }
                 self.measureHeight(of: webView)
+                self.validateContent(of: webView)
             }
         }
 
@@ -118,6 +154,24 @@ struct EmailWebView: UIViewRepresentable {
                 guard measuredHeight.isFinite, measuredHeight > 0 else { return }
                 DispatchQueue.main.async {
                     EmailWebView.setHeight(CGFloat(measuredHeight), for: webView)
+                }
+            }
+        }
+
+        private func validateContent(of webView: WKWebView) {
+            // A successful navigation can still leave an empty document
+            // (for example malformed or stripped HTML). Let the SwiftUI
+            // caller show its plain-text/empty-body fallback in that case.
+            let script = """
+            Boolean(document.body && (
+                document.body.innerText.trim().length > 0 ||
+                document.body.querySelector('img, video, table, svg') !== null
+            ))
+            """
+            webView.evaluateJavaScript(script) { result, _ in
+                guard let hasContent = (result as? NSNumber)?.boolValue, !hasContent else { return }
+                DispatchQueue.main.async { [weak self] in
+                    self?.onLoadFailure?()
                 }
             }
         }

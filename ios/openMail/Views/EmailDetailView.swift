@@ -88,14 +88,21 @@ struct EmailDetailView: View {
 
                 Divider()
 
-                if let html = email.body_html, !html.isEmpty, !htmlDidFailToLoad {
-                    EmailWebView(html: html) {
-                        htmlDidFailToLoad = true
-                    }
-                } else if let text = email.body_text, !text.isEmpty {
+                // Prefer plain text. It is the canonical, reliable body on
+                // iOS and avoids depending on WKWebView sizing on a device.
+                if let text = nonEmptyBodyText(email.body_text) {
                     Text(text)
                         .font(.body)
                         .textSelection(.enabled)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                } else if let html = nonEmptyBodyHTML(email.body_html), !htmlDidFailToLoad {
+                    EmailWebView(html: html) {
+                        htmlDidFailToLoad = true
+                    }
+                    .frame(minHeight: 120, alignment: .topLeading)
+                } else {
+                    Text(noBodyText)
+                        .foregroundStyle(.secondary)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
 
@@ -170,6 +177,22 @@ struct EmailDetailView: View {
 
     private func senderName(_ email: EmailDetail) -> String {
         email.sender_name ?? email.sender_email ?? "?"
+    }
+
+    private func nonEmptyBodyText(_ value: String?) -> String? {
+        guard let value else { return nil }
+        return value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : value
+    }
+
+    private func nonEmptyBodyHTML(_ value: String?) -> String? {
+        guard let value else { return nil }
+        return value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : value
+    }
+
+    private var noBodyText: String {
+        Locale.current.language.languageCode?.identifier == "cs"
+            ? "Tento e-mail nemá textový obsah"
+            : "This email has no text content"
     }
 
     // MARK: - Actions
