@@ -59,28 +59,41 @@ private final class CookieCaptureDelegate: NSObject, URLSessionDataDelegate {
         newRequest request: URLRequest,
         completionHandler: @escaping (URLRequest?) -> Void
     ) {
-        capture(from: response)
-        completionHandler(request)
+        let capturedCookie = capture(from: response)
+        guard request.url?.host?.lowercased() == baseHost,
+              let capturedCookie,
+              let cookieHeader = HTTPCookie.requestHeaderFields(with: [capturedCookie])["Cookie"] else {
+            completionHandler(request)
+            return
+        }
+
+        var redirectRequest = request
+        redirectRequest.setValue(cookieHeader, forHTTPHeaderField: "Cookie")
+        completionHandler(redirectRequest)
     }
 
-    private func capture(from response: URLResponse) {
+    @discardableResult
+    private func capture(from response: URLResponse) -> HTTPCookie? {
         guard let http = response as? HTTPURLResponse,
               let responseURL = http.url,
               responseURL.host?.lowercased() == baseHost,
               let setCookie = http.value(forHTTPHeaderField: "Set-Cookie"),
-              !setCookie.isEmpty else { return }
+              !setCookie.isEmpty else { return nil }
 
         let cookies = HTTPCookie.cookies(
             withResponseHeaderFields: ["Set-Cookie": setCookie],
             for: responseURL
         )
+        var capturedCookie: HTTPCookie?
         for cookie in cookies where cookie.name == "session_id" {
             let domain = cookie.domain
                 .trimmingCharacters(in: CharacterSet(charactersIn: "."))
                 .lowercased()
             guard domain == baseHost || baseHost.hasSuffix("." + domain) else { continue }
             storage.setCookie(cookie)
+            capturedCookie = cookie
         }
+        return capturedCookie
     }
 }
 

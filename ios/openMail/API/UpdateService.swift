@@ -43,7 +43,7 @@ enum UpdateState: Equatable {
 final class UpdateService {
     static let shared = UpdateService()
 
-    /// Release notes bundled with the currently installed 0.0.10 (build 10)
+    /// Release notes bundled with the currently installed 0.0.11 (build 11)
     /// release.  These remain available when the remote update manifest cannot
     /// be reached, and can be displayed directly by SettingsView.
     static let currentChangelog: [String] = [
@@ -51,7 +51,8 @@ final class UpdateService {
         "Spolehlivější scrollování dlouhých e-mailů",
         "Stabilnější načítání e-mailů",
         "Zachování scroll pozice Inboxu a jemné zaoblení HTML obsahu",
-        "Opraveno přihlášení a předávání session cookie přes redirect"
+        "Opraveno přihlášení a předávání session cookie přes redirect",
+        "Session cookie se nyní předává i při přesměrování po loginu"
     ]
 
     /// Readable alias for callers that refer to the bundled changelog as
