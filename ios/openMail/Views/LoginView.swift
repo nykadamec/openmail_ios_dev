@@ -6,8 +6,16 @@ struct LoginView: View {
 
     @State private var username = ""
     @State private var password = ""
+    @State private var rememberMe = false
     @State private var isLoading = false
     @State private var errorMessage: String?
+
+    /// An optional message supplied when a previously stored session expired.
+    var initialMessage: String?
+
+    init(initialMessage: String? = nil) {
+        self.initialMessage = initialMessage
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -61,8 +69,25 @@ struct LoginView: View {
             }
             .padding(.horizontal, 24)
 
+            VStack(alignment: .leading, spacing: 4) {
+                Toggle(isOn: $rememberMe) {
+                    Text("login.rememberMe")
+                        .font(.subheadline.weight(.medium))
+                }
+                .toggleStyle(.switch)
+                .disabled(isLoading)
+                .accessibilityHint(Text("login.rememberMeAccessibilityHint"))
+
+                Text("login.rememberMeHint")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .padding(.leading, 1)
+            }
+            .padding(.horizontal, 28)
+            .padding(.top, 14)
+
             // Error
-            if let errorMessage {
+            if let errorMessage = errorMessage ?? initialMessage {
                 Text(errorMessage)
                     .font(.footnote)
                     .foregroundStyle(.red)
@@ -97,6 +122,8 @@ struct LoginView: View {
             .disabled(isLoading || !canSubmit)
             .padding(.horizontal, 24)
             .padding(.top, 16)
+            .accessibilityLabel(Text("login.submit"))
+            .accessibilityHint(Text(isLoading ? "login.submittingAccessibilityHint" : "login.submitAccessibilityHint"))
 
             Spacer(minLength: 40)
         }
@@ -149,7 +176,8 @@ struct LoginView: View {
         do {
             try await authStore.login(
                 username: username.trimmingCharacters(in: .whitespaces),
-                password: password
+                password: password,
+                rememberMe: rememberMe
             )
         } catch is APIClientError {
             errorMessage = String(localized: "login.error")

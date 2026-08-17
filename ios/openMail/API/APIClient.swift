@@ -34,15 +34,23 @@ enum APIClientError: Error, LocalizedError {
 
 /// Thin async/await wrapper around the openMail Flask JSON API.
 ///
-/// Uses `URLSession.shared`, so the `session_id` cookie set by `POST /login`
-/// is stored in the shared cookie jar and sent automatically with every
-/// subsequent request to `https://email.adamec.pro`.
+/// Uses a private cookie jar so only the openMail session is persisted/removed.
 final class APIClient {
     static let shared = APIClient()
 
     let base = URL(string: "https://email.adamec.pro")!
-    /// Shared session – its cookie jar holds the `session_id`.
-    let session: URLSession = .shared
+    private let cookieStorage = HTTPCookieStorage()
+    private let keychain = KeychainStore()
+    /// Private session – its cookie jar holds only this client's cookies.
+    let session: URLSession
+
+    init() {
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.httpCookieStorage = cookieStorage
+        configuration.httpShouldSetCookies = true
+        configuration.httpCookieAcceptPolicy = .always
+        session = URLSession(configuration: configuration)
+    }
 
     /// An attachment to send with `send(to:subject:body:attachments:)`.
     struct SendAttachment {
@@ -54,12 +62,12 @@ final class APIClient {
     // MARK: Auth
 
     /// POST /login (form-urlencoded), then GET /api/me to resolve the user.
-    func login(username: String, password: String) async throws -> User {
+    func login(username: String, password: String, rememberMe: Bool = false) async throws -> User {
         var form = URLComponents()
         form.queryItems = [
             URLQueryItem(name: "username", value: username),
             URLQueryItem(name: "password", value: password),
-            URLQueryItem(name: "remember_me", value: "1"),
+            URLQueryItem(name: "remember_me", value: rememberMe ? "1" : "0"),
         ]
         var request = URLRequest(url: url("login"))
         request.httpMethod = "POST"
@@ -76,7 +84,40 @@ final class APIClient {
         guard (200..<400).contains(http.statusCode) else {
             throw APIClientError.http(http.statusCode)
         }
-        return try await me()
+        let loggedInUser = try await me()
+        if rememberMe {
+            if let cookie = sessionCookie() {
+                try? keychain.save(cookie.value)
+            }
+        } else {
+            try? keychain.delete()
+        }
+        return loggedInUser
+    }
+
+    /// Whether this private session currently has an openMail session cookie.
+    var hasSessionCookie: Bool { sessionCookie() != nil }
+
+    /// Imports the persisted cookie, if available. Keychain failures are treated
+    /// as an unavailable credential rather than an application-fatal error.
+    @discardableResult
+    func restorePersistedSession() -> Bool {
+        let storedValue: String?
+        do {
+            storedValue = try keychain.read()
+        } catch {
+            return false
+        }
+        guard let value = storedValue, !value.isEmpty,
+              let cookie = makeCookie(value: value) else { return false }
+        cookieStorage.setCookie(cookie)
+        return true
+    }
+
+    /// Removes only the openMail session cookie and its persisted copy.
+    func clearSession() {
+        if let cookie = sessionCookie() { cookieStorage.deleteCookie(cookie) }
+        try? keychain.delete()
     }
 
     /// GET /api/me – validates the session and returns the current user.
@@ -200,13 +241,7 @@ final class APIClient {
         var request = URLRequest(url: url("logout"))
         request.httpMethod = "POST"
         _ = try? await session.data(for: request)
-        let storage = URLCredentialStorage.shared
-        for (space, credentials) in storage.allCredentials {
-            for (_, credential) in credentials {
-                storage.remove(credential, for: space)
-            }
-        }
-        HTTPCookieStorage.shared.removeCookies(since: .distantPast)
+        clearSession()
     }
 
     // MARK: Helpers
@@ -227,6 +262,28 @@ final class APIClient {
         var components = URLComponents(url: url, resolvingAgainstBaseURL: false)!
         components.queryItems = query
         return components.url ?? url
+    }
+
+    private func sessionCookie() -> HTTPCookie? {
+        cookieStorage.cookies?.first { cookie in
+            cookie.name == "session_id" && cookieDomainMatches(cookie)
+        }
+    }
+
+    private func cookieDomainMatches(_ cookie: HTTPCookie) -> Bool {
+        let host = base.host ?? ""
+        let domain = cookie.domain.trimmingCharacters(in: CharacterSet(charactersIn: ".")).lowercased()
+        return domain == host.lowercased()
+    }
+
+    private func makeCookie(value: String) -> HTTPCookie? {
+        HTTPCookie(properties: [
+            .domain: base.host ?? "email.adamec.pro",
+            .path: "/",
+            .name: "session_id",
+            .value: value,
+            .secure: "TRUE",
+        ])
     }
 
     /// Throws the appropriate `APIClientError` for an HTTP response;
@@ -278,6 +335,10 @@ final class APIClient {
                 )
             }
             #endif
+            if let http = result.1 as? HTTPURLResponse, http.statusCode == 401 {
+                clearSession()
+                throw APIClientError.unauthorized
+            }
             return result
         } catch let error as URLError {
             #if DEBUG

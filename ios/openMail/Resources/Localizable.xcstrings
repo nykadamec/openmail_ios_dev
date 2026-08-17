@@ -271,6 +271,66 @@
         "en" : { "stringUnit" : { "state" : "translated", "value" : "Incorrect username or password." } }
       }
     },
+    "login.rememberMe" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Zůstat přihlášen" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Stay signed in" } }
+      }
+    },
+    "login.rememberMeHint" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Až 30 dní na tomto zařízení" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Up to 30 days on this device" } }
+      }
+    },
+    "login.rememberMeAccessibilityHint" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Udrží vás přihlášené až 30 dní na tomto zařízení." } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Keeps you signed in for up to 30 days on this device." } }
+      }
+    },
+    "login.restoringSession" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Obnovuji relaci…" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Restoring your session…" } }
+      }
+    },
+    "login.sessionExpired" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Relace vypršela. Přihlaste se znovu." } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Your session expired. Please sign in again." } }
+      }
+    },
+    "login.restoreFailed" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Relaci se nepodařilo obnovit. Zkontrolujte připojení a zkuste to znovu." } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "We couldn’t restore your session. Check your connection and try again." } }
+      }
+    },
+    "login.retry" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Zkusit znovu" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Try again" } }
+      }
+    },
+    "login.submitAccessibilityHint" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Odešle přihlašovací údaje." } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Submits your sign-in details." } }
+      }
+    },
+    "login.submittingAccessibilityHint" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Přihlašování probíhá." } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Signing in is in progress." } }
+      }
+    },
+    "login.retryAccessibilityHint" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Zkusí obnovit relaci znovu." } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Attempts to restore your session again." } }
+      }
+    },
     "login.password" : {
       "localizations" : {
         "cs" : { "stringUnit" : { "state" : "translated", "value" : "Heslo" } },

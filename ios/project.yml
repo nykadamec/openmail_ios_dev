@@ -16,8 +16,8 @@ targets:
         INFOPLIST_KEY_CFBundleDisplayName: openMail
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         SWIFT_VERSION: "5.9"
-        MARKETING_VERSION: "0.0.8"
-        CURRENT_PROJECT_VERSION: "8"
+        MARKETING_VERSION: "0.0.9"
+        CURRENT_PROJECT_VERSION: "9"
         CODE_SIGNING_ALLOWED: "NO"
         CODE_SIGNING_REQUIRED: "NO"
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
