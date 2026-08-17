@@ -190,7 +190,30 @@ final class APIClient {
         let loggedInUser = try await me()
         if rememberMe {
             if let cookie = sessionCookie() {
-                try? keychain.save(cookie.value)
+                do {
+                    // Persist the cookie captured by this login, while keeping
+                    // a successful server login independent of Keychain state.
+                    try keychain.save(cookie.value)
+                } catch let error as KeychainStore.StoreError {
+                    #if DEBUG
+                    switch error {
+                    case .keychain(let status):
+                        Logger(subsystem: "com.openmail", category: "keychain").debug(
+                            "Session save failed category=keychain status=\(status, privacy: .public)"
+                        )
+                    case .invalidValue:
+                        Logger(subsystem: "com.openmail", category: "keychain").debug(
+                            "Session save failed category=keychain status=invalid-value"
+                        )
+                    }
+                    #endif
+                } catch {
+                    #if DEBUG
+                    Logger(subsystem: "com.openmail", category: "keychain").debug(
+                        "Session save failed category=keychain status=unknown"
+                    )
+                    #endif
+                }
             }
         } else {
             try? keychain.delete()

@@ -28,14 +28,12 @@ final class KeychainStore {
             kSecAttrService as String: service,
             kSecAttrAccount as String: account,
         ]
-        let attributes: [String: Any] = [
-            kSecValueData as String: data,
-            kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly,
-        ]
-
-        let updateStatus = SecItemUpdate(query as CFDictionary, attributes as CFDictionary)
-        if updateStatus == errSecSuccess { return }
-        guard updateStatus == errSecItemNotFound else { throw StoreError.keychain(updateStatus) }
+        // Replacing the item instead of updating it also handles legacy items
+        // whose accessibility attribute cannot be changed by SecItemUpdate.
+        let deleteStatus = SecItemDelete(query as CFDictionary)
+        guard deleteStatus == errSecSuccess || deleteStatus == errSecItemNotFound else {
+            throw StoreError.keychain(deleteStatus)
+        }
 
         var item = query
         item[kSecValueData as String] = data
