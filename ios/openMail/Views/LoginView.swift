@@ -179,10 +179,28 @@ struct LoginView: View {
                 password: password,
                 rememberMe: rememberMe
             )
-        } catch is APIClientError {
-            errorMessage = String(localized: "login.error")
+        } catch let error as APIClientError {
+            errorMessage = localizedLoginError(for: error)
         } catch {
             errorMessage = String(localized: "errors.generic")
+        }
+    }
+
+    private func localizedLoginError(for error: APIClientError) -> String {
+        switch error {
+        case .unauthorized:
+            // A 401 during sign-in means rejected credentials; the same
+            // message is also safe if an existing session has expired.
+            return String(localized: "login.error")
+        case .network:
+            return String(localized: "errors.network")
+        case .http:
+            return String(localized: "errors.serverUnavailable")
+        case .server:
+            // Never expose a server-provided message on the login screen.
+            return String(localized: "errors.serverUnavailable")
+        case .decode, .unexpectedResponse:
+            return String(localized: "errors.unexpectedResponse")
         }
     }
 

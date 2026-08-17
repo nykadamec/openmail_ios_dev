@@ -30,6 +30,60 @@ enum APIClientError: Error, LocalizedError {
     }
 }
 
+/// Captures the authentication cookie on every response, including an
+/// intermediate redirect response.  The delegate deliberately imports only
+/// the session_id cookie; no response headers are retained or logged.
+private final class CookieCaptureDelegate: NSObject, URLSessionDataDelegate {
+    private let storage: HTTPCookieStorage
+    private let baseHost: String
+
+    init(storage: HTTPCookieStorage, baseHost: String) {
+        self.storage = storage
+        self.baseHost = baseHost.lowercased()
+    }
+
+    func urlSession(
+        _ session: URLSession,
+        dataTask: URLSessionDataTask,
+        didReceive response: URLResponse,
+        completionHandler: @escaping (URLSession.ResponseDisposition) -> Void
+    ) {
+        capture(from: response)
+        completionHandler(.allow)
+    }
+
+    func urlSession(
+        _ session: URLSession,
+        task: URLSessionTask,
+        willPerformHTTPRedirection response: HTTPURLResponse,
+        newRequest request: URLRequest,
+        completionHandler: @escaping (URLRequest?) -> Void
+    ) {
+        capture(from: response)
+        completionHandler(request)
+    }
+
+    private func capture(from response: URLResponse) {
+        guard let http = response as? HTTPURLResponse,
+              let responseURL = http.url,
+              responseURL.host?.lowercased() == baseHost,
+              let setCookie = http.value(forHTTPHeaderField: "Set-Cookie"),
+              !setCookie.isEmpty else { return }
+
+        let cookies = HTTPCookie.cookies(
+            withResponseHeaderFields: ["Set-Cookie": setCookie],
+            for: responseURL
+        )
+        for cookie in cookies where cookie.name == "session_id" {
+            let domain = cookie.domain
+                .trimmingCharacters(in: CharacterSet(charactersIn: "."))
+                .lowercased()
+            guard domain == baseHost || baseHost.hasSuffix("." + domain) else { continue }
+            storage.setCookie(cookie)
+        }
+    }
+}
+
 // MARK: - Client
 
 /// Thin async/await wrapper around the openMail Flask JSON API.
@@ -41,6 +95,7 @@ final class APIClient {
     let base = URL(string: "https://email.adamec.pro")!
     private let cookieStorage = HTTPCookieStorage()
     private let keychain = KeychainStore()
+    private let cookieCaptureDelegate: CookieCaptureDelegate
     /// Private session – its cookie jar holds only this client's cookies.
     let session: URLSession
 
@@ -49,7 +104,12 @@ final class APIClient {
         configuration.httpCookieStorage = cookieStorage
         configuration.httpShouldSetCookies = true
         configuration.httpCookieAcceptPolicy = .always
-        session = URLSession(configuration: configuration)
+        // URLSession normally imports Set-Cookie headers itself, but doing this
+        // explicitly is important for the 302 response between /login and the
+        // final response.  In particular, this keeps the cookie when a custom
+        // ephemeral cookie jar is used.
+        cookieCaptureDelegate = CookieCaptureDelegate(storage: cookieStorage, baseHost: base.host ?? "")
+        session = URLSession(configuration: configuration, delegate: cookieCaptureDelegate, delegateQueue: nil)
     }
 
     /// An attachment to send with `send(to:subject:body:attachments:)`.
@@ -273,7 +333,11 @@ final class APIClient {
     private func cookieDomainMatches(_ cookie: HTTPCookie) -> Bool {
         let host = base.host ?? ""
         let domain = cookie.domain.trimmingCharacters(in: CharacterSet(charactersIn: ".")).lowercased()
-        return domain == host.lowercased()
+        let normalizedHost = host.lowercased()
+        // A host-only cookie has the exact host as its domain.  A domain cookie
+        // may also be set on a parent domain (for example .adamec.pro), but a
+        // plain suffix check would incorrectly accept eviladamec.pro.
+        return domain == normalizedHost || normalizedHost.hasSuffix("." + domain)
     }
 
     private func makeCookie(value: String) -> HTTPCookie? {
