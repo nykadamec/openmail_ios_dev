@@ -1,0 +1,8 @@
+{
+  "version": "0.0.2",
+  "build": 2,
+  "title": "openMail 0.0.2",
+  "releaseURL": "https://github.com/nykadamec/openmail_ios_dev/releases/tag/v0.0.2",
+  "ipaURL": "https://github.com/nykadamec/openmail_ios_dev/releases/download/v0.0.2/openMail-unsigned.ipa",
+  "minimumSupportedVersion": "0.0.2"
+}

@@ -1198,7 +1198,9 @@ function initEventListeners() {
   document.querySelector('[data-action="htmlToggle"]')?.addEventListener('click', () => {
     // handler lives in ui.renderReader via htmlToggle.onclick
   });
-  document.querySelector('[data-action="openComposer"]')?.addEventListener('click', openComposer);
+  document.querySelectorAll('[data-action="openComposer"]').forEach(btn => {
+    btn.addEventListener('click', openComposer);
+  });
   document.querySelectorAll('[data-action="sync"]').forEach(btn => {
     btn.addEventListener('click', syncEmails);
   });
@@ -1207,10 +1209,10 @@ function initEventListeners() {
     btn.addEventListener('click', openSettings);
   });
   document.querySelector('[data-action="closeMenu"]')?.addEventListener('click', closeMenu);
-  document.querySelector('[data-action="logout"]')?.addEventListener('click', logout);
+  document.querySelectorAll('[data-action="logout"]').forEach(btn => btn.addEventListener('click', logout));
   document.querySelector('[data-action="closeContacts"]')?.addEventListener('click', closeContacts);
   document.querySelector('[data-action="closeSettings"]')?.addEventListener('click', closeSettings);
-  document.querySelector('[data-action="closeReader"]')?.addEventListener('click', closeReader);
+  document.querySelectorAll('[data-action="closeReader"]').forEach(btn => btn.addEventListener('click', closeReader));
   document.querySelector('[data-action="closeComposer"]')?.addEventListener('click', closeComposer);
   document.querySelector('[data-action="sendEmail"]')?.addEventListener('click', sendEmail);
   document.querySelector('[data-action="toggleStarFromReader"]')?.addEventListener('click', toggleStarFromReader);

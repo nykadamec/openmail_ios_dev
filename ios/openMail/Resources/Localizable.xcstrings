@@ -1,0 +1,420 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "action.compose" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Nová zpráva" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Compose" } }
+      }
+    },
+    "action.logout" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Odhlásit se" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Log out" } }
+      }
+    },
+    "action.preview" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Zobrazit" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Preview" } }
+      }
+    },
+    "action.removeAttachment" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Odebrat přílohu" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Remove attachment" } }
+      }
+    },
+    "action.search" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Hledat" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Search" } }
+      }
+    },
+    "action.send" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Odeslat" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Send" } }
+      }
+    },
+    "action.share" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Sdílet" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Share" } }
+      }
+    },
+    "action.signout" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Odhlásit se" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Sign out" } }
+      }
+    },
+    "action.star" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Označit hvězdičkou" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Star" } }
+      }
+    },
+    "action.unstar" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Zrušit označení" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Unstar" } }
+      }
+    },
+    "attachments.title" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Přílohy" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Attachments" } }
+      }
+    },
+    "composer.addFile" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Přidat soubor" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Add file" } }
+      }
+    },
+    "composer.addPhotos" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Přidat fotky" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Add photos" } }
+      }
+    },
+    "composer.attachments" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Přílohy" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Attachments" } }
+      }
+    },
+    "composer.body" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Zpráva" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Message" } }
+      }
+    },
+    "composer.clearAttachments" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Smazat přílohy" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Clear attachments" } }
+      }
+    },
+    "composer.noAttachments" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Žádné přílohy" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "No attachments" } }
+      }
+    },
+    "composer.sendFailed" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Zprávu se nepodařilo odeslat." } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "The message could not be sent." } }
+      }
+    },
+    "composer.sentMessage" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Vaše zpráva byla odeslána." } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Your message has been sent." } }
+      }
+    },
+    "composer.sentTitle" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Odesláno" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Sent" } }
+      }
+    },
+    "composer.subject" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Předmět" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Subject" } }
+      }
+    },
+    "composer.to" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Komu" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "To" } }
+      }
+    },
+    "empty.inbox" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Žádné zprávy" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "No messages" } }
+      }
+    },
+    "refresh.emptyInbox" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Žádné zprávy" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "No messages" } }
+      }
+    },
+    "refresh.failed" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Obnovení se nepodařilo" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Refresh failed" } }
+      }
+    },
+    "refresh.noNewEmails" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Žádné nové zprávy" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "You're up to date" } }
+      }
+    },
+    "refresh.newEmails.one" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "%lld nová zpráva" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "%lld new email" } }
+      }
+    },
+    "refresh.newEmails.few" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "%lld nové zprávy" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "%lld new emails" } }
+      }
+    },
+    "refresh.newEmails.many" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "%lld nových zpráv" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "%lld new emails" } }
+      }
+    },
+    "refresh.dismissHint" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Klepnutím zavřete" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Tap to dismiss" } }
+      }
+    },
+    "refresh.newEmails" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "%lld nových zpráv" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "%lld new emails" } }
+      }
+    },
+    "errors.generic" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Něco se nepovedlo." } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Something went wrong." } }
+      }
+    },
+    "errors.network" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Síť není dostupná. Zkuste to znovu." } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "The network is unavailable. Try again." } }
+      }
+    },
+    "errors.serverUnavailable" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Server není momentálně dostupný. Zkuste to znovu." } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "The server is unavailable right now. Try again." } }
+      }
+    },
+    "errors.unexpectedResponse" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Server vrátil neočekávanou odpověď." } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "The server returned an unexpected response." } }
+      }
+    },
+    "errors.unauthorized" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Vaše relace vypršela. Přihlaste se znovu." } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Your session has expired. Please sign in again." } }
+      }
+    },
+    "folder.inbox" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Příchozí" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Inbox" } }
+      }
+    },
+    "folder.sent" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Odeslané" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Sent" } }
+      }
+    },
+    "folder.spam" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Spam" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Spam" } }
+      }
+    },
+    "folder.starred" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Označené" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Starred" } }
+      }
+    },
+    "folder.trash" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Koš" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Trash" } }
+      }
+    },
+    "inbox.title" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Pošta" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Mail" } }
+      }
+    },
+    "inbox.unread" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "nepřečtených" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "unread" } }
+      }
+    },
+    "loading.email" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Načítám e-mail…" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Loading email…" } }
+      }
+    },
+    "login.error" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Nesprávné uživatelské jméno nebo heslo." } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Incorrect username or password." } }
+      }
+    },
+    "login.password" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Heslo" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Password" } }
+      }
+    },
+    "login.submit" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Přihlásit se" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Sign in" } }
+      }
+    },
+    "login.subtitle" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Přihlaste se ke svému e-mailu" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Sign in to your email" } }
+      }
+    },
+    "login.title" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Vítejte zpět" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Welcome back" } }
+      }
+    },
+    "login.username" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Uživatelské jméno" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Username" } }
+      }
+    },
+    "settings.app" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Nastavení aplikace" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "App settings" } }
+      }
+    },
+    "settings.appVersion" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Verze aplikace" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "App version" } }
+      }
+    },
+    "settings.appVersionAccessibility" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Aktuální verze aplikace" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Current app version" } }
+      }
+    },
+    "settings.checkForUpdates" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Zkontrolovat aktualizace" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Check for updates" } }
+      }
+    },
+    "settings.checkForUpdatesAccessibility" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Zkontrolovat dostupnost aktualizací" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Check for available updates" } }
+      }
+    },
+    "settings.checkingForUpdates" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Kontroluji aktualizace…" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Checking for updates…" } }
+      }
+    },
+    "settings.checkForUpdatesHint" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Zkontroluje nejnovější verzi na GitHubu." } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Checks GitHub for the latest version." } }
+      }
+    },
+    "settings.upToDate" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Používáte aktuální verzi" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "You’re up to date" } }
+      }
+    },
+    "settings.updateAvailable" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Je dostupná nová verze" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "A new version is available" } }
+      }
+    },
+    "settings.openRelease" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Otevřít vydání" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Open release" } }
+      }
+    },
+    "settings.openReleaseAccessibility" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Otevřít novou verzi v prohlížeči" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Open the new version in a browser" } }
+      }
+    },
+    "settings.openReleaseHint" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Otevře přesné vydání v systémovém prohlížeči." } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Opens the exact release in your system browser." } }
+      }
+    },
+    "settings.lastChecked" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Naposledy ověřeno: %@" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Last checked: %@" } }
+      }
+    },
+    "settings.updateCheckFailed" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Aktualizace se nepodařilo ověřit" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Couldn’t check for updates" } }
+      }
+    },
+    "settings.invalidUpdateManifest" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Informace o aktualizaci nejsou platné" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Update information is invalid" } }
+      }
+    },
+    "settings.account" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Účet" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Account" } }
+      }
+    },
+    "settings.email" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "E-mail" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Email" } }
+      }
+    },
+    "settings.fromName" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Jméno odesílatele" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Sender name" } }
+      }
+    },
+    "settings.username" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Uživatelské jméno" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Username" } }
+      }
+    }
+  },
+  "version" : "1.0"
+}
