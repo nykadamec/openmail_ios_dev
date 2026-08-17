@@ -343,6 +343,12 @@
         "en" : { "stringUnit" : { "state" : "translated", "value" : "Checks GitHub for the latest version." } }
       }
     },
+    "settings.changelog" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Co je nového" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "What’s new" } }
+      }
+    },
     "settings.upToDate" : {
       "localizations" : {
         "cs" : { "stringUnit" : { "state" : "translated", "value" : "Používáte aktuální verzi" } },

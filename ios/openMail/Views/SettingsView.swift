@@ -113,6 +113,25 @@ struct SettingsView: View {
                 .buttonStyle(.plain)
                 .accessibilityLabel(Text("settings.openReleaseAccessibility"))
                 .accessibilityHint(Text("settings.openReleaseHint"))
+
+                if !manifest.changelog.isEmpty {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("settings.changelog")
+                            .font(.subheadline.weight(.semibold))
+
+                        ForEach(Array(manifest.changelog.enumerated()), id: \.offset) { _, entry in
+                            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                                Text("•")
+                                    .foregroundStyle(.secondary)
+                                Text(entry)
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                    }
+                    .padding(.top, 4)
+                    .accessibilityElement(children: .contain)
+                }
             }
 
             Button {

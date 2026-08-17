@@ -9,6 +9,18 @@ struct UpdateManifest: Codable, Equatable {
     let releaseURL: String
     let ipaURL: String
     let minimumSupportedVersion: String
+    let changelog: [String]
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        version = try container.decode(String.self, forKey: .version)
+        build = try container.decode(Int.self, forKey: .build)
+        title = try container.decode(String.self, forKey: .title)
+        releaseURL = try container.decode(String.self, forKey: .releaseURL)
+        ipaURL = try container.decode(String.self, forKey: .ipaURL)
+        minimumSupportedVersion = try container.decode(String.self, forKey: .minimumSupportedVersion)
+        changelog = try container.decodeIfPresent([String].self, forKey: .changelog) ?? []
+    }
 }
 
 enum UpdateState: Equatable {
