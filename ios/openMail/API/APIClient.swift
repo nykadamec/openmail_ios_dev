@@ -31,31 +31,33 @@ enum APIClientError: Error, LocalizedError {
 }
 
 /// Captures the authentication cookie on every response, including an
-/// intermediate redirect response.  The delegate deliberately imports only
-/// the session_id cookie; no response headers are retained or logged.
+/// intermediate redirect response. The captured cookie is kept per task and
+/// is never written to the client's active cookie jar from a URLSession
+/// callback. The auth operation which owns the task must explicitly commit it.
 private final class CookieCaptureDelegate: NSObject, URLSessionDataDelegate {
-    private let storage: HTTPCookieStorage
     private let baseHost: String
     private let lock = NSLock()
-    private var lastCapturedSessionCookie: HTTPCookie?
+    private final class TaskState {
+        var response: URLResponse?
+        var data = Data()
+        var capturedSessionCookie: HTTPCookie?
+        var completion: ((Result<CaptureResult, Error>) -> Void)?
+    }
 
-    init(storage: HTTPCookieStorage, baseHost: String) {
-        self.storage = storage
+    private var tasks: [Int: TaskState] = [:]
+
+    init(baseHost: String) {
         self.baseHost = baseHost.lowercased()
     }
 
-    /// The last valid session cookie captured from the openMail host.  Access
-    /// is synchronized because URLSession delegate callbacks are not required
-    /// to run on the caller's thread.
-    var capturedSessionCookie: HTTPCookie? {
+    func register(
+        _ task: URLSessionDataTask,
+        completion: @escaping (Result<CaptureResult, Error>) -> Void
+    ) {
         lock.lock()
-        defer { lock.unlock() }
-        return lastCapturedSessionCookie
-    }
-
-    func clearCapturedSessionCookie() {
-        lock.lock()
-        lastCapturedSessionCookie = nil
+        let state = TaskState()
+        state.completion = completion
+        tasks[task.taskIdentifier] = state
         lock.unlock()
     }
 
@@ -65,8 +67,21 @@ private final class CookieCaptureDelegate: NSObject, URLSessionDataDelegate {
         didReceive response: URLResponse,
         completionHandler: @escaping (URLSession.ResponseDisposition) -> Void
     ) {
-        capture(from: response)
+        lock.lock()
+        if let state = tasks[dataTask.taskIdentifier] {
+            state.response = response
+            if let cookie = capture(from: response) {
+                state.capturedSessionCookie = cookie
+            }
+        }
+        lock.unlock()
         completionHandler(.allow)
+    }
+
+    func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
+        lock.lock()
+        tasks[dataTask.taskIdentifier]?.data.append(data)
+        lock.unlock()
     }
 
     func urlSession(
@@ -76,7 +91,13 @@ private final class CookieCaptureDelegate: NSObject, URLSessionDataDelegate {
         newRequest request: URLRequest,
         completionHandler: @escaping (URLRequest?) -> Void
     ) {
-        let capturedCookie = capture(from: response) ?? capturedSessionCookie
+        lock.lock()
+        let state = tasks[task.taskIdentifier]
+        if let cookie = capture(from: response) {
+            state?.capturedSessionCookie = cookie
+        }
+        let capturedCookie = state?.capturedSessionCookie
+        lock.unlock()
         guard request.url?.host?.lowercased() == baseHost,
               let capturedCookie,
               let cookieHeader = HTTPCookie.requestHeaderFields(with: [capturedCookie])["Cookie"] else {
@@ -89,7 +110,29 @@ private final class CookieCaptureDelegate: NSObject, URLSessionDataDelegate {
         completionHandler(redirectRequest)
     }
 
-    @discardableResult
+    func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
+        lock.lock()
+        guard let state = tasks.removeValue(forKey: task.taskIdentifier),
+              let completion = state.completion else {
+            lock.unlock()
+            return
+        }
+        let result: Result<CaptureResult, Error>
+        if let error {
+            result = .failure(error)
+        } else if let response = state.response {
+            result = .success(CaptureResult(
+                data: state.data,
+                response: response,
+                capturedSessionCookie: state.capturedSessionCookie
+            ))
+        } else {
+            result = .failure(URLError(.badServerResponse))
+        }
+        lock.unlock()
+        completion(result)
+    }
+
     private func capture(from response: URLResponse) -> HTTPCookie? {
         guard let http = response as? HTTPURLResponse,
               let responseURL = http.url,
@@ -104,19 +147,7 @@ private final class CookieCaptureDelegate: NSObject, URLSessionDataDelegate {
         let validCookies = cookies.filter { cookie in
             cookie.name == "session_id" && cookieDomainMatches(cookie) && !cookie.value.isEmpty
         }
-        guard let capturedCookie = validCookies.last else { return nil }
-
-        // Remove older domain/path variants so sessionCookie() cannot select a
-        // stale cookie instead of the one just issued by the server.
-        for cookie in storage.cookies ?? [] where cookie.name == "session_id" && cookieDomainMatches(cookie) {
-            storage.deleteCookie(cookie)
-        }
-        storage.setCookie(capturedCookie)
-
-        lock.lock()
-        lastCapturedSessionCookie = capturedCookie
-        lock.unlock()
-        return capturedCookie
+        return validCookies.last
     }
 
     private func cookieDomainMatches(_ cookie: HTTPCookie) -> Bool {
@@ -127,6 +158,12 @@ private final class CookieCaptureDelegate: NSObject, URLSessionDataDelegate {
     }
 }
 
+private struct CaptureResult {
+    let data: Data
+    let response: URLResponse
+    let capturedSessionCookie: HTTPCookie?
+}
+
 // MARK: - Client
 
 /// Thin async/await wrapper around the openMail Flask JSON API.
@@ -135,24 +172,36 @@ private final class CookieCaptureDelegate: NSObject, URLSessionDataDelegate {
 final class APIClient {
     static let shared = APIClient()
 
-    let base = URL(string: "https://email.adamec.pro")!
+    let base: URL
+    let profileID: UUID
     private let cookieStorage = HTTPCookieStorage()
-    private let keychain = KeychainStore()
+    private let keychain: KeychainStore
     private let cookieCaptureDelegate: CookieCaptureDelegate
+    private let authOperationLock = NSLock()
+    private var authOperationGeneration = 0
+
+    /// A capability for the auth coordinator to clear only the session which
+    /// belongs to the currently active auth operation.
+    struct AuthOperationToken {
+        fileprivate let generation: Int
+    }
     /// Private session – its cookie jar holds only this client's cookies.
     let session: URLSession
 
-    init() {
+    init(baseURL: URL = ServerProfile.defaultPublicProfile.baseURL,
+         profileID: UUID = ServerProfile.defaultPublicProfile.id) {
+        self.base = baseURL
+        self.profileID = profileID
         let configuration = URLSessionConfiguration.ephemeral
         configuration.httpCookieStorage = cookieStorage
-        configuration.httpShouldSetCookies = true
-        configuration.httpCookieAcceptPolicy = .always
-        // URLSession normally imports Set-Cookie headers itself, but doing this
-        // explicitly is important for the 302 response between /login and the
-        // final response.  In particular, this keeps the cookie when a custom
-        // ephemeral cookie jar is used.
-        cookieCaptureDelegate = CookieCaptureDelegate(storage: cookieStorage, baseHost: base.host ?? "")
+        // Cookie state is committed only while authOperationLock is held.
+        // Letting URLSession mutate the jar from a callback would reintroduce
+        // a stale login/restore race, so requests attach cookies explicitly.
+        configuration.httpShouldSetCookies = false
+        configuration.httpCookieAcceptPolicy = .never
+        cookieCaptureDelegate = CookieCaptureDelegate(baseHost: base.host ?? "")
         session = URLSession(configuration: configuration, delegate: cookieCaptureDelegate, delegateQueue: nil)
+        keychain = KeychainStore(account: profileID.uuidString)
     }
 
     /// An attachment to send with `send(to:subject:body:attachments:)`.
@@ -166,6 +215,7 @@ final class APIClient {
 
     /// POST /login (form-urlencoded), then GET /api/me to resolve the user.
     func login(username: String, password: String, rememberMe: Bool = false) async throws -> User {
+        let operation = beginAuthOperation()
         var form = URLComponents()
         form.queryItems = [
             URLQueryItem(name: "username", value: username),
@@ -176,7 +226,7 @@ final class APIClient {
         request.httpMethod = "POST"
         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
         request.httpBody = form.query?.data(using: .utf8)
-        let (_, response) = try await perform(request)
+        let (_, response, capturedCookie) = try await performWithCookie(request)
         guard let http = response as? HTTPURLResponse else {
             throw APIClientError.server("Invalid response")
         }
@@ -187,36 +237,13 @@ final class APIClient {
         guard (200..<400).contains(http.statusCode) else {
             throw APIClientError.http(http.statusCode)
         }
-        let loggedInUser = try await me()
-        if rememberMe {
-            if let cookie = sessionCookie() {
-                do {
-                    // Persist the cookie captured by this login, while keeping
-                    // a successful server login independent of Keychain state.
-                    try keychain.save(cookie.value)
-                } catch let error as KeychainStore.StoreError {
-                    #if DEBUG
-                    switch error {
-                    case .keychain(let status):
-                        Logger(subsystem: "com.openmail", category: "keychain").debug(
-                            "Session save failed category=keychain status=\(status, privacy: .public)"
-                        )
-                    case .invalidValue:
-                        Logger(subsystem: "com.openmail", category: "keychain").debug(
-                            "Session save failed category=keychain status=invalid-value"
-                        )
-                    }
-                    #endif
-                } catch {
-                    #if DEBUG
-                    Logger(subsystem: "com.openmail", category: "keychain").debug(
-                        "Session save failed category=keychain status=unknown"
-                    )
-                    #endif
-                }
-            }
-        } else {
-            try? keychain.delete()
+        // Validate with this login's captured cookie, not with the mutable
+        // active jar. The final cookie/Keychain commit follows below and is
+        // generation-checked as one critical section.
+        guard let capturedCookie else { throw APIClientError.unexpectedResponse }
+        let loggedInUser = try await me(using: capturedCookie)
+        guard commitLogin(cookie: capturedCookie, rememberMe: rememberMe, for: operation) else {
+            return loggedInUser
         }
         return loggedInUser
     }
@@ -228,6 +255,12 @@ final class APIClient {
     /// as an unavailable credential rather than an application-fatal error.
     @discardableResult
     func restorePersistedSession() -> Bool {
+        restorePersistedSession(for: beginAuthOperation())
+    }
+
+    @discardableResult
+    func restorePersistedSession(for operation: AuthOperationToken?) -> Bool {
+        let operation = operation ?? beginAuthOperation()
         let storedValue: String?
         do {
             storedValue = try keychain.read()
@@ -236,25 +269,128 @@ final class APIClient {
         }
         guard let value = storedValue, !value.isEmpty,
               let cookie = makeCookie(value: value) else { return false }
-        for storedCookie in cookieStorage.cookies ?? [] where storedCookie.name == "session_id" && cookieDomainMatches(storedCookie) {
-            cookieStorage.deleteCookie(storedCookie)
-        }
-        cookieStorage.setCookie(cookie)
+        authOperationLock.lock()
+        defer { authOperationLock.unlock() }
+        if operation.generation != authOperationGeneration { return false }
+        replaceSessionCookieLocked(with: cookie)
         return true
     }
 
     /// Removes only the openMail session cookie and its persisted copy.
     func clearSession() {
+        authOperationLock.lock()
+        authOperationGeneration += 1
+        removeSessionCredentialsLocked()
+        authOperationLock.unlock()
+    }
+
+    /// Clears credentials only when the caller still owns the auth operation.
+    func clearSession(ifCurrent token: AuthOperationToken) {
+        authOperationLock.lock()
+        guard token.generation == authOperationGeneration else {
+            authOperationLock.unlock()
+            return
+        }
+        // Invalidate first, but keep invalidation and the clear in the same
+        // critical section so no commit can slip between the two operations.
+        authOperationGeneration += 1
+        removeSessionCredentialsLocked()
+        authOperationLock.unlock()
+    }
+
+    private func removeSessionCredentialsLocked() {
         for cookie in cookieStorage.cookies ?? [] where cookie.name == "session_id" && cookieDomainMatches(cookie) {
             cookieStorage.deleteCookie(cookie)
         }
-        cookieCaptureDelegate.clearCapturedSessionCookie()
         try? keychain.delete()
+    }
+
+    /// Commits a successful login only while its operation generation still
+    /// owns the client. Cookie storage and Keychain are deliberately mutated
+    /// under the same lock as the generation check.
+    private func commitLogin(
+        cookie: HTTPCookie?,
+        rememberMe: Bool,
+        for operation: AuthOperationToken
+    ) -> Bool {
+        guard let cookie,
+              cookie.name == "session_id",
+              cookieDomainMatches(cookie),
+              !cookie.value.isEmpty else { return false }
+
+        authOperationLock.lock()
+        defer { authOperationLock.unlock() }
+        guard operation.generation == authOperationGeneration else { return false }
+
+        if rememberMe {
+            do {
+                try keychain.save(cookie.value)
+            } catch let error as KeychainStore.StoreError {
+                #if DEBUG
+                switch error {
+                case .keychain(let status):
+                    Logger(subsystem: "com.openmail", category: "keychain").debug(
+                        "Session save failed category=keychain status=\(status, privacy: .public)"
+                    )
+                case .invalidValue:
+                    Logger(subsystem: "com.openmail", category: "keychain").debug(
+                        "Session save failed category=keychain status=invalid-value"
+                    )
+                }
+                #endif
+            } catch {
+                #if DEBUG
+                Logger(subsystem: "com.openmail", category: "keychain").debug(
+                    "Session save failed category=keychain status=unknown"
+                )
+                #endif
+            }
+        } else {
+            try? keychain.delete()
+        }
+        replaceSessionCookieLocked(with: cookie)
+        return true
+    }
+
+    /// Cancels requests belonging to this profile without affecting any other
+    /// profile's private URLSession.
+    func cancelPendingRequests() {
+        session.getAllTasks { tasks in
+            tasks.forEach { $0.cancel() }
+        }
+    }
+
+    /// Invalidates authentication work whose result must no longer be persisted.
+    @discardableResult
+    func invalidateAuthOperations() -> AuthOperationToken {
+        authOperationLock.lock()
+        authOperationGeneration += 1
+        let token = AuthOperationToken(generation: authOperationGeneration)
+        authOperationLock.unlock()
+        return token
+    }
+
+    private func beginAuthOperation() -> AuthOperationToken {
+        authOperationLock.lock()
+        defer { authOperationLock.unlock() }
+        authOperationGeneration += 1
+        return AuthOperationToken(generation: authOperationGeneration)
     }
 
     /// GET /api/me – validates the session and returns the current user.
     func me() async throws -> User {
         let (data, response) = try await perform(URLRequest(url: url("api/me")))
+        try validate(response)
+        return try decode(User.self, from: data)
+    }
+
+    private func me(using cookie: HTTPCookie) async throws -> User {
+        var request = URLRequest(url: url("api/me"))
+        request.setValue(
+            HTTPCookie.requestHeaderFields(with: [cookie])["Cookie"],
+            forHTTPHeaderField: "Cookie"
+        )
+        let (data, response) = try await perform(request, cookieOverride: cookie)
         try validate(response)
         return try decode(User.self, from: data)
     }
@@ -313,6 +449,82 @@ final class APIClient {
         return try decode(Stats.self, from: data)
     }
 
+    // MARK: Contacts and domain rules
+
+    /// GET /api/contacts, optionally filtered by the server-side `q` search.
+    func contacts(q: String? = nil) async throws -> [Contact] {
+        var query: [URLQueryItem] = []
+        if let q, !q.isEmpty { query.append(URLQueryItem(name: "q", value: q)) }
+        let (data, response) = try await perform(URLRequest(url: url("api/contacts", query: query)))
+        try validate(response)
+        return try decodeCollection(Contact.self, from: data, keys: ["contacts", "items"])
+    }
+
+    /// Convenience alias for callers which explicitly expose a search action.
+    func searchContacts(_ query: String) async throws -> [Contact] {
+        try await contacts(q: query)
+    }
+
+    /// Named variant of `contacts(q:)` for callers that separate list/search.
+    func listContacts(query: String? = nil) async throws -> [Contact] {
+        try await contacts(q: query)
+    }
+
+    /// Labeled search variant for use from SwiftUI view models.
+    func searchContacts(query: String) async throws -> [Contact] {
+        try await contacts(q: query)
+    }
+
+    /// POST /api/contacts with `{name, email, notes}`.
+    func createContact(name: String, email: String, notes: String? = nil) async throws -> Contact {
+        var fields: [String: Any] = ["name": name, "email": email]
+        if let notes { fields["notes"] = notes }
+        return try await contactRequest(path: "api/contacts", method: "POST", fields: fields)
+    }
+
+    /// PATCH /api/contacts/<id>. Allowed fields are determined by the server.
+    func updateContact(id: Int, fields: [String: Any]) async throws -> Contact {
+        try await contactRequest(path: "api/contacts/\(id)", method: "PATCH", fields: fields)
+    }
+
+    /// DELETE /api/contacts/<id>.
+    func deleteContact(id: Int) async throws {
+        var request = URLRequest(url: url("api/contacts/\(id)"))
+        request.httpMethod = "DELETE"
+        let (_, response) = try await perform(request)
+        try validate(response)
+    }
+
+    /// GET /api/domain-rules. Rules are consistently addressed by this path.
+    func contactRules() async throws -> [ContactRule] {
+        let (data, response) = try await perform(URLRequest(url: url("api/domain-rules")))
+        try validate(response)
+        return try decodeCollection(ContactRule.self, from: data, keys: ["rules", "contact_rules", "items"])
+    }
+
+    func listContactRules() async throws -> [ContactRule] {
+        try await contactRules()
+    }
+
+    /// POST /api/domain-rules with `{domain, ...}`.
+    func createContactRule(domain: String, isStarred: Bool = true) async throws -> ContactRule {
+        try await contactRuleRequest(path: "api/domain-rules", method: "POST",
+                                     fields: ["domain": domain, "is_starred": isStarred])
+    }
+
+    /// PATCH /api/domain-rules/<id>.
+    func updateContactRule(id: Int, fields: [String: Any]) async throws -> ContactRule {
+        try await contactRuleRequest(path: "api/domain-rules/\(id)", method: "PATCH", fields: fields)
+    }
+
+    /// DELETE /api/domain-rules/<id>.
+    func deleteContactRule(id: Int) async throws {
+        var request = URLRequest(url: url("api/domain-rules/\(id)"))
+        request.httpMethod = "DELETE"
+        let (_, response) = try await perform(request)
+        try validate(response)
+    }
+
     // MARK: Folders
 
     /// GET /api/folders. The response may be `{system: [...], custom: [...]}`;
@@ -368,12 +580,23 @@ final class APIClient {
         return url
     }
 
+    /// Downloads an attachment through this client's private, authenticated session.
+    func downloadAttachment(emailId: Int, filename: String) async throws -> Data {
+        let (data, response) = try await perform(URLRequest(url: attachmentURL(emailId: emailId, filename: filename)))
+        try validate(response)
+        return data
+    }
+
     /// POST /api/logout, then wipe any stored credentials and cookies.
     func logout() async {
+        // Invalidate before awaiting the network request. The same token is
+        // used after the await, so a newer login can never be cleared by this
+        // logout's late completion.
+        let operation = beginAuthOperation()
         var request = URLRequest(url: url("logout"))
         request.httpMethod = "POST"
-        _ = try? await session.data(for: request)
-        clearSession()
+        _ = try? await perform(request)
+        clearSession(ifCurrent: operation)
     }
 
     // MARK: Helpers
@@ -381,6 +604,46 @@ final class APIClient {
     /// Strict container for the `/api/folders` response envelope.
     private struct FoldersResponse: Decodable {
         let custom: [FolderItem]?
+    }
+
+    private func contactRequest(path: String, method: String, fields: [String: Any]) async throws -> Contact {
+        var request = URLRequest(url: url(path))
+        request.httpMethod = method
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONSerialization.data(withJSONObject: fields)
+        let (data, response) = try await perform(request)
+        try validate(response)
+        return try decodeEnvelope(Contact.self, from: data, keys: ["contact"])
+    }
+
+    private func contactRuleRequest(path: String, method: String, fields: [String: Any]) async throws -> ContactRule {
+        var request = URLRequest(url: url(path))
+        request.httpMethod = method
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONSerialization.data(withJSONObject: fields)
+        let (data, response) = try await perform(request)
+        try validate(response)
+        return try decodeEnvelope(ContactRule.self, from: data, keys: ["rule", "contact_rule"])
+    }
+
+    private func decodeEnvelope<T: Decodable>(_ type: T.Type, from data: Data, keys: [String]) throws -> T {
+        if let value = try? decode(type, from: data) { return value }
+        let object = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        for key in keys where object?[key] != nil {
+            let nested = try JSONSerialization.data(withJSONObject: object![key]!)
+            return try decode(type, from: nested)
+        }
+        throw APIClientError.decode
+    }
+
+    private func decodeCollection<T: Decodable>(_ type: T.Type, from data: Data, keys: [String]) throws -> [T] {
+        if let values = try? decode([T].self, from: data) { return values }
+        let object = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        for key in keys where object?[key] != nil {
+            let nested = try JSONSerialization.data(withJSONObject: object![key]!)
+            return try decode([T].self, from: nested)
+        }
+        throw APIClientError.decode
     }
 
     /// Builds a URL from a slash-separated path relative to `base`,
@@ -397,15 +660,25 @@ final class APIClient {
     }
 
     private func sessionCookie() -> HTTPCookie? {
-        if let cookie = cookieStorage.cookies?.first(where: { cookie in
+        authOperationLock.lock()
+        defer { authOperationLock.unlock() }
+        return sessionCookieLocked()
+    }
+
+    private func sessionCookieLocked() -> HTTPCookie? {
+        cookieStorage.cookies?.first(where: { cookie in
             cookie.name == "session_id" && cookieDomainMatches(cookie)
-        }) {
-            return cookie
+        })
+    }
+
+    private func replaceSessionCookieLocked(with cookie: HTTPCookie) {
+        // Remove older domain/path variants so requests cannot select a stale
+        // session after a successful login or restore.
+        for storedCookie in cookieStorage.cookies ?? []
+            where storedCookie.name == "session_id" && cookieDomainMatches(storedCookie) {
+            cookieStorage.deleteCookie(storedCookie)
         }
-        guard let capturedCookie = cookieCaptureDelegate.capturedSessionCookie,
-              capturedCookie.name == "session_id",
-              cookieDomainMatches(capturedCookie) else { return nil }
-        return capturedCookie
+        cookieStorage.setCookie(cookie)
     }
 
     private func cookieDomainMatches(_ cookie: HTTPCookie) -> Bool {
@@ -468,6 +741,22 @@ final class APIClient {
     /// One boundary for transport diagnostics. We deliberately never log
     /// request headers, cookies, query values or response bodies.
     private func perform(_ request: URLRequest) async throws -> (Data, URLResponse) {
+        let result = try await performWithCookie(request)
+        return (result.0, result.1)
+    }
+
+    private func perform(
+        _ request: URLRequest,
+        cookieOverride: HTTPCookie
+    ) async throws -> (Data, URLResponse) {
+        let result = try await performWithCookie(request, cookieOverride: cookieOverride)
+        return (result.0, result.1)
+    }
+
+    private func performWithCookie(
+        _ request: URLRequest,
+        cookieOverride: HTTPCookie? = nil
+    ) async throws -> (Data, URLResponse, HTTPCookie?) {
         var request = request
         let isBaseHostRequest = request.url?.host?.lowercased() == base.host?.lowercased()
         let isLoginRequest = request.url?.path == "/login"
@@ -477,25 +766,31 @@ final class APIClient {
             // redirects.
             request.httpShouldHandleCookies = false
         } else if isBaseHostRequest,
-                  let cookie = sessionCookie(),
+                  let cookie = cookieOverride ?? sessionCookie(),
                   let cookieHeader = HTTPCookie.requestHeaderFields(with: [cookie])["Cookie"] {
             request.setValue(cookieHeader, forHTTPHeaderField: "Cookie")
         }
 
         do {
-            let result = try await session.data(for: request)
+            let task = session.dataTask(with: request)
+            let result = try await withTaskCancellationHandler(operation: {
+                try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<CaptureResult, Error>) in
+                    cookieCaptureDelegate.register(task) { result in
+                        continuation.resume(with: result)
+                    }
+                    task.resume()
+                }
+            }, onCancel: {
+                task.cancel()
+            })
             #if DEBUG
-            if let http = result.1 as? HTTPURLResponse {
+            if let http = result.response as? HTTPURLResponse {
                 Logger(subsystem: "com.openmail", category: "api").debug(
                     "HTTP \(http.statusCode, privacy: .public) \(request.httpMethod ?? "GET", privacy: .public) \(request.url?.path ?? "", privacy: .public) content-type=\(http.value(forHTTPHeaderField: "Content-Type") ?? "none", privacy: .public)"
                 )
             }
             #endif
-            if let http = result.1 as? HTTPURLResponse, http.statusCode == 401 {
-                clearSession()
-                throw APIClientError.unauthorized
-            }
-            return result
+            return (result.data, result.response, result.capturedSessionCookie)
         } catch let error as URLError {
             #if DEBUG
             Logger(subsystem: "com.openmail", category: "api").debug("Network error \(error.code.rawValue, privacy: .public)")

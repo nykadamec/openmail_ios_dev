@@ -1,14 +1,33 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -Eeuo pipefail
 cd "$(dirname "$0")"
 
-if [ -f .flask.pid ]; then
-  kill $(cat .flask.pid) 2>/dev/null || true
-  rm -f .flask.pid
-fi
+usage() { echo "Usage: ./stop.sh [--help]"; }
+case "${1:-}" in
+  "") ;;
+  -h|--help) usage; exit 0 ;;
+  *) echo "Chyba: neznámý argument: $1" >&2; usage >&2; exit 2 ;;
+esac
 
-if [ -f .cloudflared.pid ]; then
-  kill $(cat .cloudflared.pid) 2>/dev/null || true
-  rm -f .cloudflared.pid
-fi
+stop_owned() {
+  local file="$1" kind="$2" pid cmd
+  [[ -f "$file" ]] || return 0
+  pid="$(<"$file")"
+  if [[ "$pid" =~ ^[0-9]+$ ]] && kill -0 "$pid" 2>/dev/null; then
+    cmd="$(ps -p "$pid" -o command= 2>/dev/null || true)"
+    # PID files can outlive a process. Never kill a reused PID belonging to
+    # an unrelated command.
+    if { [[ "$kind" == flask && "$cmd" == *app.py* ]]; } ||
+       { [[ "$kind" == cloudflared && "$cmd" == *cloudflared* && "$cmd" == *tunnel* ]]; }; then
+      kill -TERM "$pid" 2>/dev/null || true
+      echo "Zastaven $kind (PID $pid)."
+    else
+      echo "PID $pid není vlastněný openMail; nekončím cizí proces." >&2
+    fi
+  fi
+  rm -f "$file"
+}
 
+stop_owned .flask.pid flask
+stop_owned .cloudflared.pid cloudflared
 echo "openMail stopped"

@@ -54,7 +54,7 @@ enum FolderFilter: Hashable {
 struct InboxView: View {
     @Environment(AuthStore.self) private var authStore
 
-    private let client = APIClient.shared
+    private var client: APIClient { authStore.activeClient }
     private let pageSize = 50
 
     @State private var emails: [EmailSummary] = []
@@ -370,14 +370,16 @@ struct InboxView: View {
     // MARK: - Data
 
     private func loadMeta() async {
+        let token = authStore.sessionToken()
         do {
-            async let stats = try client.stats()
-            async let folders = try client.folders()
+            async let stats = try token.client.stats()
+            async let folders = try token.client.folders()
             let (s, f) = try await (stats, folders)
+            guard authStore.isCurrent(token) else { return }
             self.stats = s
             customFolders = f
         } catch APIClientError.unauthorized {
-            await handleUnauthorized()
+            if authStore.isCurrent(token) { await handleUnauthorized(token) }
         } catch {
             // Non-fatal – header and custom filters can stay empty.
         }
@@ -389,6 +391,7 @@ struct InboxView: View {
     }
 
     private func fetch(reset: Bool, isRefresh: Bool) async {
+        let token = authStore.sessionToken()
         requestGeneration += 1
         let generation = requestGeneration
         if reset && !isRefresh {
@@ -415,7 +418,7 @@ struct InboxView: View {
         let folder = currentFolder
         let query = searchText.trimmingCharacters(in: .whitespaces)
         do {
-            let page = try await client.emails(
+            let page = try await token.client.emails(
                 folder: folder.folderParam,
                 q: query.isEmpty ? nil : query,
                 starred: folder.isStarred,
@@ -425,7 +428,7 @@ struct InboxView: View {
                 limit: pageSize,
                 offset: offset
             )
-            guard generation == requestGeneration else { return }
+            guard generation == requestGeneration, authStore.isCurrent(token) else { return }
             if reset {
                 // During pull-to-refresh the old list stays visible. Commit
                 // the decoded response as one state update after success.
@@ -446,15 +449,15 @@ struct InboxView: View {
                 emails.append(contentsOf: page.emails)
             }
         } catch APIClientError.unauthorized {
-            guard generation == requestGeneration else { return }
+            guard generation == requestGeneration, authStore.isCurrent(token) else { return }
             if isRefresh { refreshFailureMessageKey = "errors.unauthorized" }
-            await handleUnauthorized()
+            if authStore.isCurrent(token) { await handleUnauthorized(token) }
         } catch APIClientError.network(.cancelled) {
             // Cancellation is expected when the user changes folder/search.
         } catch is CancellationError {
             // Do not turn structured-concurrency cancellation into an error UI.
         } catch {
-            guard generation == requestGeneration else { return }
+            guard generation == requestGeneration, authStore.isCurrent(token) else { return }
             if reset {
                 if !isRefresh { initialLoadFailed = true }
                 refreshFailureMessageKey = localizedRefreshFailure(for: error)
@@ -485,22 +488,25 @@ struct InboxView: View {
     }
 
     private func toggleStar(_ email: EmailSummary) async {
+        let token = authStore.sessionToken()
         let newValue = !starredIDs.contains(email.id)
         do {
-            _ = try await client.patchEmail(id: email.id, fields: ["is_starred": newValue ? 1 : 0])
+            _ = try await token.client.patchEmail(id: email.id, fields: ["is_starred": newValue ? 1 : 0])
+            guard authStore.isCurrent(token) else { return }
             if newValue {
                 starredIDs.insert(email.id)
             } else {
                 starredIDs.remove(email.id)
             }
         } catch APIClientError.unauthorized {
-            await handleUnauthorized()
+            if authStore.isCurrent(token) { await handleUnauthorized(token) }
         } catch {
             // Keep the previous visual state on failure.
         }
     }
 
-    private func handleUnauthorized() async {
+    private func handleUnauthorized(_ token: AuthStore.SessionToken) async {
+        guard authStore.isCurrent(token) else { return }
         await authStore.logout()
     }
 }

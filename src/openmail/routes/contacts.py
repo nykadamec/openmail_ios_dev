@@ -33,7 +33,10 @@ def create_contact_route():
 @bp.route("/contacts/<int:contact_id>", methods=["PATCH"])
 @login_required
 def update_contact_route(contact_id: int):
-    contact = contact_service.update_contact(contact_id, request.json or {})
+    data = request.json or {}
+    if 'email' in data:
+        data['email'] = (data.get('email') or '').strip().lower()
+    contact = contact_service.update_contact(contact_id, data)
     if not contact:
         return jsonify({"error": "No valid fields or not found"}), 400
     return jsonify(contact)
@@ -81,3 +84,33 @@ def contact_exists_route():
     if not email:
         return jsonify({"error": "Email required"}), 400
     return jsonify({"exists": contact_service.contact_exists(email)})
+
+
+@bp.route("/domain-rules", methods=["GET"])
+@login_required
+def list_domain_rules_route():
+    return jsonify(contact_service.list_domain_rules())
+
+
+@bp.route("/domain-rules", methods=["POST"])
+@login_required
+def create_domain_rule_route():
+    data = request.json or {}
+    domain = (data.get('domain') or '').strip().lower()
+    result, status = contact_service.create_domain_rule(domain, data.get('action', 'star'), data.get('enabled', True))
+    return jsonify(result), status
+
+
+@bp.route("/domain-rules/<int:rule_id>", methods=["PATCH"])
+@login_required
+def update_domain_rule_route(rule_id: int):
+    result = contact_service.update_domain_rule(rule_id, request.json or {})
+    if result is None:
+        return jsonify({"error": "No valid fields or not found"}), 400
+    return jsonify(result)
+
+
+@bp.route("/domain-rules/<int:rule_id>", methods=["DELETE"])
+@login_required
+def delete_domain_rule_route(rule_id: int):
+    return jsonify({"deleted": contact_service.delete_domain_rule(rule_id)})

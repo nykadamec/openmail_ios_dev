@@ -198,38 +198,46 @@ struct EmailDetailView: View {
     // MARK: - Actions
 
     private func load() async {
+        let token = authStore.sessionToken()
         isLoading = true
         htmlDidFailToLoad = false
         defer { isLoading = false }
         do {
-            detail = try await APIClient.shared.email(id: emailID)
+            let loaded = try await token.client.email(id: emailID)
+            guard authStore.isCurrent(token) else { return }
+            detail = loaded
         } catch APIClientError.unauthorized {
-            await authStore.logout()
+            if authStore.isCurrent(token) { await authStore.logout() }
         } catch {
             // Leave `detail` nil → fallback state shown above.
         }
     }
 
     private func toggleStar(_ email: EmailDetail) async {
+        let token = authStore.sessionToken()
         let newValue = !email.isStarred
         do {
-            let updated = try await APIClient.shared.patchEmail(id: email.id, fields: ["is_starred": newValue ? 1 : 0])
+            let updated = try await token.client.patchEmail(id: email.id, fields: ["is_starred": newValue ? 1 : 0])
+            guard authStore.isCurrent(token) else { return }
             detail = updated
         } catch APIClientError.unauthorized {
-            await authStore.logout()
+            if authStore.isCurrent(token) { await authStore.logout() }
         } catch {
             // Keep previous visual state on failure.
         }
     }
 
     private func download(_ attachment: Attachment) async -> URL? {
+        let token = authStore.sessionToken()
         if let url = downloaded[attachment.filename] { return url }
         downloading.insert(attachment.filename)
         defer { downloading.remove(attachment.filename) }
 
-        let remote = APIClient.shared.attachmentURL(emailId: emailID, filename: attachment.filename)
         do {
-            let (tempURL, _) = try await URLSession.shared.download(from: remote)
+            let data = try await token.client.downloadAttachment(emailId: emailID, filename: attachment.filename)
+            guard authStore.isCurrent(token) else { return nil }
+            let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+            try data.write(to: tempURL, options: .atomic)
             let destination = FileManager.default.temporaryDirectory
                 .appendingPathComponent(UUID().uuidString)
                 .appendingPathExtension((attachment.filename as NSString).pathExtension.isEmpty ? "bin" : (attachment.filename as NSString).pathExtension)
@@ -238,7 +246,7 @@ struct EmailDetailView: View {
             downloaded[attachment.filename] = destination
             return destination
         } catch APIClientError.unauthorized {
-            await authStore.logout()
+            if authStore.isCurrent(token) { await authStore.logout() }
             return nil
         } catch {
             return nil

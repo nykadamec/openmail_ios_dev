@@ -18,3 +18,5 @@ ios/DerivedData/
 *.xcuserstate
 xcuserdata/
 .DS_Store
+# Deepwork orchestration state
+.slim/deepwork/

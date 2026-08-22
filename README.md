@@ -45,6 +45,18 @@ PYTHONPATH=src:. python scripts/add_user.py info adamec info@adamec.pro --from-n
 ./start.sh
 ```
 
+Výchozí režim spouští Flask a Cloudflare tunnel. Pro přístup přes Tailscale
+lze tunnel vynechat a zvolit bind adresu (volitelně i port):
+
+```bash
+./start.sh tailscale 0.0.0.0 5005
+./start.sh cloudflare 127.0.0.1 5005
+./start.sh --help
+./start.sh tailscale 0.0.0.0 5005 --dry-run
+```
+
+Host a port lze také nastavit přes `FLASK_HOST` a `FLASK_PORT`.
+
 - Lokálně: http://127.0.0.1:5005
 - Veřejně: https://email.adamec.pro
 

@@ -1,5 +1,55 @@
 import Foundation
 
+// MARK: - Contacts
+
+/// Address-book entries returned by `/api/contacts`.
+///
+/// The API has historically returned partially populated records, therefore
+/// decoding is deliberately forgiving (and accepts numeric ids encoded as
+/// either JSON numbers or strings).
+struct Contact: Decodable, Identifiable, Hashable {
+    let id: Int
+    let name: String
+    let email: String
+    let notes: String?
+
+    private enum CodingKeys: String, CodingKey { case id, name, email, notes }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = (try? c.decode(Int.self, forKey: .id))
+            ?? (try? Int(c.decode(String.self, forKey: .id))) ?? 0
+        name = try c.decodeIfPresent(String.self, forKey: .name) ?? ""
+        email = try c.decodeIfPresent(String.self, forKey: .email) ?? ""
+        notes = try c.decodeIfPresent(String.self, forKey: .notes)
+    }
+}
+
+/// A domain rule which controls automatic starring.  Unknown fields are
+/// ignored so the model remains compatible with newer server responses.
+struct ContactRule: Decodable, Identifiable, Hashable {
+    let id: Int
+    let domain: String
+    let is_starred: Bool
+    let enabled: Bool
+
+    var isStarred: Bool { is_starred }
+
+    private enum CodingKeys: String, CodingKey { case id, domain, is_starred, starred, enabled }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = (try? c.decode(Int.self, forKey: .id))
+            ?? (try? Int(c.decode(String.self, forKey: .id))) ?? 0
+        domain = try c.decodeIfPresent(String.self, forKey: .domain) ?? ""
+        is_starred = (try? c.decode(Bool.self, forKey: .is_starred))
+            ?? (try? c.decode(Bool.self, forKey: .starred))
+            ?? ((try? c.decode(Int.self, forKey: .is_starred)) == 1)
+        enabled = (try? c.decode(Bool.self, forKey: .enabled))
+            ?? ((try? c.decode(Int.self, forKey: .enabled)) != 0)
+    }
+}
+
 // MARK: - User
 
 struct User: Decodable, Identifiable {

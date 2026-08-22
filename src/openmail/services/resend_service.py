@@ -91,8 +91,11 @@ def _process_inbound_email(payload: dict, user_id: int) -> dict | None:
     folder = "spam" if spam else "inbox"
     preview = (body_text or "")[:300]
 
-    from openmail.services.contact_service import is_starred_address
-    auto_starred = 1 if (not spam and parsed["sender_email"] and is_starred_address(user_id, parsed["sender_email"])) else 0
+    from openmail.services.contact_service import is_starred_address, is_domain_rule_enabled
+    auto_starred = 1 if (not spam and parsed["sender_email"] and (
+        is_starred_address(user_id, parsed["sender_email"])
+        or is_domain_rule_enabled(user_id, parsed["sender_email"])
+    )) else 0
 
     conn.execute(
         """INSERT INTO emails
@@ -285,6 +288,5 @@ def sync_emails() -> dict:
             continue
     conn.commit()
     return {"imported": imported}
-
 
 

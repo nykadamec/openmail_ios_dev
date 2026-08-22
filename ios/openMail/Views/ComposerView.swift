@@ -206,6 +206,7 @@ struct ComposerView: View {
 
     private func send() async {
         guard canSend else { return }
+        let token = authStore.sessionToken()
         isLoading = true
         defer { isLoading = false }
 
@@ -214,19 +215,21 @@ struct ComposerView: View {
         }
 
         do {
-            _ = try await APIClient.shared.send(
+            _ = try await token.client.send(
                 to: to.trimmingCharacters(in: .whitespaces),
                 subject: subject,
                 body: bodyText,
                 attachments: payload
             )
+            guard authStore.isCurrent(token) else { return }
             alertTitle = String(localized: "composer.sentTitle")
             alertMessage = String(localized: "composer.sentMessage")
             showAlert = true
             clear()
         } catch APIClientError.unauthorized {
-            await authStore.logout()
+            if authStore.isCurrent(token) { await authStore.logout() }
         } catch {
+            guard authStore.isCurrent(token) else { return }
             alertTitle = String(localized: "errors.generic")
             alertMessage = String(localized: "composer.sendFailed")
             showAlert = true
