@@ -1,11 +1,13 @@
 """Public routes: index, setup, login, logout, sw.js, manifest."""
 from __future__ import annotations
 
+import ipaddress
+import os
 from pathlib import Path
 
 from flask import Blueprint, render_template, request, make_response, redirect, url_for, send_from_directory, jsonify
 
-from openmail.config import FROM_EMAIL, REMEMBER_ME_DAYS, REMEMBER_USERNAME_DAYS, FLASK_DEBUG
+from openmail.config import FROM_EMAIL, REMEMBER_ME_DAYS, REMEMBER_USERNAME_DAYS
 from openmail.db import get_db
 from openmail.auth.users import has_users, create_user, verify_user, get_user_by_id
 from openmail.auth.session import create_session, delete_session
@@ -18,12 +20,55 @@ bp = Blueprint('public', __name__)
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent.parent
 
+# cloudflared runs next to Flask and connects to the origin over loopback.  Do
+# not trust X-Forwarded-Proto from arbitrary clients (the Tailscale endpoint
+# reaches Flask directly).  Additional proxy addresses can be explicitly
+# configured as a comma-separated list of IPs/CIDRs.
+_TRUSTED_PROXY_NETWORKS = []
+for _proxy_address in os.environ.get(
+    'OPENMAIL_TRUSTED_PROXY_IPS', '127.0.0.1,::1'
+).split(','):
+    try:
+        _TRUSTED_PROXY_NETWORKS.append(
+            ipaddress.ip_network(_proxy_address.strip(), strict=False)
+        )
+    except ValueError:
+        # An invalid optional entry must never make an HTTP request secure.
+        continue
+
+
+def _request_is_https() -> bool:
+    """Return whether the client-facing request uses HTTPS.
+
+    ``request.is_secure`` covers direct HTTPS.  For the local Cloudflare
+    Tunnel (and explicitly configured reverse proxies), inspect
+    X-Forwarded-Proto only when the immediate peer is trusted.  In particular,
+    a Tailscale client cannot spoof the header and cause the HTTP endpoint to
+    emit a Secure cookie.
+    """
+    if request.is_secure:
+        return True
+
+    remote_addr = request.remote_addr
+    if not remote_addr:
+        return False
+    try:
+        remote_ip = ipaddress.ip_address(remote_addr)
+    except ValueError:
+        return False
+    if not any(remote_ip in network for network in _TRUSTED_PROXY_NETWORKS):
+        return False
+
+    # For a proxy chain, the first value is the protocol seen by the client.
+    forwarded_proto = request.headers.get('X-Forwarded-Proto', '')
+    return forwarded_proto.split(',', 1)[0].strip().lower() == 'https'
+
 
 def _set_session_cookie(resp, sid: str, remember: bool = False) -> None:
     max_age = REMEMBER_ME_DAYS * 24 * 3600 if remember else 15 * 60
     resp.set_cookie(
         'session_id', sid,
-        httponly=True, samesite='Lax', secure=not FLASK_DEBUG,
+        httponly=True, samesite='Lax', secure=_request_is_https(),
         max_age=max_age,
     )
 
@@ -32,7 +77,7 @@ def _set_remember_username_cookie(resp, username: str | None) -> None:
     if username:
         resp.set_cookie(
             'remember_username', username,
-            httponly=True, samesite='Lax', secure=not FLASK_DEBUG,
+            httponly=True, samesite='Lax', secure=_request_is_https(),
             max_age=REMEMBER_USERNAME_DAYS * 24 * 3600,
         )
     else:

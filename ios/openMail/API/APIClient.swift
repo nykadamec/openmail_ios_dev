@@ -177,6 +177,10 @@ final class APIClient {
     private let cookieCaptureDelegate: CookieCaptureDelegate
     private let authOperationLock = NSLock()
     private var authOperationGeneration = 0
+    /// The cookie used for explicit request transport.  URLSession's cookie
+    /// storage is retained as a jar for compatibility, but it is not a
+    /// reliable source when automatic cookie handling is disabled.
+    private var activeSessionCookie: HTTPCookie?
 
     /// A capability for the auth coordinator to clear only the session which
     /// belongs to the currently active auth operation.
@@ -228,8 +232,8 @@ final class APIClient {
             throw APIClientError.server("Invalid response")
         }
         // 401 = invalid credentials (rendered login page). After a successful
-        // login the server redirects and the shared cookie jar keeps the
-        // session_id, so the final response is the app shell (200).
+        // login the server redirects and the capture delegate retains the
+        // newly issued session_id for the explicit commit below.
         if http.statusCode == 401 { throw APIClientError.unauthorized }
         guard (200..<400).contains(http.statusCode) else {
             throw APIClientError.http(http.statusCode)
@@ -296,6 +300,7 @@ final class APIClient {
     }
 
     private func removeSessionCredentialsLocked() {
+        activeSessionCookie = nil
         for cookie in cookieStorage.cookies ?? [] where cookie.name == "session_id" && cookieDomainMatches(cookie) {
             cookieStorage.deleteCookie(cookie)
         }
@@ -663,12 +668,16 @@ final class APIClient {
     }
 
     private func sessionCookieLocked() -> HTTPCookie? {
-        cookieStorage.cookies?.first(where: { cookie in
+        if let activeSessionCookie {
+            return activeSessionCookie
+        }
+        return cookieStorage.cookies?.first(where: { cookie in
             cookie.name == "session_id" && cookieDomainMatches(cookie)
         })
     }
 
     private func replaceSessionCookieLocked(with cookie: HTTPCookie) {
+        activeSessionCookie = cookie
         // Remove older domain/path variants so requests cannot select a stale
         // session after a successful login or restore.
         for storedCookie in cookieStorage.cookies ?? []
