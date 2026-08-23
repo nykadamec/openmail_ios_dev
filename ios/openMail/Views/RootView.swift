@@ -6,6 +6,7 @@ struct RootView: View {
     @Environment(AuthStore.self) private var authStore
     @State private var restoreState: RestoreState = .restoring
     @State private var hasAttemptedInitialRestore = false
+    @State private var needsServerSetup = false
 
     private enum RestoreState {
         case restoring
@@ -16,7 +17,9 @@ struct RootView: View {
 
     var body: some View {
         Group {
-            if authStore.isRestoringSession || restoreState == .restoring {
+            if needsServerSetup || !authStore.hasConfiguredProfile {
+                serverSetupView
+            } else if authStore.isRestoringSession || restoreState == .restoring {
                 restoringView
             } else if restoreState == .failed {
                 retryView
@@ -67,8 +70,26 @@ struct RootView: View {
         .background(Color(.systemBackground))
     }
 
+    private var serverSetupView: some View {
+        NavigationStack {
+            ServerProfilesView { hasProfiles in
+                guard hasProfiles else {
+                    needsServerSetup = true
+                    return
+                }
+
+                needsServerSetup = false
+                restoreState = .restoring
+                Task { await restoreSession() }
+            }
+        }
+        .accessibilityElement(children: .contain)
+    }
+
     private func restoreSession() async {
-        guard restoreState == .restoring || restoreState == .failed else { return }
+        guard !needsServerSetup,
+              authStore.hasConfiguredProfile,
+              restoreState == .restoring || restoreState == .failed else { return }
         restoreState = .restoring
         await authStore.restoreSession()
 

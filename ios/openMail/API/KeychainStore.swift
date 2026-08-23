@@ -9,13 +9,57 @@ final class KeychainStore {
     }
 
     static let authService = "nykadamec.openmail.auth"
+    private static let legacyAccount = "session_id"
 
     private let service: String
     private let account: String
 
-    init(service: String = KeychainStore.authService, account: String = "session_id") {
+    init(service: String = KeychainStore.authService, account: String = ServerProfile.defaultPublicProfile.id.uuidString) {
         self.service = service
         self.account = account
+        // The old implementation used the literal cookie name as its
+        // account.  Migrate only while opening the built-in public profile;
+        // custom profiles must never inherit another profile's credential.
+        if service == Self.authService, account == ServerProfile.defaultPublicProfile.id.uuidString {
+            Self.migrateLegacyAccount(service: service, destinationAccount: account)
+        }
+    }
+
+    private static func migrateLegacyAccount(service: String, destinationAccount: String) {
+        let destinationQuery: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: destinationAccount,
+        ]
+        // Do not replace an existing profile credential with legacy data.
+        var existing: CFTypeRef?
+        let destinationStatus = SecItemCopyMatching(
+            destinationQuery.merging([kSecReturnData as String: true]) { _, new in new } as CFDictionary,
+            &existing
+        )
+        guard destinationStatus == errSecItemNotFound else { return }
+
+        let legacyQuery: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: legacyAccount,
+            kSecReturnData as String: true,
+            kSecMatchLimit as String: kSecMatchLimitOne,
+        ]
+        var result: CFTypeRef?
+        guard SecItemCopyMatching(legacyQuery as CFDictionary, &result) == errSecSuccess,
+              let data = result as? Data, !data.isEmpty else { return }
+
+        var destination = destinationQuery
+        destination[kSecValueData as String] = data
+        destination[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
+        // Delete the legacy item only after the new item was successfully saved.
+        guard SecItemAdd(destination as CFDictionary, nil) == errSecSuccess else { return }
+        _ = SecItemDelete([
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: legacyAccount,
+        ] as CFDictionary)
     }
 
     func save(_ value: String) throws {

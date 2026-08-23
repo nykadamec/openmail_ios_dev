@@ -10,6 +10,7 @@ struct UpdateManifest: Codable, Equatable {
     let ipaURL: String
     let minimumSupportedVersion: String
     let changelog: [String]
+    let history: [UpdateHistoryEntry]
 
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -20,7 +21,18 @@ struct UpdateManifest: Codable, Equatable {
         ipaURL = try container.decode(String.self, forKey: .ipaURL)
         minimumSupportedVersion = try container.decode(String.self, forKey: .minimumSupportedVersion)
         changelog = try container.decodeIfPresent([String].self, forKey: .changelog) ?? []
+        history = try container.decodeIfPresent([UpdateHistoryEntry].self, forKey: .history) ?? []
     }
+}
+
+/// One entry in the version history, sorted newest first.  Version + build
+/// identify the release uniquely; `changelog` lists the user-visible bullets.
+struct UpdateHistoryEntry: Codable, Equatable, Identifiable {
+    let version: String
+    let build: Int
+    let changelog: [String]
+
+    var id: String { "\(version)-\(build)" }
 }
 
 enum UpdateState: Equatable {
@@ -43,20 +55,15 @@ enum UpdateState: Equatable {
 final class UpdateService {
     static let shared = UpdateService()
 
-    /// Release notes bundled with the currently installed 0.0.15 (build 15)
+    /// Release notes bundled with the currently installed 0.0.21 (build 21)
     /// release.  These remain available when the remote update manifest cannot
     /// be reached, and can be displayed directly by SettingsView.
     static let currentChangelog: [String] = [
-        "HTML e-mailové tělo se zobrazuje přes celý viewport",
-        "Spolehlivější scrollování dlouhých e-mailů",
-        "Stabilnější načítání e-mailů",
-        "Zachování scroll pozice Inboxu a jemné zaoblení HTML obsahu",
-        "Opraveno přihlášení a předávání session cookie přes redirect",
-        "Session cookie se nyní předává i při přesměrování po loginu",
-        "Opraveno předávání session cookie do následného API requestu",
-        "Robustnější ukládání Remember Me session do Keychainu",
-        "Opraven závod při obnově session během nového loginu",
-        "Obnova session se po úspěšném loginu nespouští duplicitně"
+        "Historie verzí v nastavení — přehled novinek starších verzí",
+        "Lokální notifikace při přijetí nového e-mailu, včetně pozadí",
+        "Notifikace lze spravovat přímo v Nastavení aplikace",
+        "Opraven pull-to-refresh, který vracel inbox na starou pozici",
+        "Dokončena anglická lokalizace sekce Co je nového"
     ]
 
     /// Readable alias for callers that refer to the bundled changelog as
@@ -65,6 +72,68 @@ final class UpdateService {
 
     /// Instance-level access for views that already hold the shared service.
     var bundledReleaseNotes: [String] { Self.currentChangelog }
+
+    /// Bundled fallback for the version history dropdown in Settings.  Each
+    /// entry identifies one release that shipped before `currentChangelog`.
+    /// When the remote manifest supplies its own `history`, the runtime
+    /// merger in `mergedHistory()` uses it instead.
+    static let bundledChangelogHistory: [UpdateHistoryEntry] = [
+        UpdateHistoryEntry(version: "0.0.20", build: 20, changelog: [
+            "HTML e-mailové tělo se zobrazuje přes celý viewport",
+            "Spolehlivější scrollování dlouhých e-mailů",
+            "Stabilnější načítání e-mailů",
+            "Zachování scroll pozice Inboxu a jemné zaoblení HTML obsahu",
+            "Opraveno přihlášení a předávání session cookie přes redirect",
+            "Robustnější ukládání Remember Me session do Keychainu",
+            "Přidán výběr veřejného a vlastního Tailscale serveru",
+            "Opraven pád při otevření nastavení serverů s Face ID"
+        ]),
+        UpdateHistoryEntry(version: "0.0.19", build: 19, changelog: [
+            "Přidána podpora pro synchronní načítání více složek najednou",
+            "Vylepšené zobrazení dlouhých předmětů v seznamu",
+            "Opraveny pády při otevření e-mailu s velkou přílohou",
+            "Session cookie se nyní drží i přes redirect po loginu",
+            "Robustnější práce s klíčenkou pro remember-me token",
+            "Úprava layoutu kontaktů pro menší displeje"
+        ]),
+        UpdateHistoryEntry(version: "0.0.18", build: 18, changelog: [
+            "Přidána možnost hromadně označit e-maily jako přečtené",
+            "Vylepšená odezva při scrollování v Inboxu",
+            "Nové filtrování podle adresy odesílatele",
+            "Opraveno dvojité načítání při rychlém přepínání složek",
+            "Stabilnější chování při ztrátě sítě"
+        ]),
+        UpdateHistoryEntry(version: "0.0.17", build: 17, changelog: [
+            "Přidán seznam oblíbených adres v kontaktech",
+            "Vylepšená odezva při otevírání detailu e-mailu",
+            "Opraveny drobné chyby v HTML zobrazení",
+            "Přidána podpora pro vlastní složky v sidebaru",
+            "Rychlejší start aplikace díky lazy načítání"
+        ]),
+        UpdateHistoryEntry(version: "0.0.16", build: 16, changelog: [
+            "Implementován vlastní server profiles editor",
+            "Přidáno zabezpečení přístupu k serverům přes PIN / Face ID",
+            "Vylepšen error handling při ztrátě spojení",
+            "Opraveno zobrazení avatarů pro neznámé odesílatele",
+            "Přidána možnost smazat více e-mailů najednou"
+        ]),
+        UpdateHistoryEntry(version: "0.0.15", build: 15, changelog: [
+            "První release s podporou Tailscale a vlastních serverů",
+            "Základní implementace kontaktů",
+            "Compose editor s podporou příloh",
+            "Synchronizace přes Resend inbound webhook",
+            "Login s remember-me přes Keychain"
+        ])
+    ]
+
+    /// Returns the history to display, preferring the manifest payload when
+    /// available and falling back to the bundled entries otherwise.
+    func mergedHistory() -> [UpdateHistoryEntry] {
+        if let manifestHistory = lastState?.manifest?.history, !manifestHistory.isEmpty {
+            return manifestHistory
+        }
+        return Self.bundledChangelogHistory
+    }
 
     static let manifestURL = URL(string:
         "https://raw.githubusercontent.com/nykadamec/openmail_ios_dev/main/ios/update.json"
