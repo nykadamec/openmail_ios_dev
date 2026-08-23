@@ -42,7 +42,10 @@ struct SettingsView: View {
                     }
 
                     NavigationLink {
-                        ServerProfilesView()
+                        ServerProfilesView { hasProfiles in
+                            guard !hasProfiles else { return }
+                            Task { await authStore.logout() }
+                        }
                     } label: {
                         Label("settings.servers", systemImage: "server.rack")
                     }
@@ -249,6 +252,11 @@ struct SettingsView: View {
 /// its cookie jar and login state are invalidated together.
 struct ServerProfilesView: View {
     @Environment(AuthStore.self) private var authStore
+    /// Called after the first profile is ready, or after the last profile is
+    /// removed.  RootView uses this to leave the setup screen without making
+    /// the empty state depend on an active client.
+    let onProfileAvailabilityChanged: ((Bool) -> Void)?
+
     @State private var profiles: [ServerProfile] = []
     @State private var isLoading = true
     @State private var loadError: String?
@@ -259,11 +267,18 @@ struct ServerProfilesView: View {
     @State private var switchingProfileID: UUID?
     @State private var connectivity: [UUID: ServerConnectivity] = [:]
 
-    private let defaultProfileID = ServerProfile.defaultPublicProfile.id
+    init(onProfileAvailabilityChanged: ((Bool) -> Void)? = nil) {
+        self.onProfileAvailabilityChanged = onProfileAvailabilityChanged
+    }
 
     var body: some View {
         Group {
-            if isAuthorized {
+            if isLoading && profiles.isEmpty {
+                ProgressView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else if profiles.isEmpty {
+                emptyProfilesView
+            } else if isAuthorized {
                 profilesList
             } else {
                 ServerProtectionView {
@@ -308,6 +323,39 @@ struct ServerProfilesView: View {
         }
     }
 
+    private var emptyProfilesView: some View {
+        VStack(spacing: 20) {
+            Image(systemName: "server.rack")
+                .font(.system(size: 44, weight: .medium))
+                .foregroundStyle(.tint)
+                .symbolRenderingMode(.hierarchical)
+
+            VStack(spacing: 8) {
+                Text("settings.serversOnboardingTitle")
+                    .font(.title3.weight(.semibold))
+                    .multilineTextAlignment(.center)
+                Text("settings.serversOnboardingExplanation")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            Button {
+                showingEditor = true
+            } label: {
+                Label("settings.addServer", systemImage: "plus")
+                    .frame(minWidth: 180, minHeight: 44)
+            }
+            .buttonStyle(.borderedProminent)
+            .accessibilityHint(Text("settings.addServerHint"))
+        }
+        .padding(32)
+        .frame(maxWidth: 460)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color(.systemGroupedBackground))
+    }
+
     private var profilesList: some View {
         List {
             Section {
@@ -332,11 +380,11 @@ struct ServerProfilesView: View {
                     ForEach(profiles) { profile in
                         ServerProfileRow(
                             profile: profile,
-                            isActive: profile.id == authStore.activeProfile.id,
+                            isActive: profile.id == authStore.activeProfile?.id,
                             connectivity: connectivity[profile.id],
                             isSwitching: switchingProfileID == profile.id,
-                            canEdit: profile.id != defaultProfileID,
-                            canDelete: profile.id != defaultProfileID,
+                            canEdit: true,
+                            canDelete: true,
                             onSelect: { select(profile) },
                             onEdit: { editingProfile = profile },
                             onDelete: { deletingProfile = profile },
@@ -365,23 +413,10 @@ struct ServerProfilesView: View {
         loadError = nil
         // ServerProfileStore validates and persists the local payload.  Keep a
         // copy in view state because the store intentionally is not observable.
-        var loadedProfiles = authStore.profileStore.profiles
-        if !loadedProfiles.contains(where: { $0.id == defaultProfileID }) {
-            loadedProfiles.insert(.defaultPublicProfile, at: 0)
-            do {
-                try authStore.profileStore.setProfiles(loadedProfiles)
-            } catch {
-                isLoading = false
-                loadError = String(localized: "settings.serversLoadFailed")
-                return
-            }
-        }
-        profiles = authStore.profileStore.profiles
+        let loadedProfiles = authStore.profileStore.profiles
+        profiles = loadedProfiles
         isLoading = false
-        guard !profiles.isEmpty else {
-            loadError = String(localized: "settings.serversLoadFailed")
-            return
-        }
+        guard !profiles.isEmpty else { return }
 
         await withTaskGroup(of: (UUID, ServerConnectivity).self) { group in
             for profile in profiles {
@@ -399,7 +434,7 @@ struct ServerProfilesView: View {
     }
 
     private func select(_ profile: ServerProfile) {
-        guard profile.id != authStore.activeProfile.id, switchingProfileID == nil else { return }
+        guard profile.id != authStore.activeProfile?.id, switchingProfileID == nil else { return }
         switchingProfileID = profile.id
         Task {
             await authStore.switchProfile(id: profile.id)
@@ -409,7 +444,8 @@ struct ServerProfilesView: View {
 
     private func save(_ profile: ServerProfile) throws {
         let previous = profiles.first(where: { $0.id == profile.id })
-        let wasActive = profile.id == authStore.activeProfile.id
+        let wasInitialSetup = profiles.isEmpty
+        let wasActive = profile.id == authStore.activeProfile?.id
         let endpointChanged = previous.map {
             $0.scheme != profile.scheme || $0.host != profile.host || $0.port != profile.port
         } ?? false
@@ -424,21 +460,22 @@ struct ServerProfilesView: View {
         connectivity[profile.id] = .checking
         Task { await checkConnectivity(for: profile) }
 
-        // AuthStore intentionally has no in-place client mutation.  Recreate
-        // the active client through its public switch contract when an active
-        // profile's endpoint changes, ending at the edited profile and forcing
-        // the expected fresh login.
-        if wasActive && endpointChanged {
+        // The first profile has no active client yet.  switchProfile is also
+        // the hand-off that creates it and invalidates any stale session.
+        if wasInitialSetup {
             Task {
-                await authStore.switchProfile(id: defaultProfileID)
                 await authStore.switchProfile(id: profile.id)
+                onProfileAvailabilityChanged?(true)
             }
+        } else if wasActive && endpointChanged {
+            // AuthStore owns the active client.  Its updated switch contract
+            // must recreate the client when re-selecting the active profile.
+            Task { await authStore.switchProfile(id: profile.id) }
         }
     }
 
     private func delete(_ profile: ServerProfile) async {
-        guard profile.id != defaultProfileID else { return }
-        let wasActive = profile.id == authStore.activeProfile.id
+        let wasActive = profile.id == authStore.activeProfile?.id
         var updated = profiles
         updated.removeAll { $0.id == profile.id }
 
@@ -447,12 +484,10 @@ struct ServerProfilesView: View {
             profiles = authStore.profileStore.profiles
             connectivity.removeValue(forKey: profile.id)
 
-            // AuthStore owns the active client.  Once the active profile is
-            // removed, switch to the built-in profile to invalidate the old
-            // session and return the user to login.
-            if wasActive {
-                await authStore.switchProfile(id: defaultProfileID)
-            }
+            // There is deliberately no fallback endpoint.  The next render
+            // becomes the unprotected first-setup state; adding a profile
+            // creates a fresh client through the first-profile hand-off.
+            if wasActive && profiles.isEmpty { onProfileAvailabilityChanged?(false) }
         } catch {
             loadError = String(localized: "settings.serverSaveFailed")
         }

@@ -32,13 +32,26 @@ struct ServerProfile: Codable, Identifiable, Equatable {
     var host: String
     var port: Int?
 
+    /// Stable placeholder retained only for source/keychain compatibility.
+    /// It is never a real default endpoint.
     static let defaultPublicProfile: ServerProfile = try! ServerProfile(
         id: UUID(uuidString: "4E8F2C37-0A10-4D5F-9E2F-7A9B3B4F1E21")!,
-        name: "openMail",
+        name: "No server configured",
         scheme: .https,
-        host: "email.adamec.pro",
+        host: "invalid.local",
         port: nil
     )
+
+    /// In-memory endpoint used while no server has been configured.
+    static let emptyProfile = defaultPublicProfile
+
+    /// Separate Keychain namespace for the empty state.  This prevents the
+    /// legacy cookie migration from running for a new, unconfigured app.
+    static let emptyClientID = UUID(uuidString: "00000000-0000-0000-0000-000000000001")!
+
+    var isEmptyProfile: Bool {
+        id == Self.emptyProfile.id && host == Self.emptyProfile.host
+    }
 
     init(id: UUID = UUID(), name: String, scheme: Scheme = .https, host: String, port: Int? = nil) throws {
         let normalized = try Self.normalize(scheme: scheme, host: host, port: port)

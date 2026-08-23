@@ -697,6 +697,24 @@
         "en" : { "stringUnit" : { "state" : "translated", "value" : "No saved servers" } }
       }
     },
+    "settings.serversOnboardingTitle" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Přidejte svůj e-mailový server" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Add your email server" } }
+      }
+    },
+    "settings.serversOnboardingExplanation" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "openMail je připravený. Přidejte adresu serveru, ke kterému se chcete připojit." } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "openMail is ready. Add the address of the server you want to connect to." } }
+      }
+    },
+    "settings.addServerHint" : {
+      "localizations" : {
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Otevře formulář pro přidání serveru." } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Opens the form to add a server." } }
+      }
+    },
     "settings.serversLoadFailed" : {
       "localizations" : {
         "cs" : { "stringUnit" : { "state" : "translated", "value" : "Servery se nepodařilo načíst." } },

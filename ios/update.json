@@ -1,9 +1,9 @@
 {
-  "version": "0.0.16",
-  "build": 16,
-  "title": "openMail 0.0.16",
-  "releaseURL": "https://github.com/nykadamec/openmail_ios_dev/releases/tag/v0.0.16",
-  "ipaURL": "https://github.com/nykadamec/openmail_ios_dev/releases/download/v0.0.16/openMail-unsigned.ipa",
+  "version": "0.0.17",
+  "build": 17,
+  "title": "openMail 0.0.17",
+  "releaseURL": "https://github.com/nykadamec/openmail_ios_dev/releases/tag/v0.0.17",
+  "ipaURL": "https://github.com/nykadamec/openmail_ios_dev/releases/download/v0.0.17/openMail-unsigned.ipa",
   "minimumSupportedVersion": "0.0.9",
   "changelog": [
     "HTML e-mailové tělo se zobrazuje přes celý viewport",
@@ -19,6 +19,7 @@
     "Robustnější ukládání Remember Me session do Keychainu",
     "Opraven závod při obnově session během nového loginu",
     "Obnova session se po úspěšném loginu nespouští duplicitně",
-    "Přidán výběr veřejného a vlastního Tailscale serveru"
+    "Přidán výběr veřejného a vlastního Tailscale serveru",
+    "Veřejný server byl odstraněn z výchozí konfigurace"
   ]
 }

@@ -170,8 +170,6 @@ private struct CaptureResult {
 ///
 /// Uses a private cookie jar so only the openMail session is persisted/removed.
 final class APIClient {
-    static let shared = APIClient()
-
     let base: URL
     let profileID: UUID
     private let cookieStorage = HTTPCookieStorage()
@@ -188,8 +186,7 @@ final class APIClient {
     /// Private session – its cookie jar holds only this client's cookies.
     let session: URLSession
 
-    init(baseURL: URL = ServerProfile.defaultPublicProfile.baseURL,
-         profileID: UUID = ServerProfile.defaultPublicProfile.id) {
+    init(baseURL: URL, profileID: UUID) {
         self.base = baseURL
         self.profileID = profileID
         let configuration = URLSessionConfiguration.ephemeral
@@ -693,7 +690,7 @@ final class APIClient {
 
     private func makeCookie(value: String) -> HTTPCookie? {
         HTTPCookie(properties: [
-            .domain: base.host ?? "email.adamec.pro",
+            .domain: base.host ?? ServerProfile.emptyProfile.host,
             .path: "/",
             .name: "session_id",
             .value: value,

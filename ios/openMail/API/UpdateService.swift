@@ -43,7 +43,7 @@ enum UpdateState: Equatable {
 final class UpdateService {
     static let shared = UpdateService()
 
-    /// Release notes bundled with the currently installed 0.0.16 (build 16)
+    /// Release notes bundled with the currently installed 0.0.17 (build 17)
     /// release.  These remain available when the remote update manifest cannot
     /// be reached, and can be displayed directly by SettingsView.
     static let currentChangelog: [String] = [
@@ -57,7 +57,8 @@ final class UpdateService {
         "Robustnější ukládání Remember Me session do Keychainu",
         "Opraven závod při obnově session během nového loginu",
         "Obnova session se po úspěšném loginu nespouští duplicitně",
-        "Přidán výběr veřejného a vlastního Tailscale serveru"
+        "Přidán výběr veřejného a vlastního Tailscale serveru",
+        "Veřejný server byl odstraněn z výchozí konfigurace"
     ]
 
     /// Readable alias for callers that refer to the bundled changelog as

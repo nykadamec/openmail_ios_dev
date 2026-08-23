@@ -1,7 +1,9 @@
 import Foundation
+import Observation
 
 /// Local profile persistence.  Only endpoint metadata is stored here; session
 /// credentials remain in KeychainStore, namespaced by profile UUID.
+@Observable
 final class ServerProfileStore {
     private struct State: Codable {
         var profiles: [ServerProfile]
@@ -20,16 +22,21 @@ final class ServerProfileStore {
             profiles = state.profiles
             activeProfileID = state.activeProfileID
         } else {
-            profiles = [ServerProfile.defaultPublicProfile]
-            activeProfileID = ServerProfile.defaultPublicProfile.id
+            profiles = []
+            activeProfileID = nil
         }
-        if profiles.isEmpty { profiles = [ServerProfile.defaultPublicProfile] }
-        if activeProfileID == nil || !profiles.contains(where: { $0.id == activeProfileID }) {
+        if profiles.isEmpty {
+            activeProfileID = nil
+        } else if activeProfileID == nil || !profiles.contains(where: { $0.id == activeProfileID }) {
             activeProfileID = profiles[0].id
         }
     }
 
     var activeProfile: ServerProfile? { profiles.first { $0.id == activeProfileID } }
+
+    var hasConfiguredProfile: Bool {
+        profiles.contains(where: { !$0.isEmptyProfile })
+    }
 
     func save() throws {
         let data = try JSONEncoder().encode(State(profiles: profiles, activeProfileID: activeProfileID))
@@ -37,8 +44,12 @@ final class ServerProfileStore {
     }
 
     func setProfiles(_ profiles: [ServerProfile]) throws {
-        self.profiles = profiles.isEmpty ? [ServerProfile.defaultPublicProfile] : profiles
-        if !self.profiles.contains(where: { $0.id == activeProfileID }) { activeProfileID = self.profiles[0].id }
+        self.profiles = profiles
+        if self.profiles.isEmpty {
+            activeProfileID = nil
+        } else if !self.profiles.contains(where: { $0.id == activeProfileID }) {
+            activeProfileID = self.profiles[0].id
+        }
         try save()
     }
 

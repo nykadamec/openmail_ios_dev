@@ -70,7 +70,11 @@ if [[ "$MODE" == cloudflare ]]; then
   echo "$CLOUDFLARED_PID" >"$CLOUDFLARED_PID_FILE"
 fi
 echo "openMail started ($MODE)"
-echo "Local:  http://127.0.0.1:$PORT"
+echo "Bind:   http://$HOST:$PORT"
+if [[ "$MODE" == tailscale ]]; then
+  TAILSCALE_IP="$(tailscale ip -4 2>/dev/null || true)"
+  [[ -n "$TAILSCALE_IP" ]] && echo "Tailscale: http://$TAILSCALE_IP:$PORT"
+fi
 [[ "$MODE" == cloudflare ]] && echo "Public: https://email.adamec.pro"
 if [[ "$MODE" == cloudflare ]]; then
   echo "Logs:   logs/app.log, logs/cloudflared.log"
