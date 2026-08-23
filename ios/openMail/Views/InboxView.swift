@@ -190,7 +190,7 @@ struct InboxView: View {
                         ComposerView()
                     } label: {
                         Image(systemName: "square.and.pencil")
-                            .accessibilityLabel("action.compose")
+                            .accessibilityLabel(Text("action.compose"))
                     }
                 }
             }
@@ -364,7 +364,7 @@ struct InboxView: View {
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(starred ? "action.unstar" : "action.star")
+        .accessibilityLabel(Text(starred ? "action.unstar" : "action.star"))
     }
 
     // MARK: - Data

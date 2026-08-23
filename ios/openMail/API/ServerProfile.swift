@@ -17,11 +17,11 @@ struct ServerProfile: Codable, Identifiable, Equatable {
 
         var errorDescription: String? {
             switch self {
-            case .emptyHost: return "Server hostname is required"
-            case .invalidScheme: return "Only HTTP and HTTPS are supported"
-            case .invalidHost: return "Invalid server hostname or IP address"
-            case .invalidPort: return "Invalid server port"
-            case .forbiddenURLComponents: return "Server URL must not contain credentials, path, query, or fragment"
+            case .emptyHost: return String(localized: "settings.serverEmptyHost")
+            case .invalidScheme: return String(localized: "settings.serverInvalidScheme")
+            case .invalidHost: return String(localized: "settings.serverInvalidHost")
+            case .invalidPort: return String(localized: "settings.serverInvalidPort")
+            case .forbiddenURLComponents: return String(localized: "settings.serverForbiddenURL")
             }
         }
     }

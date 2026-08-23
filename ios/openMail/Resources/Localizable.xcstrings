@@ -1,1056 +1,3510 @@
 {
-  "sourceLanguage" : "en",
-  "strings" : {
-    "action.compose" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Nová zpráva" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Compose" } }
-      }
-    },
-    "action.add" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Přidat" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Add" } }
-      }
-    },
-    "action.cancel" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Zrušit" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Cancel" } }
-      }
-    },
-    "action.delete" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Smazat" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Delete" } }
-      }
-    },
-    "action.edit" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Upravit" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Edit" } }
-      }
-    },
-    "action.logout" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Odhlásit se" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Log out" } }
-      }
-    },
-    "action.preview" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Zobrazit" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Preview" } }
-      }
-    },
-    "action.removeAttachment" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Odebrat přílohu" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Remove attachment" } }
-      }
-    },
-    "action.retry" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Zkusit znovu" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Retry" } }
-      }
-    },
-    "action.save" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Uložit" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Save" } }
-      }
-    },
-    "action.search" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Hledat" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Search" } }
-      }
-    },
-    "action.send" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Odeslat" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Send" } }
-      }
-    },
-    "action.share" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Sdílet" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Share" } }
-      }
-    },
-    "action.signout" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Odhlásit se" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Sign out" } }
-      }
-    },
-    "action.star" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Označit hvězdičkou" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Star" } }
-      }
-    },
-    "action.unstar" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Zrušit označení" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Unstar" } }
-      }
-    },
-    "attachments.title" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Přílohy" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Attachments" } }
-      }
-    },
-    "contacts.add" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Přidat kontakt" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Add contact" } }
-      }
-    },
-    "contacts.addRule" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Přidat pravidlo" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Add rule" } }
-      }
-    },
-    "contacts.deleteMessage" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Opravdu chcete smazat kontakt %@?" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Are you sure you want to delete contact %@?" } }
-      }
-    },
-    "contacts.deleteRuleMessage" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Opravdu chcete smazat pravidlo pro %@?" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Are you sure you want to delete the rule for %@?" } }
-      }
-    },
-    "contacts.deleteTitle" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Smazat?" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Delete?" } }
-      }
-    },
-    "contacts.details" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Údaje kontaktu" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Contact details" } }
-      }
-    },
-    "contacts.disabled" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Vypnuto" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Disabled" } }
-      }
-    },
-    "contacts.domain" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Doména" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Domain" } }
-      }
-    },
-    "contacts.edit" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Upravit kontakt" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Edit contact" } }
-      }
-    },
-    "contacts.editRule" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Upravit pravidlo" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Edit rule" } }
-      }
-    },
-    "contacts.email" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "E-mail" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Email" } }
-      }
-    },
-    "contacts.empty" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Zatím nemáte žádné kontakty" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "You don’t have any contacts yet" } }
-      }
-    },
-    "contacts.errorTitle" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Něco se nepodařilo" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Something went wrong" } }
-      }
-    },
-    "contacts.loadFailed" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Kontakty se nepodařilo načíst" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Couldn’t load contacts" } }
-      }
-    },
-    "contacts.name" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Jméno" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Name" } }
-      }
-    },
-    "contacts.newEmailsOnly" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Pouze nové e-maily" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "New emails only" } }
-      }
-    },
-    "contacts.notes" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Poznámky" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Notes" } }
-      }
-    },
-    "contacts.ruleDetails" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Nastavení pravidla" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Rule settings" } }
-      }
-    },
-    "contacts.rules" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Pravidla" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Rules" } }
-      }
-    },
-    "contacts.rulesEmpty" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Zatím nemáte žádná pravidla" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "You don’t have any rules yet" } }
-      }
-    },
-    "contacts.rulesExplanation" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Pravidla se použijí na nové e-maily z dané domény." } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Rules apply to new emails from the selected domain." } }
-      }
-    },
-    "contacts.search" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Hledat kontakty" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Search contacts" } }
-      }
-    },
-    "contacts.star" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Automaticky označit nové e-maily hvězdičkou" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Automatically star new emails" } }
-      }
-    },
-    "contacts.starNew" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Označovat nové e-maily hvězdičkou" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Star new emails" } }
-      }
-    },
-    "contacts.title" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Kontakty" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Contacts" } }
-      }
-    },
-    "contacts.unstar" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Zrušit automatické hvězdičkování" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Stop automatically starring new emails" } }
-      }
-    },
-    "composer.addFile" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Přidat soubor" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Add file" } }
-      }
-    },
-    "composer.addPhotos" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Přidat fotky" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Add photos" } }
-      }
-    },
-    "composer.attachments" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Přílohy" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Attachments" } }
-      }
-    },
-    "composer.body" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Zpráva" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Message" } }
-      }
-    },
-    "composer.clearAttachments" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Smazat přílohy" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Clear attachments" } }
-      }
-    },
-    "composer.noAttachments" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Žádné přílohy" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "No attachments" } }
-      }
-    },
-    "composer.sendFailed" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Zprávu se nepodařilo odeslat." } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "The message could not be sent." } }
-      }
-    },
-    "composer.sentMessage" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Vaše zpráva byla odeslána." } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Your message has been sent." } }
-      }
-    },
-    "composer.sentTitle" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Odesláno" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Sent" } }
-      }
-    },
-    "composer.subject" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Předmět" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Subject" } }
-      }
-    },
-    "composer.to" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Komu" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "To" } }
-      }
-    },
-    "empty.inbox" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Žádné zprávy" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "No messages" } }
-      }
-    },
-    "refresh.emptyInbox" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Žádné zprávy" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "No messages" } }
-      }
-    },
-    "refresh.failed" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Obnovení se nepodařilo" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Refresh failed" } }
-      }
-    },
-    "refresh.noNewEmails" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Žádné nové zprávy" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "You're up to date" } }
-      }
-    },
-    "refresh.newEmails.one" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "%lld nová zpráva" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "%lld new email" } }
-      }
-    },
-    "refresh.newEmails.few" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "%lld nové zprávy" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "%lld new emails" } }
-      }
-    },
-    "refresh.newEmails.many" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "%lld nových zpráv" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "%lld new emails" } }
-      }
-    },
-    "refresh.dismissHint" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Klepnutím zavřete" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Tap to dismiss" } }
-      }
-    },
-    "refresh.newEmails" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "%lld nových zpráv" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "%lld new emails" } }
-      }
-    },
-    "errors.generic" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Něco se nepovedlo." } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Something went wrong." } }
-      }
-    },
-    "errors.network" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Síť není dostupná. Zkuste to znovu." } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "The network is unavailable. Try again." } }
-      }
-    },
-    "errors.serverUnavailable" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Server není momentálně dostupný. Zkuste to znovu." } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "The server is unavailable right now. Try again." } }
-      }
-    },
-    "errors.unexpectedResponse" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Server vrátil neočekávanou odpověď." } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "The server returned an unexpected response." } }
-      }
-    },
-    "errors.unauthorized" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Vaše relace vypršela. Přihlaste se znovu." } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Your session has expired. Please sign in again." } }
-      }
-    },
-    "folder.inbox" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Příchozí" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Inbox" } }
-      }
-    },
-    "folder.sent" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Odeslané" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Sent" } }
-      }
-    },
-    "folder.spam" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Spam" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Spam" } }
-      }
-    },
-    "folder.starred" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Označené" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Starred" } }
-      }
-    },
-    "folder.trash" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Koš" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Trash" } }
-      }
-    },
-    "inbox.title" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Pošta" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Mail" } }
-      }
-    },
-    "inbox.unread" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "nepřečtených" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "unread" } }
-      }
-    },
-    "loading.email" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Načítám e-mail…" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Loading email…" } }
-      }
-    },
-    "login.error" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Nesprávné uživatelské jméno nebo heslo." } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Incorrect username or password." } }
-      }
-    },
-    "login.rememberMe" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Zůstat přihlášen" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Stay signed in" } }
-      }
-    },
-    "login.rememberMeHint" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Až 30 dní na tomto zařízení" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Up to 30 days on this device" } }
-      }
-    },
-    "login.rememberMeAccessibilityHint" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Udrží vás přihlášené až 30 dní na tomto zařízení." } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Keeps you signed in for up to 30 days on this device." } }
-      }
-    },
-    "login.restoringSession" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Obnovuji relaci…" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Restoring your session…" } }
-      }
-    },
-    "login.sessionExpired" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Relace vypršela. Přihlaste se znovu." } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Your session expired. Please sign in again." } }
-      }
-    },
-    "login.restoreFailed" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Relaci se nepodařilo obnovit. Zkontrolujte připojení a zkuste to znovu." } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "We couldn’t restore your session. Check your connection and try again." } }
-      }
-    },
-    "login.retry" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Zkusit znovu" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Try again" } }
-      }
-    },
-    "login.submitAccessibilityHint" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Odešle přihlašovací údaje." } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Submits your sign-in details." } }
-      }
-    },
-    "login.submittingAccessibilityHint" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Přihlašování probíhá." } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Signing in is in progress." } }
-      }
-    },
-    "login.retryAccessibilityHint" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Zkusí obnovit relaci znovu." } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Attempts to restore your session again." } }
-      }
-    },
-    "login.password" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Heslo" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Password" } }
-      }
-    },
-    "login.submit" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Přihlásit se" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Sign in" } }
-      }
-    },
-    "login.subtitle" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Přihlaste se ke svému e-mailu" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Sign in to your email" } }
-      }
-    },
-    "login.title" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Vítejte zpět" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Welcome back" } }
-      }
-    },
-    "login.username" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Uživatelské jméno" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Username" } }
-      }
-    },
-    "settings.app" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Nastavení aplikace" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "App settings" } }
-      }
-    },
-    "settings.appVersion" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Verze aplikace" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "App version" } }
-      }
-    },
-    "settings.appVersionAccessibility" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Aktuální verze aplikace" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Current app version" } }
-      }
-    },
-    "settings.checkForUpdates" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Zkontrolovat aktualizace" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Check for updates" } }
-      }
-    },
-    "settings.checkForUpdatesAccessibility" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Zkontrolovat dostupnost aktualizací" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Check for available updates" } }
-      }
-    },
-    "settings.checkingForUpdates" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Kontroluji aktualizace…" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Checking for updates…" } }
-      }
-    },
-    "settings.checkForUpdatesHint" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Zkontroluje nejnovější verzi na GitHubu." } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Checks GitHub for the latest version." } }
-      }
-    },
-    "settings.changelog" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Co je nového" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "What’s new" } }
-      }
-    },
-    "settings.whatsNew" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Co je nového v této verzi" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "What’s new in this version" } }
-      }
-    },
-    "settings.changelogHistory" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Historie verzí" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Version history" } }
-      }
-    },
-    "settings.changelogVersion" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Verze {version}" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Version {version}" } }
-      }
-    },
-    "settings.changelogEmpty" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Historie verzí zatím není k dispozici." } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Version history is not available yet." } }
-      }
-    },
-    "settings.notifications" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Notifikace" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Notifications" } }
-      }
-    },
-    "settings.notificationsEnable" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Povolit notifikace pro nové e-maily" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Notify on new emails" } }
-      }
-    },
-    "settings.notificationsStatus" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Stav v iOS" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "iOS status" } }
-      }
-    },
-    "settings.notificationsAuthorized" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Povoleno" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Authorized" } }
-      }
-    },
-    "settings.notificationsDenied" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Zakázáno v iOS Nastavení" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Denied in iOS Settings" } }
-      }
-    },
-    "settings.notificationsNotDetermined" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Není rozhodnuto — otevřete aplikaci a povolte." } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Not decided yet — open the app to enable." } }
-      }
-    },
-    "settings.notificationsOpenIOSSettings" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Otevřít iOS Nastavení" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Open iOS Settings" } }
-      }
-    },
-    "notifications.newEmailTitle" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Nový e-mail" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "New email" } }
-      }
-    },
-    "notifications.newEmailBody" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Od: {sender}\nPředmět: {subject}" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "From: {sender}\nSubject: {subject}" } }
-      }
-    },
-    "notifications.openAction" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Otevřít" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Open" } }
-      }
-    },
-    "settings.upToDate" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Používáte aktuální verzi" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "You’re up to date" } }
-      }
-    },
-    "settings.updateAvailable" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Je dostupná nová verze" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "A new version is available" } }
-      }
-    },
-    "settings.openRelease" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Otevřít vydání" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Open release" } }
-      }
-    },
-    "settings.openReleaseAccessibility" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Otevřít novou verzi v prohlížeči" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Open the new version in a browser" } }
-      }
-    },
-    "settings.openReleaseHint" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Otevře přesné vydání v systémovém prohlížeči." } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Opens the exact release in your system browser." } }
-      }
-    },
-    "settings.lastChecked" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Naposledy ověřeno: %@" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Last checked: %@" } }
-      }
-    },
-    "settings.updateCheckFailed" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Aktualizace se nepodařilo ověřit" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Couldn’t check for updates" } }
-      }
-    },
-    "settings.invalidUpdateManifest" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Informace o aktualizaci nejsou platné" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Update information is invalid" } }
-      }
-    },
-    "settings.account" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Účet" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Account" } }
-      }
-    },
-    "settings.email" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "E-mail" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Email" } }
-      }
-    },
-    "settings.fromName" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Jméno odesílatele" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Sender name" } }
-      }
-    },
-    "settings.username" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Uživatelské jméno" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Username" } }
-      }
-    },
-    "settings.servers" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Servery" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Servers" } }
-      }
-    },
-    "settings.serversExplanation" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Vyberte, ke kterému serveru se openMail připojí. Přepnutí vyžaduje nové přihlášení." } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Choose which server openMail connects to. Switching requires a new sign-in." } }
-      }
-    },
-    "settings.savedServers" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Uložené servery" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Saved servers" } }
-      }
-    },
-    "settings.serversEmpty" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Žádné uložené servery" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "No saved servers" } }
-      }
-    },
-    "settings.serversOnboardingTitle" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Přidejte svůj e-mailový server" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Add your email server" } }
-      }
-    },
-    "settings.serversOnboardingExplanation" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "openMail je připravený. Přidejte adresu serveru, ke kterému se chcete připojit." } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "openMail is ready. Add the address of the server you want to connect to." } }
-      }
-    },
-    "settings.addServerHint" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Otevře formulář pro přidání serveru." } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Opens the form to add a server." } }
-      }
-    },
-    "settings.serversLoadFailed" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Servery se nepodařilo načíst." } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Couldn’t load servers." } }
-      }
-    },
-    "settings.serverErrorTitle" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Servery" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Servers" } }
-      }
-    },
-    "settings.addServer" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Přidat server" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Add server" } }
-      }
-    },
-    "settings.editServer" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Upravit server" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Edit server" } }
-      }
-    },
-    "settings.activeServer" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Aktivní" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Active" } }
-      }
-    },
-    "settings.activeServerHint" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Tento server je právě aktivní." } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "This server is currently active." } }
-      }
-    },
-    "settings.switchServerHint" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Klepnutím server vyberete a budete se muset znovu přihlásit." } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Tap to select this server; you will need to sign in again." } }
-      }
-    },
-    "settings.serverChecking" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Ověřuji dostupnost…" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Checking availability…" } }
-      }
-    },
-    "settings.serverOnline" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Dostupný (HTTP %lld)" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Available (HTTP %lld)" } }
-      }
-    },
-    "settings.serverOffline" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Nedostupný · Zkusit znovu" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Unavailable · Retry" } }
-      }
-    },
-    "settings.serverDetails" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Podrobnosti serveru" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Server details" } }
-      }
-    },
-    "settings.serverName" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Název" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Name" } }
-      }
-    },
-    "settings.serverScheme" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Protokol" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Protocol" } }
-      }
-    },
-    "settings.serverHost" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Hostname nebo IP adresa" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Hostname or IP address" } }
-      }
-    },
-    "settings.serverPortOptional" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Port (volitelné)" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Port (optional)" } }
-      }
-    },
-    "settings.serverSecurityNote" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Ukládá se pouze adresa serveru. Přihlašovací údaje a relace se k profilu nepřidávají." } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Only the server address is saved. Sign-in details and sessions are never added to a profile." } }
-      }
-    },
-    "settings.serverDeleteTitle" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Smazat server?" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Delete server?" } }
-      }
-    },
-    "settings.serverDeleteMessage" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Opravdu chcete smazat server „%@“?" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Are you sure you want to delete server “%@”?" } }
-      }
-    },
-    "settings.serverSaveFailed" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Server se nepodařilo uložit." } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Couldn’t save the server." } }
-      }
-    },
-    "settings.serverEmptyHost" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Zadejte hostname nebo IP adresu serveru." } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Enter a server hostname or IP address." } }
-      }
-    },
-    "settings.serverInvalidScheme" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Podporován je pouze HTTP nebo HTTPS." } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Only HTTP and HTTPS are supported." } }
-      }
-    },
-    "settings.serverInvalidHost" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Hostname nebo IP adresa není platná." } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "The hostname or IP address is invalid." } }
-      }
-    },
-    "settings.serverInvalidPort" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Port musí být číslo od 1 do 65535." } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "The port must be a number from 1 to 65535." } }
-      }
-    },
-    "settings.serverForbiddenURL" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Adresa serveru nesmí obsahovat přihlašovací údaje, cestu ani dotaz." } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "The server address must not contain credentials, a path, or a query." } }
-      }
-    },
-    "settings.protectionChecking" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Ověřuji zabezpečení…" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Checking protection…" } }
-      }
-    },
-    "settings.protectionTitle" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Servery jsou chráněné" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Servers are protected" } }
-      }
-    },
-    "settings.protectionExplanation" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Použijte Face ID nebo bezpečnostní PIN pro správu serverů." } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Use Face ID or your security PIN to manage servers." } }
-      }
-    },
-    "settings.createPinTitle" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Nastavte bezpečnostní PIN" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Set a security PIN" } }
-      }
-    },
-    "settings.createPinExplanation" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "PIN chrání správu serverů, když Face ID není dostupné. Uloží se bezpečně do Klíčenky." } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Your PIN protects server management when Face ID is unavailable. It is stored securely in the Keychain." } }
-      }
-    },
-    "settings.pin" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "PIN (4–8 číslic)" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "PIN (4–8 digits)" } }
-      }
-    },
-    "settings.confirmPin" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Potvrdit PIN" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Confirm PIN" } }
-      }
-    },
-    "settings.savePin" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Uložit PIN" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Save PIN" } }
-      }
-    },
-    "settings.unlockWithPin" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Odemknout PINem" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Unlock with PIN" } }
-      }
-    },
-    "settings.useFaceID" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Použít Face ID" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Use Face ID" } }
-      }
-    },
-    "settings.faceIDReason" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Ověřte se pro správu serverů." } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Authenticate to manage servers." } }
-      }
-    },
-    "settings.faceIDUnavailable" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Face ID není dostupné. Použijte PIN." } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Face ID is unavailable. Use your PIN." } }
-      }
-    },
-    "settings.faceIDFallback" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Ověření Face ID se nepodařilo. Použijte PIN." } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Face ID couldn’t verify you. Use your PIN." } }
-      }
-    },
-    "settings.pinMismatch" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "PIN musí mít 4–8 číslic a obě pole se musí shodovat." } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "The PIN must contain 4–8 digits and both fields must match." } }
-      }
-    },
-    "settings.pinIncorrect" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Nesprávný PIN." } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Incorrect PIN." } }
-      }
-    },
-    "settings.pinSaveFailed" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "PIN se nepodařilo bezpečně uložit." } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "The PIN couldn’t be stored securely." } }
-      }
-    },
-    "settings.pinReadFailed" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "PIN se nepodařilo ověřit." } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "The PIN couldn’t be verified." } }
-      }
-    },
-    "settings.protectionUnavailable" : {
-      "localizations" : {
-        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Zabezpečení není dostupné. Nastavte nový PIN." } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Protection is unavailable. Set a new PIN." } }
+  "sourceLanguage": "en",
+  "strings": {
+    "action.compose": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nová zpráva"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compose"
+          }
+        }
+      }
+    },
+    "action.add": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Přidat"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add"
+          }
+        }
+      }
+    },
+    "action.cancel": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zrušit"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel"
+          }
+        }
+      }
+    },
+    "action.delete": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Smazat"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete"
+          }
+        }
+      }
+    },
+    "action.edit": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Upravit"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit"
+          }
+        }
+      }
+    },
+    "action.logout": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Odhlásit se"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Log out"
+          }
+        }
+      }
+    },
+    "action.preview": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zobrazit"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preview"
+          }
+        }
+      }
+    },
+    "action.removeAttachment": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Odebrat přílohu"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove attachment"
+          }
+        }
+      }
+    },
+    "action.retry": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zkusit znovu"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retry"
+          }
+        }
+      }
+    },
+    "action.save": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uložit"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save"
+          }
+        }
+      }
+    },
+    "action.search": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hledat"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search"
+          }
+        }
+      }
+    },
+    "action.send": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Odeslat"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Send"
+          }
+        }
+      }
+    },
+    "action.share": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sdílet"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Share"
+          }
+        }
+      }
+    },
+    "action.signout": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Odhlásit se"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign out"
+          }
+        }
+      }
+    },
+    "action.star": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Označit hvězdičkou"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Star"
+          }
+        }
+      }
+    },
+    "action.unstar": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zrušit označení"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unstar"
+          }
+        }
+      }
+    },
+    "attachments.title": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Přílohy"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Attachments"
+          }
+        }
+      }
+    },
+    "contacts.add": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Přidat kontakt"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add contact"
+          }
+        }
+      }
+    },
+    "contacts.addRule": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Přidat pravidlo"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add rule"
+          }
+        }
+      }
+    },
+    "contacts.deleteMessage": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opravdu chcete smazat kontakt %@?"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Are you sure you want to delete contact %@?"
+          }
+        }
+      }
+    },
+    "contacts.deleteRuleMessage": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opravdu chcete smazat pravidlo pro %@?"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Are you sure you want to delete the rule for %@?"
+          }
+        }
+      }
+    },
+    "contacts.deleteTitle": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Smazat?"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete?"
+          }
+        }
+      }
+    },
+    "contacts.details": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Údaje kontaktu"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Contact details"
+          }
+        }
+      }
+    },
+    "contacts.disabled": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vypnuto"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disabled"
+          }
+        }
+      }
+    },
+    "contacts.domain": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Doména"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Domain"
+          }
+        }
+      }
+    },
+    "contacts.edit": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Upravit kontakt"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit contact"
+          }
+        }
+      }
+    },
+    "contacts.editRule": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Upravit pravidlo"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit rule"
+          }
+        }
+      }
+    },
+    "contacts.email": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "E-mail"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Email"
+          }
+        }
+      }
+    },
+    "contacts.empty": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zatím nemáte žádné kontakty"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You don’t have any contacts yet"
+          }
+        }
+      }
+    },
+    "contacts.errorTitle": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Něco se nepodařilo"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Something went wrong"
+          }
+        }
+      }
+    },
+    "contacts.loadFailed": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kontakty se nepodařilo načíst"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn’t load contacts"
+          }
+        }
+      }
+    },
+    "contacts.name": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jméno"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Name"
+          }
+        }
+      }
+    },
+    "contacts.newEmailsOnly": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pouze nové e-maily"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New emails only"
+          }
+        }
+      }
+    },
+    "contacts.notes": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Poznámky"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notes"
+          }
+        }
+      }
+    },
+    "contacts.ruleDetails": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nastavení pravidla"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rule settings"
+          }
+        }
+      }
+    },
+    "contacts.rules": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pravidla"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rules"
+          }
+        }
+      }
+    },
+    "contacts.rulesEmpty": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zatím nemáte žádná pravidla"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You don’t have any rules yet"
+          }
+        }
+      }
+    },
+    "contacts.rulesExplanation": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pravidla se použijí na nové e-maily z dané domény."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rules apply to new emails from the selected domain."
+          }
+        }
+      }
+    },
+    "contacts.search": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hledat kontakty"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search contacts"
+          }
+        }
+      }
+    },
+    "contacts.star": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automaticky označit nové e-maily hvězdičkou"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automatically star new emails"
+          }
+        }
+      }
+    },
+    "contacts.starNew": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Označovat nové e-maily hvězdičkou"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Star new emails"
+          }
+        }
+      }
+    },
+    "contacts.title": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kontakty"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Contacts"
+          }
+        }
+      }
+    },
+    "contacts.unstar": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zrušit automatické hvězdičkování"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stop automatically starring new emails"
+          }
+        }
+      }
+    },
+    "composer.addFile": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Přidat soubor"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add file"
+          }
+        }
+      }
+    },
+    "composer.addPhotos": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Přidat fotky"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add photos"
+          }
+        }
+      }
+    },
+    "composer.attachments": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Přílohy"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Attachments"
+          }
+        }
+      }
+    },
+    "composer.body": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zpráva"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Message"
+          }
+        }
+      }
+    },
+    "composer.clearAttachments": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Smazat přílohy"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear attachments"
+          }
+        }
+      }
+    },
+    "composer.noAttachments": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Žádné přílohy"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No attachments"
+          }
+        }
+      }
+    },
+    "composer.sendFailed": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zprávu se nepodařilo odeslat."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The message could not be sent."
+          }
+        }
+      }
+    },
+    "composer.sentMessage": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vaše zpráva byla odeslána."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your message has been sent."
+          }
+        }
+      }
+    },
+    "composer.sentTitle": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Odesláno"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sent"
+          }
+        }
+      }
+    },
+    "composer.subject": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Předmět"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Subject"
+          }
+        }
+      }
+    },
+    "composer.to": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Komu"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "To"
+          }
+        }
+      }
+    },
+    "empty.inbox": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Žádné zprávy"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No messages"
+          }
+        }
+      }
+    },
+    "refresh.emptyInbox": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Žádné zprávy"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No messages"
+          }
+        }
+      }
+    },
+    "refresh.failed": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Obnovení se nepodařilo"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Refresh failed"
+          }
+        }
+      }
+    },
+    "refresh.noNewEmails": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Žádné nové zprávy"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You're up to date"
+          }
+        }
+      }
+    },
+    "refresh.newEmails.one": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld nová zpráva"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld new email"
+          }
+        }
+      }
+    },
+    "refresh.newEmails.few": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld nové zprávy"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld new emails"
+          }
+        }
+      }
+    },
+    "refresh.newEmails.many": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld nových zpráv"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld new emails"
+          }
+        }
+      }
+    },
+    "refresh.dismissHint": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klepnutím zavřete"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tap to dismiss"
+          }
+        }
+      }
+    },
+    "refresh.newEmails": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld nových zpráv"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld new emails"
+          }
+        }
+      }
+    },
+    "errors.generic": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Něco se nepovedlo."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Something went wrong."
+          }
+        }
+      }
+    },
+    "errors.network": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Síť není dostupná. Zkuste to znovu."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The network is unavailable. Try again."
+          }
+        }
+      }
+    },
+    "errors.serverUnavailable": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Server není momentálně dostupný. Zkuste to znovu."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The server is unavailable right now. Try again."
+          }
+        }
+      }
+    },
+    "errors.unexpectedResponse": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Server vrátil neočekávanou odpověď."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The server returned an unexpected response."
+          }
+        }
+      }
+    },
+    "errors.unauthorized": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vaše relace vypršela. Přihlaste se znovu."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your session has expired. Please sign in again."
+          }
+        }
+      }
+    },
+    "folder.inbox": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Příchozí"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inbox"
+          }
+        }
+      }
+    },
+    "folder.sent": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Odeslané"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sent"
+          }
+        }
+      }
+    },
+    "folder.spam": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spam"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spam"
+          }
+        }
+      }
+    },
+    "folder.starred": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Označené"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Starred"
+          }
+        }
+      }
+    },
+    "folder.trash": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Koš"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trash"
+          }
+        }
+      }
+    },
+    "inbox.title": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pošta"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mail"
+          }
+        }
+      }
+    },
+    "inbox.unread": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "nepřečtených"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "unread"
+          }
+        }
+      }
+    },
+    "loading.email": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Načítám e-mail…"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loading email…"
+          }
+        }
+      }
+    },
+    "login.error": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nesprávné uživatelské jméno nebo heslo."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Incorrect username or password."
+          }
+        }
+      }
+    },
+    "login.rememberMe": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zůstat přihlášen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stay signed in"
+          }
+        }
+      }
+    },
+    "login.rememberMeHint": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Až 30 dní na tomto zařízení"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Up to 30 days on this device"
+          }
+        }
+      }
+    },
+    "login.rememberMeAccessibilityHint": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Udrží vás přihlášené až 30 dní na tomto zařízení."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keeps you signed in for up to 30 days on this device."
+          }
+        }
+      }
+    },
+    "login.restoringSession": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Obnovuji relaci…"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restoring your session…"
+          }
+        }
+      }
+    },
+    "login.sessionExpired": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Relace vypršela. Přihlaste se znovu."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your session expired. Please sign in again."
+          }
+        }
+      }
+    },
+    "login.restoreFailed": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Relaci se nepodařilo obnovit. Zkontrolujte připojení a zkuste to znovu."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "We couldn’t restore your session. Check your connection and try again."
+          }
+        }
+      }
+    },
+    "login.retry": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zkusit znovu"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Try again"
+          }
+        }
+      }
+    },
+    "login.submitAccessibilityHint": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Odešle přihlašovací údaje."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Submits your sign-in details."
+          }
+        }
+      }
+    },
+    "login.submittingAccessibilityHint": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Přihlašování probíhá."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Signing in is in progress."
+          }
+        }
+      }
+    },
+    "login.retryAccessibilityHint": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zkusí obnovit relaci znovu."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Attempts to restore your session again."
+          }
+        }
+      }
+    },
+    "login.password": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heslo"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Password"
+          }
+        }
+      }
+    },
+    "login.submit": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Přihlásit se"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign in"
+          }
+        }
+      }
+    },
+    "login.subtitle": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Přihlaste se ke svému e-mailu"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign in to your email"
+          }
+        }
+      }
+    },
+    "login.title": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vítejte zpět"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Welcome back"
+          }
+        }
+      }
+    },
+    "login.username": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uživatelské jméno"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Username"
+          }
+        }
+      }
+    },
+    "settings.app": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nastavení aplikace"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App settings"
+          }
+        }
+      }
+    },
+    "settings.appVersion": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verze aplikace"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App version"
+          }
+        }
+      }
+    },
+    "settings.appVersionAccessibility": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktuální verze aplikace"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Current app version"
+          }
+        }
+      }
+    },
+    "settings.checkForUpdates": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zkontrolovat aktualizace"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Check for updates"
+          }
+        }
+      }
+    },
+    "settings.checkForUpdatesAccessibility": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zkontrolovat dostupnost aktualizací"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Check for available updates"
+          }
+        }
+      }
+    },
+    "settings.checkingForUpdates": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kontroluji aktualizace…"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Checking for updates…"
+          }
+        }
+      }
+    },
+    "settings.checkForUpdatesHint": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zkontroluje nejnovější verzi na GitHubu."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Checks GitHub for the latest version."
+          }
+        }
+      }
+    },
+    "settings.changelog": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Co je nového"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What’s new"
+          }
+        }
+      }
+    },
+    "settings.whatsNew": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Co je nového v této verzi"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What’s new in this version"
+          }
+        }
+      }
+    },
+    "settings.changelogHistory": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Historie verzí"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Version history"
+          }
+        }
+      }
+    },
+    "settings.changelogVersion": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verze {version}"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Version {version}"
+          }
+        }
+      }
+    },
+    "settings.changelogEmpty": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Historie verzí zatím není k dispozici."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Version history is not available yet."
+          }
+        }
+      }
+    },
+    "settings.notifications": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notifikace"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notifications"
+          }
+        }
+      }
+    },
+    "settings.notificationsEnable": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Povolit notifikace pro nové e-maily"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notify on new emails"
+          }
+        }
+      }
+    },
+    "settings.notificationsStatus": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stav v iOS"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iOS status"
+          }
+        }
+      }
+    },
+    "settings.notificationsAuthorized": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Povoleno"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Authorized"
+          }
+        }
+      }
+    },
+    "settings.notificationsDenied": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zakázáno v iOS Nastavení"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Denied in iOS Settings"
+          }
+        }
+      }
+    },
+    "settings.notificationsNotDetermined": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Není rozhodnuto — otevřete aplikaci a povolte."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not decided yet — open the app to enable."
+          }
+        }
+      }
+    },
+    "settings.notificationsOpenIOSSettings": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Otevřít iOS Nastavení"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open iOS Settings"
+          }
+        }
+      }
+    },
+    "notifications.newEmailTitle": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nový e-mail"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New email"
+          }
+        }
+      }
+    },
+    "notifications.newEmailBody": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Od: {sender}\nPředmět: {subject}"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "From: {sender}\nSubject: {subject}"
+          }
+        }
+      }
+    },
+    "notifications.openAction": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Otevřít"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open"
+          }
+        }
+      }
+    },
+    "settings.upToDate": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Používáte aktuální verzi"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You’re up to date"
+          }
+        }
+      }
+    },
+    "settings.updateAvailable": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je dostupná nová verze"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A new version is available"
+          }
+        }
+      }
+    },
+    "settings.openRelease": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Otevřít vydání"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open release"
+          }
+        }
+      }
+    },
+    "settings.openReleaseAccessibility": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Otevřít novou verzi v prohlížeči"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open the new version in a browser"
+          }
+        }
+      }
+    },
+    "settings.openReleaseHint": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Otevře přesné vydání v systémovém prohlížeči."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opens the exact release in your system browser."
+          }
+        }
+      }
+    },
+    "settings.lastChecked": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Naposledy ověřeno: %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last checked: %@"
+          }
+        }
+      }
+    },
+    "settings.updateCheckFailed": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktualizace se nepodařilo ověřit"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn’t check for updates"
+          }
+        }
+      }
+    },
+    "settings.invalidUpdateManifest": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Informace o aktualizaci nejsou platné"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Update information is invalid"
+          }
+        }
+      }
+    },
+    "settings.account": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Účet"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Account"
+          }
+        }
+      }
+    },
+    "settings.email": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "E-mail"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Email"
+          }
+        }
+      }
+    },
+    "settings.fromName": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jméno odesílatele"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sender name"
+          }
+        }
+      }
+    },
+    "settings.username": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uživatelské jméno"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Username"
+          }
+        }
+      }
+    },
+    "settings.servers": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Servery"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Servers"
+          }
+        }
+      }
+    },
+    "settings.serversExplanation": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vyberte, ke kterému serveru se openMail připojí. Přepnutí vyžaduje nové přihlášení."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose which server openMail connects to. Switching requires a new sign-in."
+          }
+        }
+      }
+    },
+    "settings.savedServers": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uložené servery"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved servers"
+          }
+        }
+      }
+    },
+    "settings.serversEmpty": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Žádné uložené servery"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No saved servers"
+          }
+        }
+      }
+    },
+    "settings.serversOnboardingTitle": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Přidejte svůj e-mailový server"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add your email server"
+          }
+        }
+      }
+    },
+    "settings.serversOnboardingExplanation": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "openMail je připravený. Přidejte adresu serveru, ke kterému se chcete připojit."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "openMail is ready. Add the address of the server you want to connect to."
+          }
+        }
+      }
+    },
+    "settings.addServerHint": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Otevře formulář pro přidání serveru."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opens the form to add a server."
+          }
+        }
+      }
+    },
+    "settings.serversLoadFailed": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Servery se nepodařilo načíst."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn’t load servers."
+          }
+        }
+      }
+    },
+    "settings.serverErrorTitle": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Servery"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Servers"
+          }
+        }
+      }
+    },
+    "settings.addServer": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Přidat server"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add server"
+          }
+        }
+      }
+    },
+    "settings.editServer": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Upravit server"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit server"
+          }
+        }
+      }
+    },
+    "settings.activeServer": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktivní"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Active"
+          }
+        }
+      }
+    },
+    "settings.activeServerHint": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tento server je právě aktivní."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This server is currently active."
+          }
+        }
+      }
+    },
+    "settings.switchServerHint": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klepnutím server vyberete a budete se muset znovu přihlásit."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tap to select this server; you will need to sign in again."
+          }
+        }
+      }
+    },
+    "settings.serverChecking": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ověřuji dostupnost…"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Checking availability…"
+          }
+        }
+      }
+    },
+    "settings.serverOnline": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dostupný (HTTP %lld)"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Available (HTTP %lld)"
+          }
+        }
+      }
+    },
+    "settings.serverOffline": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nedostupný · Zkusit znovu"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unavailable · Retry"
+          }
+        }
+      }
+    },
+    "settings.serverDetails": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Podrobnosti serveru"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Server details"
+          }
+        }
+      }
+    },
+    "settings.serverName": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Název"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Name"
+          }
+        }
+      }
+    },
+    "settings.serverScheme": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Protokol"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Protocol"
+          }
+        }
+      }
+    },
+    "settings.serverHost": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hostname nebo IP adresa"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hostname or IP address"
+          }
+        }
+      }
+    },
+    "settings.serverPortOptional": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Port (volitelné)"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Port (optional)"
+          }
+        }
+      }
+    },
+    "settings.serverSecurityNote": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ukládá se pouze adresa serveru. Přihlašovací údaje a relace se k profilu nepřidávají."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Only the server address is saved. Sign-in details and sessions are never added to a profile."
+          }
+        }
+      }
+    },
+    "settings.serverDeleteTitle": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Smazat server?"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete server?"
+          }
+        }
+      }
+    },
+    "settings.serverDeleteMessage": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opravdu chcete smazat server „%@“?"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Are you sure you want to delete server “%@”?"
+          }
+        }
+      }
+    },
+    "settings.serverSaveFailed": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Server se nepodařilo uložit."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn’t save the server."
+          }
+        }
+      }
+    },
+    "settings.serverEmptyHost": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Název serveru je povinný"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Server hostname is required"
+          }
+        }
+      }
+    },
+    "settings.serverInvalidScheme": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Podporovány jsou pouze HTTP a HTTPS"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Only HTTP and HTTPS are supported"
+          }
+        }
+      }
+    },
+    "settings.serverInvalidHost": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Neplatný název serveru nebo IP adresa"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Invalid server hostname or IP address"
+          }
+        }
+      }
+    },
+    "settings.serverInvalidPort": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Neplatný port serveru"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Invalid server port"
+          }
+        }
+      }
+    },
+    "settings.serverForbiddenURL": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "URL serveru nesmí obsahovat přihlašovací údaje, cestu, query ani fragment"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Server URL must not contain credentials, path, query, or fragment"
+          }
+        }
+      }
+    },
+    "settings.protectionChecking": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ověřuji zabezpečení…"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Checking protection…"
+          }
+        }
+      }
+    },
+    "settings.protectionTitle": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Servery jsou chráněné"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Servers are protected"
+          }
+        }
+      }
+    },
+    "settings.protectionExplanation": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Použijte Face ID nebo bezpečnostní PIN pro správu serverů."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use Face ID or your security PIN to manage servers."
+          }
+        }
+      }
+    },
+    "settings.createPinTitle": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nastavte bezpečnostní PIN"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set a security PIN"
+          }
+        }
+      }
+    },
+    "settings.createPinExplanation": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PIN chrání správu serverů, když Face ID není dostupné. Uloží se bezpečně do Klíčenky."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your PIN protects server management when Face ID is unavailable. It is stored securely in the Keychain."
+          }
+        }
+      }
+    },
+    "settings.pin": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PIN (4–8 číslic)"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PIN (4–8 digits)"
+          }
+        }
+      }
+    },
+    "settings.confirmPin": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Potvrdit PIN"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Confirm PIN"
+          }
+        }
+      }
+    },
+    "settings.savePin": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uložit PIN"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save PIN"
+          }
+        }
+      }
+    },
+    "settings.unlockWithPin": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Odemknout PINem"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unlock with PIN"
+          }
+        }
+      }
+    },
+    "settings.useFaceID": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Použít Face ID"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use Face ID"
+          }
+        }
+      }
+    },
+    "settings.faceIDReason": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ověřte se pro správu serverů."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Authenticate to manage servers."
+          }
+        }
+      }
+    },
+    "settings.faceIDUnavailable": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Face ID není dostupné. Použijte PIN."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Face ID is unavailable. Use your PIN."
+          }
+        }
+      }
+    },
+    "settings.faceIDFallback": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ověření Face ID se nepodařilo. Použijte PIN."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Face ID couldn’t verify you. Use your PIN."
+          }
+        }
+      }
+    },
+    "settings.pinMismatch": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PIN musí mít 4–8 číslic a obě pole se musí shodovat."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The PIN must contain 4–8 digits and both fields must match."
+          }
+        }
+      }
+    },
+    "settings.pinIncorrect": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nesprávný PIN."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Incorrect PIN."
+          }
+        }
+      }
+    },
+    "settings.pinSaveFailed": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PIN se nepodařilo bezpečně uložit."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The PIN couldn’t be stored securely."
+          }
+        }
+      }
+    },
+    "settings.pinReadFailed": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PIN se nepodařilo ověřit."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The PIN couldn’t be verified."
+          }
+        }
+      }
+    },
+    "settings.protectionUnavailable": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zabezpečení není dostupné. Nastavte nový PIN."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Protection is unavailable. Set a new PIN."
+          }
+        }
+      }
+    },
+    "action.ok": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OK"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OK"
+          }
+        }
+      }
+    },
+    "errors.httpError": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chyba serveru (HTTP %lld)"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Server error (HTTP %lld)"
+          }
+        }
+      }
+    },
+    "errors.sessionExpired": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Relace vypršela"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Session expired"
+          }
+        }
+      }
+    },
+    "errors.invalidResponse": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Neplatná odpověď serveru"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Invalid response"
+          }
+        }
+      }
+    },
+    "update.changelog.current.item1": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Historie verzí v nastavení — přehled novinek starších verzí"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Version history in Settings — overview of older releases"
+          }
+        }
+      }
+    },
+    "update.changelog.current.item2": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lokální notifikace při přijetí nového e-mailu, včetně pozadí"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Local notifications for new email, including background"
+          }
+        }
+      }
+    },
+    "update.changelog.current.item3": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notifikace lze spravovat přímo v Nastavení aplikace"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notifications can be managed directly in app Settings"
+          }
+        }
+      }
+    },
+    "update.changelog.current.item4": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opraven pull-to-refresh, který vracel inbox na starou pozici"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fixed pull-to-refresh returning inbox to old position"
+          }
+        }
+      }
+    },
+    "update.changelog.current.item5": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dokončena anglická lokalizace sekce Co je nového"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Completed English localization of What’s New section"
+          }
+        }
+      }
+    },
+    "update.history.0_0_20.item1": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HTML e-mailové tělo se zobrazuje přes celý viewport"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HTML email body spans full viewport"
+          }
+        }
+      }
+    },
+    "update.history.0_0_20.item2": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spolehlivější scrollování dlouhých e-mailů"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "More reliable scrolling of long emails"
+          }
+        }
+      }
+    },
+    "update.history.0_0_20.item3": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stabilnější načítání e-mailů"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "More stable email loading"
+          }
+        }
+      }
+    },
+    "update.history.0_0_20.item4": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zachování scroll pozice Inboxu a jemné zaoblení HTML obsahu"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preserved inbox scroll position and subtle HTML rounding"
+          }
+        }
+      }
+    },
+    "update.history.0_0_20.item5": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opraveno přihlášení a předávání session cookie přes redirect"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fixed login and session cookie forwarding via redirect"
+          }
+        }
+      }
+    },
+    "update.history.0_0_20.item6": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Robustnější ukládání Remember Me session do Keychainu"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "More robust Remember Me session storage in Keychain"
+          }
+        }
+      }
+    },
+    "update.history.0_0_20.item7": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Přidán výběr veřejného a vlastního Tailscale serveru"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Added public vs custom Tailscale server selection"
+          }
+        }
+      }
+    },
+    "update.history.0_0_20.item8": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opraven pád při otevření nastavení serverů s Face ID"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fixed crash when opening server settings with Face ID"
+          }
+        }
+      }
+    },
+    "update.history.0_0_19.item1": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Přidána podpora pro synchronní načítání více složek najednou"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Added synchronous multi-folder loading"
+          }
+        }
+      }
+    },
+    "update.history.0_0_19.item2": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vylepšené zobrazení dlouhých předmětů v seznamu"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Improved long subject display in list"
+          }
+        }
+      }
+    },
+    "update.history.0_0_19.item3": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opraveny pády při otevření e-mailu s velkou přílohou"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fixed crashes on large attachment emails"
+          }
+        }
+      }
+    },
+    "update.history.0_0_19.item4": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Session cookie se nyní drží i přes redirect po loginu"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Session cookie now persists across login redirect"
+          }
+        }
+      }
+    },
+    "update.history.0_0_19.item5": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Robustnější práce s klíčenkou pro remember-me token"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "More robust Keychain handling for remember-me"
+          }
+        }
+      }
+    },
+    "update.history.0_0_19.item6": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Úprava layoutu kontaktů pro menší displeje"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Contacts layout tweaks for small screens"
+          }
+        }
+      }
+    },
+    "update.history.0_0_18.item1": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Přidána možnost hromadně označit e-maily jako přečtené"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Added bulk mark-as-read"
+          }
+        }
+      }
+    },
+    "update.history.0_0_18.item2": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vylepšená odezva při scrollování v Inboxu"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Improved inbox scroll responsiveness"
+          }
+        }
+      }
+    },
+    "update.history.0_0_18.item3": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nové filtrování podle adresy odesílatele"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New sender address filtering"
+          }
+        }
+      }
+    },
+    "update.history.0_0_18.item4": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opraveno dvojité načítání při rychlém přepínání složek"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fixed double loading on fast folder switching"
+          }
+        }
+      }
+    },
+    "update.history.0_0_18.item5": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stabilnější chování při ztrátě sítě"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "More stable offline behavior"
+          }
+        }
+      }
+    },
+    "update.history.0_0_17.item1": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Přidán seznam oblíbených adres v kontaktech"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Added favorites in Contacts"
+          }
+        }
+      }
+    },
+    "update.history.0_0_17.item2": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vylepšená odezva při otevírání detailu e-mailu"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Improved email detail open latency"
+          }
+        }
+      }
+    },
+    "update.history.0_0_17.item3": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opraveny drobné chyby v HTML zobrazení"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fixed minor HTML rendering bugs"
+          }
+        }
+      }
+    },
+    "update.history.0_0_17.item4": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Přidána podpora pro vlastní složky v sidebaru"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Added custom folders in sidebar"
+          }
+        }
+      }
+    },
+    "update.history.0_0_17.item5": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rychlejší start aplikace díky lazy načítání"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Faster cold start via lazy loading"
+          }
+        }
+      }
+    },
+    "update.history.0_0_16.item1": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Implementován vlastní server profiles editor"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Custom server profiles editor"
+          }
+        }
+      }
+    },
+    "update.history.0_0_16.item2": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Přidáno zabezpečení přístupu k serverům přes PIN / Face ID"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PIN / Face ID server access protection"
+          }
+        }
+      }
+    },
+    "update.history.0_0_16.item3": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vylepšen error handling při ztrátě spojení"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Improved offline error handling"
+          }
+        }
+      }
+    },
+    "update.history.0_0_16.item4": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opraveno zobrazení avatarů pro neznámé odesílatele"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fixed avatars for unknown senders"
+          }
+        }
+      }
+    },
+    "update.history.0_0_16.item5": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Přidána možnost smazat více e-mailů najednou"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Added bulk email delete"
+          }
+        }
+      }
+    },
+    "update.history.0_0_15.item1": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "První release s podporou Tailscale a vlastních serverů"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "First Tailscale + custom servers release"
+          }
+        }
+      }
+    },
+    "update.history.0_0_15.item2": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Základní implementace kontaktů"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Basic Contacts implementation"
+          }
+        }
+      }
+    },
+    "update.history.0_0_15.item3": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compose editor s podporou příloh"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compose editor with attachments"
+          }
+        }
+      }
+    },
+    "update.history.0_0_15.item4": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Synchronizace přes Resend inbound webhook"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resend inbound webhook sync"
+          }
+        }
+      }
+    },
+    "update.history.0_0_15.item5": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Login s remember-me přes Keychain"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Login with remember-me via Keychain"
+          }
+        }
+      }
+    },
+    "settings.contacts": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kontakty"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Contacts"
+          }
+        }
       }
     }
   },
-  "version" : "1.0"
+  "version": "1.0"
 }

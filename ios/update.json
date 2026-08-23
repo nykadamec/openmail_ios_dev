@@ -1,23 +1,98 @@
 {
-  "version": "0.0.15",
-  "build": 15,
-  "title": "openMail 0.0.15",
-  "releaseURL": "https://github.com/nykadamec/openmail_ios_dev/releases/tag/v0.0.15",
-  "ipaURL": "https://github.com/nykadamec/openmail_ios_dev/releases/download/v0.0.15/openMail-unsigned.ipa",
+  "version": "0.0.22",
+  "build": 22,
+  "title": "openMail 0.0.22",
+  "releaseURL": "https://github.com/nykadamec/openmail_ios_dev/releases/tag/v0.0.22",
+  "ipaURL": "https://github.com/nykadamec/openmail_ios_dev/releases/download/v0.0.22/openMail-unsigned.ipa",
   "minimumSupportedVersion": "0.0.9",
   "changelog": [
-    "HTML e-mailové tělo se zobrazuje přes celý viewport",
-    "Spolehlivější scrollování dlouhých e-mailů",
-    "Stabilnější načítání e-mailů",
-    "Zachování scroll pozice Inboxu a jemné zaoblení HTML obsahu",
-    "Remember Me pro pohodlnější přihlášení",
-    "Ukládání session do Keychainu",
-    "Obnovení přihlášení po restartu aplikace",
-    "Opraveno přihlášení a předávání session cookie přes redirect",
-    "Session cookie se nyní předává i při přesměrování po loginu",
-    "Opraveno předávání session cookie do následného API requestu",
-    "Robustnější ukládání Remember Me session do Keychainu",
-    "Opraven závod při obnově session během nového loginu",
-    "Obnova session se po úspěšném loginu nespouští duplicitně"
+    "Historie verzí v nastavení — přehled novinek starších verzí",
+    "Lokální notifikace při přijetí nového e-mailu, včetně pozadí",
+    "Notifikace lze spravovat přímo v Nastavení aplikace",
+    "Opraven pull-to-refresh, který vracel inbox na starou pozici",
+    "Dokončena anglická lokalizace sekce Co je nového"
+  ],
+  "history": [
+    {
+      "version": "0.0.21",
+      "build": 21,
+      "changelog": [
+        "Historie verzí v nastavení — přehled novinek starších verzí",
+        "Lokální notifikace při přijetí nového e-mailu, včetně pozadí",
+        "Notifikace lze spravovat přímo v Nastavení aplikace",
+        "Opraven pull-to-refresh, který vracel inbox na starou pozici",
+        "Dokončena anglická lokalizace sekce Co je nového"
+      ]
+    },
+    {
+      "version": "0.0.20",
+      "build": 20,
+      "changelog": [
+        "HTML e-mailové tělo se zobrazuje přes celý viewport",
+        "Spolehlivější scrollování dlouhých e-mailů",
+        "Stabilnější načítání e-mailů",
+        "Zachování scroll pozice Inboxu a jemné zaoblení HTML obsahu",
+        "Opraveno přihlášení a předávání session cookie přes redirect",
+        "Robustnější ukládání Remember Me session do Keychainu",
+        "Přidán výběr veřejného a vlastního Tailscale serveru",
+        "Opraven pád při otevření nastavení serverů s Face ID"
+      ]
+    },
+    {
+      "version": "0.0.19",
+      "build": 19,
+      "changelog": [
+        "Přidána podpora pro synchronní načítání více složek najednou",
+        "Vylepšené zobrazení dlouhých předmětů v seznamu",
+        "Opraveny pády při otevření e-mailu s velkou přílohou",
+        "Session cookie se nyní drží i přes redirect po loginu",
+        "Robustnější práce s klíčenkou pro remember-me token",
+        "Úprava layoutu kontaktů pro menší displeje"
+      ]
+    },
+    {
+      "version": "0.0.18",
+      "build": 18,
+      "changelog": [
+        "Přidána možnost hromadně označit e-maily jako přečtené",
+        "Vylepšená odezva při scrollování v Inboxu",
+        "Nové filtrování podle adresy odesílatele",
+        "Opraveno dvojité načítání při rychlém přepínání složek",
+        "Stabilnější chování při ztrátě sítě"
+      ]
+    },
+    {
+      "version": "0.0.17",
+      "build": 17,
+      "changelog": [
+        "Přidán seznam oblíbených adres v kontaktech",
+        "Vylepšená odezva při otevírání detailu e-mailu",
+        "Opraveny drobné chyby v HTML zobrazení",
+        "Přidána podpora pro vlastní složky v sidebaru",
+        "Rychlejší start aplikace díky lazy načítání"
+      ]
+    },
+    {
+      "version": "0.0.16",
+      "build": 16,
+      "changelog": [
+        "Implementován vlastní server profiles editor",
+        "Přidáno zabezpečení přístupu k serverům přes PIN / Face ID",
+        "Vylepšen error handling při ztrátě spojení",
+        "Opraveno zobrazení avatarů pro neznámé odesílatele",
+        "Přidána možnost smazat více e-mailů najednou"
+      ]
+    },
+    {
+      "version": "0.0.15",
+      "build": 15,
+      "changelog": [
+        "První release s podporou Tailscale a vlastních serverů",
+        "Základní implementace kontaktů",
+        "Compose editor s podporou příloh",
+        "Synchronizace přes Resend inbound webhook",
+        "Login s remember-me přes Keychain"
+      ]
+    }
   ]
 }

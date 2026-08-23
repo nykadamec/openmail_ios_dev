@@ -43,7 +43,7 @@ struct EmailDetailView: View {
                     } label: {
                         Image(systemName: detail.isStarred ? "star.fill" : "star")
                             .foregroundStyle(detail.isStarred ? Color.yellow : Color.accentColor)
-                            .accessibilityLabel(detail.isStarred ? "action.unstar" : "action.star")
+                            .accessibilityLabel(Text(detail.isStarred ? "action.unstar" : "action.star"))
                     }
                     .buttonStyle(.plain)
                 }

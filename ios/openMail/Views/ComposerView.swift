@@ -81,7 +81,7 @@ struct ComposerView: View {
                                         .foregroundStyle(Color(.tertiaryLabel))
                                 }
                                 .buttonStyle(.plain)
-                                .accessibilityLabel("action.removeAttachment")
+                                .accessibilityLabel(Text("action.removeAttachment"))
                             }
                         }
                     }
@@ -129,7 +129,7 @@ struct ComposerView: View {
                             attachments.removeAll()
                         } label: {
                             Image(systemName: "trash")
-                                .accessibilityLabel("composer.clearAttachments")
+                                .accessibilityLabel(Text("composer.clearAttachments"))
                         }
                     }
                 }
@@ -155,7 +155,7 @@ struct ComposerView: View {
                 Task { await loadPhotos() }
             }
             .alert(alertTitle, isPresented: $showAlert) {
-                Button("OK", role: .cancel) {}
+                Button("action.ok", role: .cancel) {}
             } message: {
                 Text(alertMessage)
             }

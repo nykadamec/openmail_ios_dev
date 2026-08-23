@@ -22,8 +22,8 @@ enum APIClientError: Error, LocalizedError {
         switch self {
         case .network: return NSLocalizedString("errors.network", comment: "Network failure")
         case .server(let message): return message
-        case .http(let code): return "Server error (HTTP \(code))"
-        case .unauthorized: return "Session expired"
+        case .http(let code): return String(format: String(localized: "errors.httpError"), code)
+        case .unauthorized: return String(localized: "errors.sessionExpired")
         case .unexpectedResponse: return NSLocalizedString("errors.unexpectedResponse", comment: "Unexpected server response")
         case .decode: return NSLocalizedString("errors.unexpectedResponse", comment: "Unexpected server response")
         }
@@ -229,7 +229,7 @@ final class APIClient {
         request.httpBody = form.query?.data(using: .utf8)
         let (_, response, capturedCookie) = try await performWithCookie(request)
         guard let http = response as? HTTPURLResponse else {
-            throw APIClientError.server("Invalid response")
+            throw APIClientError.server(String(localized: "errors.invalidResponse"))
         }
         // 401 = invalid credentials (rendered login page). After a successful
         // login the server redirects and the capture delegate retains the

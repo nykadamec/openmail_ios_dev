@@ -55,15 +55,16 @@ enum UpdateState: Equatable {
 final class UpdateService {
     static let shared = UpdateService()
 
-    /// Release notes bundled with the currently installed 0.0.21 (build 21)
+    /// Release notes bundled with the currently installed 0.0.22 (build 22)
     /// release.  These remain available when the remote update manifest cannot
     /// be reached, and can be displayed directly by SettingsView.
+    /// Values are localization keys (update.changelog.current.*), resolved in SettingsView via LocalizedStringKey.
     static let currentChangelog: [String] = [
-        "Historie verzí v nastavení — přehled novinek starších verzí",
-        "Lokální notifikace při přijetí nového e-mailu, včetně pozadí",
-        "Notifikace lze spravovat přímo v Nastavení aplikace",
-        "Opraven pull-to-refresh, který vracel inbox na starou pozici",
-        "Dokončena anglická lokalizace sekce Co je nového"
+        "update.changelog.current.item1",
+        "update.changelog.current.item2",
+        "update.changelog.current.item3",
+        "update.changelog.current.item4",
+        "update.changelog.current.item5"
     ]
 
     /// Readable alias for callers that refer to the bundled changelog as
@@ -77,52 +78,53 @@ final class UpdateService {
     /// entry identifies one release that shipped before `currentChangelog`.
     /// When the remote manifest supplies its own `history`, the runtime
     /// merger in `mergedHistory()` uses it instead.
+    /// Changelog arrays contain localization keys (update.history.*), not literal text.
     static let bundledChangelogHistory: [UpdateHistoryEntry] = [
         UpdateHistoryEntry(version: "0.0.20", build: 20, changelog: [
-            "HTML e-mailové tělo se zobrazuje přes celý viewport",
-            "Spolehlivější scrollování dlouhých e-mailů",
-            "Stabilnější načítání e-mailů",
-            "Zachování scroll pozice Inboxu a jemné zaoblení HTML obsahu",
-            "Opraveno přihlášení a předávání session cookie přes redirect",
-            "Robustnější ukládání Remember Me session do Keychainu",
-            "Přidán výběr veřejného a vlastního Tailscale serveru",
-            "Opraven pád při otevření nastavení serverů s Face ID"
+            "update.history.0_0_20.item1",
+            "update.history.0_0_20.item2",
+            "update.history.0_0_20.item3",
+            "update.history.0_0_20.item4",
+            "update.history.0_0_20.item5",
+            "update.history.0_0_20.item6",
+            "update.history.0_0_20.item7",
+            "update.history.0_0_20.item8"
         ]),
         UpdateHistoryEntry(version: "0.0.19", build: 19, changelog: [
-            "Přidána podpora pro synchronní načítání více složek najednou",
-            "Vylepšené zobrazení dlouhých předmětů v seznamu",
-            "Opraveny pády při otevření e-mailu s velkou přílohou",
-            "Session cookie se nyní drží i přes redirect po loginu",
-            "Robustnější práce s klíčenkou pro remember-me token",
-            "Úprava layoutu kontaktů pro menší displeje"
+            "update.history.0_0_19.item1",
+            "update.history.0_0_19.item2",
+            "update.history.0_0_19.item3",
+            "update.history.0_0_19.item4",
+            "update.history.0_0_19.item5",
+            "update.history.0_0_19.item6"
         ]),
         UpdateHistoryEntry(version: "0.0.18", build: 18, changelog: [
-            "Přidána možnost hromadně označit e-maily jako přečtené",
-            "Vylepšená odezva při scrollování v Inboxu",
-            "Nové filtrování podle adresy odesílatele",
-            "Opraveno dvojité načítání při rychlém přepínání složek",
-            "Stabilnější chování při ztrátě sítě"
+            "update.history.0_0_18.item1",
+            "update.history.0_0_18.item2",
+            "update.history.0_0_18.item3",
+            "update.history.0_0_18.item4",
+            "update.history.0_0_18.item5"
         ]),
         UpdateHistoryEntry(version: "0.0.17", build: 17, changelog: [
-            "Přidán seznam oblíbených adres v kontaktech",
-            "Vylepšená odezva při otevírání detailu e-mailu",
-            "Opraveny drobné chyby v HTML zobrazení",
-            "Přidána podpora pro vlastní složky v sidebaru",
-            "Rychlejší start aplikace díky lazy načítání"
+            "update.history.0_0_17.item1",
+            "update.history.0_0_17.item2",
+            "update.history.0_0_17.item3",
+            "update.history.0_0_17.item4",
+            "update.history.0_0_17.item5"
         ]),
         UpdateHistoryEntry(version: "0.0.16", build: 16, changelog: [
-            "Implementován vlastní server profiles editor",
-            "Přidáno zabezpečení přístupu k serverům přes PIN / Face ID",
-            "Vylepšen error handling při ztrátě spojení",
-            "Opraveno zobrazení avatarů pro neznámé odesílatele",
-            "Přidána možnost smazat více e-mailů najednou"
+            "update.history.0_0_16.item1",
+            "update.history.0_0_16.item2",
+            "update.history.0_0_16.item3",
+            "update.history.0_0_16.item4",
+            "update.history.0_0_16.item5"
         ]),
         UpdateHistoryEntry(version: "0.0.15", build: 15, changelog: [
-            "První release s podporou Tailscale a vlastních serverů",
-            "Základní implementace kontaktů",
-            "Compose editor s podporou příloh",
-            "Synchronizace přes Resend inbound webhook",
-            "Login s remember-me přes Keychain"
+            "update.history.0_0_15.item1",
+            "update.history.0_0_15.item2",
+            "update.history.0_0_15.item3",
+            "update.history.0_0_15.item4",
+            "update.history.0_0_15.item5"
         ])
     ]
 

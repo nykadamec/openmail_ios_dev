@@ -17,32 +17,48 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             List {
-                Section("settings.account") {
+                // Profile card — 80px, avatar 40 #007AFF
+                Section {
                     if let user = authStore.user {
-                        accountRow(
-                            title: "settings.username",
-                            value: user.username,
-                            icon: "person"
-                        )
-                        accountRow(
-                            title: "settings.email",
-                            value: user.email,
-                            icon: "envelope"
-                        )
-                        if let name = user.from_name, !name.isEmpty {
-                            accountRow(
-                                title: "settings.fromName",
-                                value: name,
-                                icon: "signature"
-                            )
+                        HStack(spacing: 12) {
+                            ZStack {
+                                Circle()
+                                    .fill(Color(red: 0, green: 122.0/255.0, blue: 1))
+                                    .frame(width: 40, height: 40)
+                                Text(String(user.username.prefix(1).uppercased()))
+                                    .font(.system(size: 17, weight: .semibold))
+                                    .foregroundStyle(.white)
+                            }
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(user.username)
+                                    .font(.system(size: 17))
+                                    .foregroundStyle(.primary)
+                                Text(user.email)
+                                    .font(.system(size: 15))
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
                         }
+                        .frame(minHeight: 56)
+                        .listRowBackground(Color.white)
                     }
+                }
 
+                // Navigation card — 88px, 2 rows, monochrome icons
+                Section {
                     NavigationLink {
                         ContactsView()
                     } label: {
-                        Label("contacts.title", systemImage: "person.2")
+                        HStack {
+                            Label("settings.contacts", systemImage: "person.2")
+                                .foregroundStyle(.primary)
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(.tertiary)
+                        }
                     }
+                    .listRowBackground(Color.white)
 
                     NavigationLink {
                         ServerProfilesView { hasProfiles in
@@ -50,8 +66,16 @@ struct SettingsView: View {
                             Task { await authStore.logout() }
                         }
                     } label: {
-                        Label("settings.servers", systemImage: "server.rack")
+                        HStack {
+                            Label("settings.servers", systemImage: "server.rack")
+                                .foregroundStyle(.primary)
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(.tertiary)
+                        }
                     }
+                    .listRowBackground(Color.white)
                 }
 
                 changelogHistorySection
@@ -109,7 +133,7 @@ struct SettingsView: View {
                         HStack(alignment: .firstTextBaseline, spacing: 8) {
                             Text("•")
                                 .foregroundStyle(.secondary)
-                            Text(entry)
+                            Text(LocalizedStringKey(entry))
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)
                         }
@@ -167,7 +191,7 @@ struct SettingsView: View {
                             HStack(alignment: .firstTextBaseline, spacing: 8) {
                                 Text("•")
                                     .foregroundStyle(.secondary)
-                                Text(entry)
+                                Text(LocalizedStringKey(entry))
                                     .font(.subheadline)
                                     .foregroundStyle(.secondary)
                             }
@@ -246,7 +270,7 @@ struct SettingsView: View {
                                 HStack(alignment: .firstTextBaseline, spacing: 8) {
                                     Text("•")
                                         .foregroundStyle(.secondary)
-                                    Text(line)
+                                    Text(LocalizedStringKey(line))
                                         .font(.footnote)
                                         .foregroundStyle(.secondary)
                                 }
