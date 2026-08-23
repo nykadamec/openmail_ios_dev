@@ -1,11 +1,13 @@
 {
-  "version": "0.0.22",
-  "build": 22,
-  "title": "openMail 0.0.22",
-  "releaseURL": "https://github.com/nykadamec/openmail_ios_dev/releases/tag/v0.0.22",
-  "ipaURL": "https://github.com/nykadamec/openmail_ios_dev/releases/download/v0.0.22/openMail-unsigned.ipa",
+  "version": "0.0.23",
+  "build": 23,
+  "title": "openMail 0.0.23",
+  "releaseURL": "https://github.com/nykadamec/openmail_ios_dev/releases/tag/v0.0.23",
+  "ipaURL": "https://github.com/nykadamec/openmail_ios_dev/releases/download/v0.0.23/openMail-unsigned.ipa",
   "minimumSupportedVersion": "0.0.9",
   "changelog": [
+    "Opraveno zobrazení Nastavení v tmavém režimu",
+    "Lokalizován titulek changelogu",
     "Historie verzí v nastavení — přehled novinek starších verzí",
     "Lokální notifikace při přijetí nového e-mailu, včetně pozadí",
     "Notifikace lze spravovat přímo v Nastavení aplikace",
