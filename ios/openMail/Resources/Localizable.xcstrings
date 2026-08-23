@@ -1638,13 +1638,13 @@
         "cs": {
           "stringUnit": {
             "state": "translated",
-            "value": "Verze {version}"
+            "value": "Verze %@"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Version {version}"
+            "value": "Version %@"
           }
         }
       }

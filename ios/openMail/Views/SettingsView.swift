@@ -40,7 +40,7 @@ struct SettingsView: View {
                             Spacer()
                         }
                         .frame(minHeight: 56)
-                        .listRowBackground(Color.white)
+                        .listRowBackground(Color(.systemBackground))
                     }
                 }
 
@@ -58,7 +58,7 @@ struct SettingsView: View {
                                 .foregroundStyle(.tertiary)
                         }
                     }
-                    .listRowBackground(Color.white)
+                    .listRowBackground(Color(.systemBackground))
 
                     NavigationLink {
                         ServerProfilesView { hasProfiles in
@@ -75,7 +75,7 @@ struct SettingsView: View {
                                 .foregroundStyle(.tertiary)
                         }
                     }
-                    .listRowBackground(Color.white)
+                    .listRowBackground(Color(.systemBackground))
                 }
 
                 changelogHistorySection
@@ -279,12 +279,16 @@ struct SettingsView: View {
                         .padding(.vertical, 4)
                         .accessibilityElement(children: .contain)
                     } label: {
-                        Text("settings.changelogVersion \(entry.version)")
+                        Text(localizedChangelogVersion(entry.version))
                             .font(.subheadline.weight(.medium))
                     }
                 }
             }
         }
+    }
+
+    private func localizedChangelogVersion(_ version: String) -> String {
+        String(format: String(localized: "settings.changelogVersion"), version)
     }
 
     private var notificationsSection: some View {
