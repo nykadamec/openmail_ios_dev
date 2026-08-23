@@ -43,7 +43,7 @@ enum UpdateState: Equatable {
 final class UpdateService {
     static let shared = UpdateService()
 
-    /// Release notes bundled with the currently installed 0.0.19 (build 19)
+    /// Release notes bundled with the currently installed 0.0.20 (build 20)
     /// release.  These remain available when the remote update manifest cannot
     /// be reached, and can be displayed directly by SettingsView.
     static let currentChangelog: [String] = [
@@ -60,7 +60,8 @@ final class UpdateService {
         "Přidán výběr veřejného a vlastního Tailscale serveru",
         "Veřejný server byl odstraněn z výchozí konfigurace",
         "Povoleno připojení na HTTP Tailscale server přes vlastní profil",
-        "Opraveno trvalé používání session cookie pro další API requesty"
+        "Opraveno trvalé používání session cookie pro další API requesty",
+        "Opraven pád při otevření nastavení serverů s Face ID"
     ]
 
     /// Readable alias for callers that refer to the bundled changelog as
