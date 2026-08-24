@@ -585,6 +585,19 @@ final class APIClient {
         return try decode(SendResult.self, from: data)
     }
 
+    // MARK: Sync
+
+    /// POST /api/sync – pulls the latest messages from Resend and stores new
+    /// ones for the current user. The server call is synchronous and may take
+    /// up to ~30 s; callers should run it off the UI task.
+    func syncEmails() async throws -> SyncResult {
+        var request = URLRequest(url: url("api/sync"))
+        request.httpMethod = "POST"
+        let (data, response) = try await perform(request)
+        try validate(response)
+        return try decode(SyncResult.self, from: data)
+    }
+
     // MARK: Attachments / logout
 
     /// GET /api/attachments/<email_id>/<filename> – the filename is split into

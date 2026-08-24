@@ -394,6 +394,13 @@ struct InboxView: View {
         shouldRestoreScroll = false
         searchTask?.cancel()
         await loadMeta()
+        // Kick off a Resend sync in the background so new mail actually
+        // reaches the local DB. The call is synchronous on the server and may
+        // take up to ~30 s, so it must not block the refresh feedback.
+        let syncClient = authStore.activeClient
+        Task.detached(priority: .utility) {
+            _ = try? await syncClient.syncEmails()
+        }
         await fetch(reset: true, isRefresh: true)
     }
 

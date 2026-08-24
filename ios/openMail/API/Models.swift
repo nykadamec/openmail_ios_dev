@@ -259,3 +259,9 @@ struct SendResult: Decodable {
     let status: String?
     let id: String?
 }
+
+/// Result of `POST /api/sync`. The server synchronously fetches up to the
+/// last 50 messages from Resend and imports new ones for the current user.
+struct SyncResult: Decodable {
+    let imported: Int?
+}

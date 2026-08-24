@@ -1,11 +1,13 @@
 {
-  "version": "0.0.27",
-  "build": 26,
-  "title": "openMail 0.0.27",
-  "releaseURL": "https://github.com/nykadamec/openmail_ios_dev/releases/tag/v0.0.27",
-  "ipaURL": "https://github.com/nykadamec/openmail_ios_dev/releases/download/v0.0.27/openMail-unsigned.ipa",
+  "version": "0.0.28",
+  "build": 27,
+  "title": "openMail 0.0.28",
+  "releaseURL": "https://github.com/nykadamec/openmail_ios_dev/releases/tag/v0.0.28",
+  "ipaURL": "https://github.com/nykadamec/openmail_ios_dev/releases/download/v0.0.28/openMail-unsigned.ipa",
   "minimumSupportedVersion": "0.0.9",
   "changelog": [
+    "Odesílání emailu bez předmětu — automatický fallback na (bez předmětu)",
+    "Pull-to-refresh nyní reálně stahuje nové emaily ze serveru (sync s Resend)",
     "Kompletní redesign Composeru",
     "Autocomplete příjemců z kontaktů v Composeru",
     "Opravena diakritika a návrhy slov v těle zprávy",
@@ -21,6 +23,25 @@
     "Dokončena anglická lokalizace sekce Co je nového"
   ],
   "history": [
+    {
+      "version": "0.0.27",
+      "build": 26,
+      "changelog": [
+        "Kompletní redesign Composeru",
+        "Autocomplete příjemců z kontaktů v Composeru",
+        "Opravena diakritika a návrhy slov v těle zprávy",
+        "Kompaktní výběr historie verzí — kliknutím na verzi se otevře sheet s jejím changelogem",
+        "Profilová karta je celá klikatelná a otevře detail profilu",
+        "Opraveno zadávání hvězdičky u kontaktů (odesílalo se na špatný endpoint)",
+        "Opraveno zobrazení Nastavení v tmavém režimu",
+        "Lokalizován titulek changelogu",
+        "Historie verzí v nastavení — přehled novinek starších verzí",
+        "Lokální notifikace při přijetí nového e-mailu, včetně pozadí",
+        "Notifikace lze spravovat přímo v Nastavení aplikace",
+        "Opraven pull-to-refresh, který vracel inbox na starou pozici",
+        "Dokončena anglická lokalizace sekce Co je nového"
+      ]
+    },
     {
       "version": "0.0.25",
       "build": 24,

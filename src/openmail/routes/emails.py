@@ -85,10 +85,11 @@ def bulk_email_action_route():
 def send_email_route():
     data = request.json or {}
     to = data.get("to", "").strip()
-    subject = data.get("subject", "").strip()
+    raw_subject = data.get("subject", "").strip()
+    subject = raw_subject or "(bez předmětu)"
     body = data.get("body", "")
-    if not to or not subject:
-        return jsonify({"error": "Missing recipient or subject"}), 400
+    if not to:
+        return jsonify({"error": "Missing recipient"}), 400
     result = resend_service.send_email(to, subject, body, data.get("attachments", []))
     if result.get("error"):
         return jsonify({"error": result["error"]}), 500
