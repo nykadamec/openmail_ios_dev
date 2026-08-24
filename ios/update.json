@@ -1,11 +1,12 @@
 {
-  "version": "0.0.26",
-  "build": 25,
-  "title": "openMail 0.0.26",
-  "releaseURL": "https://github.com/nykadamec/openmail_ios_dev/releases/tag/v0.0.26",
-  "ipaURL": "https://github.com/nykadamec/openmail_ios_dev/releases/download/v0.0.26/openMail-unsigned.ipa",
+  "version": "0.0.27",
+  "build": 26,
+  "title": "openMail 0.0.27",
+  "releaseURL": "https://github.com/nykadamec/openmail_ios_dev/releases/tag/v0.0.27",
+  "ipaURL": "https://github.com/nykadamec/openmail_ios_dev/releases/download/v0.0.27/openMail-unsigned.ipa",
   "minimumSupportedVersion": "0.0.9",
   "changelog": [
+    "Kompletní redesign Composeru",
     "Autocomplete příjemců z kontaktů v Composeru",
     "Opravena diakritika a návrhy slov v těle zprávy",
     "Kompaktní výběr historie verzí — kliknutím na verzi se otevře sheet s jejím changelogem",

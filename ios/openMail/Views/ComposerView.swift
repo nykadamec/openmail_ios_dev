@@ -71,185 +71,60 @@ struct ComposerView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: 0) {
-                    // MARK: - Recipients row
-                    recipientRow
-
-                    // Dropdown suggestions
-                    if !filteredContacts.isEmpty {
-                        suggestedCard
-                            .padding(.horizontal, 16)
-                            .padding(.top, 8)
-                    }
-
-                    Divider()
-                        .background(Color(red: 229/255, green: 229/255, blue: 234/255))
-                        .padding(.top, filteredContacts.isEmpty ? 0 : 8)
-
-                    // MARK: - Subject
-                    HStack(spacing: 8) {
-                        Text("composer.subject")
-                            .foregroundStyle(Color(.secondaryLabel))
-                            .font(.system(size: 15))
-                        TextField("", text: $subject, prompt: Text("composer.subject").foregroundStyle(Color(.placeholderText)))
-                            .font(.system(size: 15))
-                            .textInputAutocapitalization(.sentences)
-                    }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 12)
-
-                    Divider()
-                        .background(Color(red: 229/255, green: 229/255, blue: 234/255))
-
-                    // MARK: - Body
-                    ZStack(alignment: .topLeading) {
-                        if bodyText.isEmpty {
-                            Text("composer.body")
-                                .foregroundStyle(Color(.placeholderText))
-                                .font(.system(size: 17))
-                                .padding(.top, 10)
-                                .padding(.leading, 5)
-                                .allowsHitTesting(false)
-                        }
-                        TextEditor(text: $bodyText)
-                            .font(.system(size: 17))
-                            .frame(minHeight: 220)
-                            .scrollContentBackground(.hidden)
-                            .background(Color.clear)
-                            .autocorrectionDisabled(false)
-                            .textInputAutocapitalization(.sentences)
-                            .keyboardType(.default)
-                    }
-                    .padding(.horizontal, 11)
-                    .padding(.vertical, 4)
-
-                    Divider()
-                        .background(Color(red: 229/255, green: 229/255, blue: 234/255))
-
-                    // MARK: - Attachments
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text("composer.attachments")
-                            .font(.system(size: 13, weight: .semibold))
-                            .foregroundStyle(.secondary)
-                            .textCase(.uppercase)
-
-                        if attachments.isEmpty {
-                            Text("composer.noAttachments")
-                                .foregroundStyle(.secondary)
-                                .font(.system(size: 14))
-                        } else {
-                            ForEach(attachments) { attachment in
-                                HStack {
-                                    Image(systemName: "paperclip")
-                                        .foregroundStyle(.secondary)
-                                    Text(attachment.filename)
-                                        .lineLimit(1)
-                                        .font(.system(size: 14))
-                                    Spacer()
-                                    Button {
-                                        remove(attachment)
-                                    } label: {
-                                        Image(systemName: "xmark.circle.fill")
-                                            .foregroundStyle(Color(.tertiaryLabel))
-                                    }
-                                    .buttonStyle(.plain)
-                                    .accessibilityLabel(Text("action.removeAttachment"))
-                                }
-                            }
-                        }
-
-                        HStack(spacing: 16) {
-                            Button {
-                                showFileImporter = true
-                            } label: {
-                                Label("composer.addFile", systemImage: "folder")
-                                    .font(.system(size: 14, weight: .medium))
-                            }
-
-                            Button {
-                                showPhotosPicker = true
-                            } label: {
-                                Label("composer.addPhotos", systemImage: "photo")
-                                    .font(.system(size: 14, weight: .medium))
-                            }
-                        }
-                    }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 14)
-
-                    Divider()
-                        .background(Color(red: 229/255, green: 229/255, blue: 234/255))
-
-                    // MARK: - Send
-                    Button {
-                        Task { await send() }
-                    } label: {
-                        HStack {
-                            Spacer()
-                            if isLoading {
-                                ProgressView()
-                                    .tint(.white)
-                            } else {
-                                Label("action.send", systemImage: "paperplane.fill")
-                                    .font(.system(size: 16, weight: .semibold))
-                            }
-                            Spacer()
-                        }
-                        .frame(minHeight: 44)
-                        .foregroundStyle(.white)
-                        .background(canSend ? Color(red: 0, green: 122/255, blue: 1) : Color(.systemGray3))
-                        .clipShape(RoundedRectangle(cornerRadius: 10))
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 14)
-                    }
-                    .disabled(!canSend)
+            VStack(spacing: 0) {
+                recipientRow
+                if !filteredContacts.isEmpty { suggestedCard.padding(.horizontal, 16) }
+                Divider()
+                HStack(spacing: 12) {
+                    Text("composer.subject").foregroundStyle(.secondary).font(.subheadline).frame(width: 58, alignment: .leading)
+                    TextField("", text: $subject, prompt: Text("composer.subject").foregroundStyle(.placeholder))
+                        .font(.body).textInputAutocapitalization(.sentences)
                 }
-            }
-            .background(Color(.systemGroupedBackground))
-            .scrollDismissesKeyboard(.interactively)
-            .navigationTitle("action.compose")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
+                .padding(.horizontal, 16).padding(.vertical, 12)
+                Divider()
+                ZStack(alignment: .topLeading) {
+                    if bodyText.isEmpty { Text("composer.body").foregroundStyle(.placeholder).font(.body).padding(.top, 10).padding(.leading, 5).allowsHitTesting(false) }
+                    TextEditor(text: $bodyText).font(.body).scrollContentBackground(.hidden).background(.clear)
+                        .autocorrectionDisabled(false).textInputAutocapitalization(.sentences).keyboardType(.default)
+                }
+                .padding(.horizontal, 11).padding(.vertical, 8).frame(maxHeight: .infinity)
                 if !attachments.isEmpty {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button {
-                            attachments.removeAll()
-                        } label: {
-                            Image(systemName: "trash")
-                                .accessibilityLabel(Text("composer.clearAttachments"))
+                    VStack(alignment: .leading, spacing: 6) {
+                        ForEach(attachments) { attachment in
+                            HStack(spacing: 8) {
+                                Image(systemName: "paperclip").foregroundStyle(.secondary)
+                                Text(attachment.filename).lineLimit(1).font(.subheadline)
+                                Spacer()
+                                Button { remove(attachment) } label: { Image(systemName: "xmark.circle.fill").foregroundStyle(.tertiary) }
+                                    .buttonStyle(.plain).accessibilityLabel(Text("action.removeAttachment"))
+                            }
                         }
                     }
+                    .padding(.horizontal, 16).padding(.vertical, 10)
+                    .background(Color(.secondarySystemBackground))
                 }
             }
-            .task {
-                await loadContacts()
-            }
-            .fileImporter(
-                isPresented: $showFileImporter,
-                allowedContentTypes: [.item],
-                allowsMultipleSelection: true
-            ) { result in
-                if case .success(let urls) = result {
-                    for url in urls {
-                        addFile(at: url)
-                    }
+            .background(Color(.systemBackground))
+            .scrollDismissesKeyboard(.interactively)
+            .navigationTitle("action.compose").navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) { Button("action.cancel") { dismiss() } }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button { Task { await send() } } label: { if isLoading { ProgressView() } else { Image(systemName: "paperplane.fill") } }
+                        .disabled(!canSend).accessibilityLabel(Text("action.send"))
+                }
+                ToolbarItemGroup(placement: .keyboard) {
+                    Button { showFileImporter = true } label: { Image(systemName: "paperclip") }
+                    Button { showPhotosPicker = true } label: { Image(systemName: "photo") }
                 }
             }
-            .photosPicker(
-                isPresented: $showPhotosPicker,
-                selection: $photosPickerItems,
-                maxSelectionCount: 6,
-                matching: .images
-            )
-            .onChange(of: photosPickerItems) {
-                Task { await loadPhotos() }
+            .task { await loadContacts() }
+            .fileImporter(isPresented: $showFileImporter, allowedContentTypes: [.item], allowsMultipleSelection: true) { result in
+                if case .success(let urls) = result { urls.forEach { addFile(at: $0) } }
             }
-            .alert(alertTitle, isPresented: $showAlert) {
-                Button("action.ok", role: .cancel) {}
-            } message: {
-                Text(alertMessage)
-            }
+            .photosPicker(isPresented: $showPhotosPicker, selection: $photosPickerItems, maxSelectionCount: 6, matching: .images)
+            .onChange(of: photosPickerItems) { Task { await loadPhotos() } }
+            .alert(alertTitle, isPresented: $showAlert) { Button("action.ok", role: .cancel) {} } message: { Text(alertMessage) }
         }
     }
 
@@ -280,7 +155,7 @@ struct ComposerView: View {
             Spacer(minLength: 0)
         }
         .padding(.horizontal, 16)
-        .padding(.vertical, 6)
+            .padding(.vertical, 8)
     }
 
     private func chip(for contact: Contact) -> some View {
@@ -313,7 +188,7 @@ struct ComposerView: View {
         .padding(.leading, 4)
         .padding(.trailing, 6)
         .padding(.vertical, 4)
-        .background(Color(red: 229/255, green: 240/255, blue: 1))
+        .background(Color(.secondarySystemBackground))
         .clipShape(Capsule())
     }
 
@@ -326,16 +201,6 @@ struct ComposerView: View {
 
     private var suggestedCard: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text("composer.suggestedContacts")
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(.secondary)
-                .textCase(.uppercase)
-                .padding(.horizontal, 14)
-                .padding(.vertical, 8)
-
-            Divider()
-                .background(Color(red: 229/255, green: 229/255, blue: 234/255))
-
             ForEach(Array(filteredContacts.enumerated()), id: \.element.id) { index, contact in
                 Button {
                     addRecipient(contact)
@@ -344,7 +209,7 @@ struct ComposerView: View {
                         ZStack {
                             Circle()
                                 .fill(Color(red: 0, green: 122/255, blue: 1))
-                                .frame(width: 32, height: 32)
+                                    .frame(width: 28, height: 28)
                             Text(initial(for: contact))
                                 .font(.system(size: 13, weight: .semibold))
                                 .foregroundStyle(.white)
@@ -368,7 +233,7 @@ struct ComposerView: View {
                             .clipShape(Circle())
                     }
                     .padding(.horizontal, 14)
-                    .padding(.vertical, 9)
+                    .padding(.vertical, 6)
                     .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
@@ -380,12 +245,8 @@ struct ComposerView: View {
             }
         }
         .background(Color(.systemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-        .shadow(color: Color.black.opacity(0.08), radius: 10, x: 0, y: 4)
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(Color(red: 229/255, green: 229/255, blue: 234/255), lineWidth: 1)
-        )
+        .background(Color(.secondarySystemBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 8))
     }
 
     // MARK: - Contacts loading
