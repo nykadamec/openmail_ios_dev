@@ -40,3 +40,7 @@ Aktuální Composer vizuálně neodpovídá Inboxu a Settings: má příliš mno
 - Žádné změny backendu.
 - Žádné změny Inboxu, Settings ani Contacts mimo Composer.
 - Žádný release/source update bez dalšího potvrzení.
+
+## Dodatek po upřesnění požadavku
+
+Uživatel požaduje pouze implementaci nového UI kódu Composeru. Frame0 redesign není součástí implementace a nesmí se dále upravovat. Implementace se omezuje na `ComposerView.swift` a nezbytné lokalizační klíče; bez bumpu verze, buildu release a source update.
