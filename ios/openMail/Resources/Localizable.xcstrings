@@ -881,6 +881,38 @@
         }
       }
     },
+    "composer.toPlaceholder": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Přidat příjemce"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add recipient"
+          }
+        }
+      }
+    },
+    "composer.suggestedContacts": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Navržené kontakty"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Suggested contacts"
+          }
+        }
+      }
+    },
     "empty.inbox": {
       "localizations": {
         "cs": {

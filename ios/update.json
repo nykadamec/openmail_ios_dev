@@ -1,11 +1,13 @@
 {
-  "version": "0.0.25",
-  "build": 24,
-  "title": "openMail 0.0.25",
-  "releaseURL": "https://github.com/nykadamec/openmail_ios_dev/releases/tag/v0.0.25",
-  "ipaURL": "https://github.com/nykadamec/openmail_ios_dev/releases/download/v0.0.25/openMail-unsigned.ipa",
+  "version": "0.0.26",
+  "build": 25,
+  "title": "openMail 0.0.26",
+  "releaseURL": "https://github.com/nykadamec/openmail_ios_dev/releases/tag/v0.0.26",
+  "ipaURL": "https://github.com/nykadamec/openmail_ios_dev/releases/download/v0.0.26/openMail-unsigned.ipa",
   "minimumSupportedVersion": "0.0.9",
   "changelog": [
+    "Autocomplete příjemců z kontaktů v Composeru",
+    "Opravena diakritika a návrhy slov v těle zprávy",
     "Kompaktní výběr historie verzí — kliknutím na verzi se otevře sheet s jejím changelogem",
     "Profilová karta je celá klikatelná a otevře detail profilu",
     "Opraveno zadávání hvězdičky u kontaktů (odesílalo se na špatný endpoint)",
@@ -18,6 +20,17 @@
     "Dokončena anglická lokalizace sekce Co je nového"
   ],
   "history": [
+    {
+      "version": "0.0.25",
+      "build": 24,
+      "changelog": [
+        "Kompaktní výběr historie verzí — kliknutím na verzi se otevře sheet s jejím changelogem",
+        "Profilová karta je celá klikatelná a otevře detail profilu",
+        "Opraveno zadávání hvězdičky u kontaktů (odesílalo se na špatný endpoint)",
+        "Opraveno zobrazení Nastavení v tmavém režimu",
+        "Lokalizován titulek changelogu"
+      ]
+    },
     {
       "version": "0.0.24",
       "build": 23,
@@ -34,13 +47,15 @@
         "Lokalizován titulek changelogu"
       ]
     },
-    "Historie verzí v nastavení — přehled novinek starších verzí",
-    "Lokální notifikace při přijetí nového e-mailu, včetně pozadí",
-    "Notifikace lze spravovat přímo v Nastavení aplikace",
-    "Opraven pull-to-refresh, který vracel inbox na starou pozici",
-    "Dokončena anglická lokalizace sekce Co je nového"
-  ],
-  "history": [
+    {
+      "version": "0.0.22",
+      "build": 22,
+      "changelog": [
+        "Kompletní lokalizace aplikace do češtiny a angličtiny",
+        "Minimalistický redesign Nastavení — Account v 2 kartách",
+        "Všechny hardcoded texty nahrazeny lokalizačními klíči"
+      ]
+    },
     {
       "version": "0.0.21",
       "build": 21,
