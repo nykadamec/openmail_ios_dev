@@ -131,10 +131,17 @@ struct ContactsView: View {
         let token = authStore.sessionToken()
         let shouldStar = !starredIDs.contains(contact.id)
         do {
-            _ = try await token.client.updateContact(id: contact.id, fields: ["is_starred": shouldStar])
+            if shouldStar {
+                try await token.client.addStarredAddress(email: contact.email)
+            } else {
+                try await token.client.removeStarredAddress(email: contact.email)
+            }
             guard authStore.isCurrent(token) else { return }
             if shouldStar { starredIDs.insert(contact.id) } else { starredIDs.remove(contact.id) }
-        } catch { if authStore.isCurrent(token) { errorMessage = error.localizedDescription } }
+        } catch {
+            guard authStore.isCurrent(token) else { return }
+            errorMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+        }
     }
 
     private func delete(_ contact: Contact) async {

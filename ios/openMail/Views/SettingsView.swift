@@ -10,6 +10,7 @@ struct SettingsView: View {
     private let updateService = UpdateService.shared
     @State private var updateState: UpdateState?
     @State private var isCheckingForUpdates = false
+    @State private var selectedHistoryEntry: UpdateHistoryEntry?
 
     @State private var notificationsAuth: NotificationsCoordinator.AuthorizationState = .notDetermined
     @State private var isRequestingNotifications = false
@@ -275,12 +276,24 @@ struct SettingsView: View {
                         .padding(.vertical, 4)
                 } else {
                     ForEach(history) { entry in
-                        Text(entry.version)
-                            .font(.subheadline)
-                            .foregroundStyle(.primary)
+                        Button {
+                            selectedHistoryEntry = entry
+                        } label: {
+                            HStack {
+                                Text(entry.version)
+                                    .font(.subheadline)
+                                    .foregroundStyle(.primary)
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .font(.caption.weight(.semibold))
+                                    .foregroundStyle(.tertiary)
+                            }
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(.vertical, 2)
-                            .accessibilityLabel(Text(localizedChangelogVersion(entry.version)))
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(Text(localizedChangelogVersion(entry.version)))
                     }
                 }
             } label: {
@@ -296,6 +309,9 @@ struct SettingsView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
+        }
+        .sheet(item: $selectedHistoryEntry) { entry in
+            VersionDetailSheet(entry: entry)
         }
     }
 

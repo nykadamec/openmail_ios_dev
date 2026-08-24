@@ -49,6 +49,22 @@
         }
       }
     },
+    "action.close": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zavřít"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Close"
+          }
+        }
+      }
+    },
     "action.delete": {
       "localizations": {
         "cs": {

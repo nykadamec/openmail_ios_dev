@@ -497,6 +497,24 @@ final class APIClient {
         try validate(response)
     }
 
+    /// POST /api/starred-addresses with `{email}` to mark the address as starred.
+    func addStarredAddress(email: String) async throws {
+        var request = URLRequest(url: url("api/starred-addresses"))
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONEncoder().encode(["email": email.lowercased()])
+        _ = try await perform(request)
+    }
+
+    /// DELETE /api/starred-addresses with `{email}` to remove a starred address.
+    func removeStarredAddress(email: String) async throws {
+        var request = URLRequest(url: url("api/starred-addresses"))
+        request.httpMethod = "DELETE"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONEncoder().encode(["email": email.lowercased()])
+        _ = try await perform(request)
+    }
+
     /// GET /api/domain-rules. Rules are consistently addressed by this path.
     func contactRules() async throws -> [ContactRule] {
         let (data, response) = try await perform(URLRequest(url: url("api/domain-rules")))
