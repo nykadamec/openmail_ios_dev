@@ -1,11 +1,13 @@
 {
-  "version": "0.0.23",
-  "build": 23,
-  "title": "openMail 0.0.23",
-  "releaseURL": "https://github.com/nykadamec/openmail_ios_dev/releases/tag/v0.0.23",
-  "ipaURL": "https://github.com/nykadamec/openmail_ios_dev/releases/download/v0.0.23/openMail-unsigned.ipa",
+  "version": "0.0.24",
+  "build": 24,
+  "title": "openMail 0.0.24",
+  "releaseURL": "https://github.com/nykadamec/openmail_ios_dev/releases/tag/v0.0.24",
+  "ipaURL": "https://github.com/nykadamec/openmail_ios_dev/releases/download/v0.0.24/openMail-unsigned.ipa",
   "minimumSupportedVersion": "0.0.9",
   "changelog": [
+    "Kompaktní výběr historie verzí — jeden řádek s rozbalením",
+    "Profilová karta je nyní klikatelná a otevírá detail profilu",
     "Opraveno zobrazení Nastavení v tmavém režimu",
     "Lokalizován titulek changelogu",
     "Historie verzí v nastavení — přehled novinek starších verzí",
@@ -15,6 +17,23 @@
     "Dokončena anglická lokalizace sekce Co je nového"
   ],
   "history": [
+    {
+      "version": "0.0.23",
+      "build": 23,
+      "changelog": [
+        "Opraveno zobrazení Nastavení v tmavém režimu",
+        "Lokalizován titulek changelogu"
+      ]
+    },
+    {
+      "version": "0.0.22",
+      "build": 22,
+      "changelog": [
+        "Kompletní lokalizace aplikace do češtiny a angličtiny",
+        "Minimalistický redesign Nastavení — Account v 2 kartách",
+        "Všechny hardcoded texty nahrazeny lokalizačními klíči"
+      ]
+    },
     {
       "version": "0.0.21",
       "build": 21,
