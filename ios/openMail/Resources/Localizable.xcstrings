@@ -3584,6 +3584,54 @@
           }
         }
       }
+    },
+    "composer.discardTitle": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zahodit rozepsanou zprávu?"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Discard draft?"
+          }
+        }
+      }
+    },
+    "composer.discard": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zahodit"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Discard"
+          }
+        }
+      }
+    },
+    "composer.discardMessage": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Všechny příjemce, předmět, text a přílohy budou smazány."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All recipients, subject, body and attachments will be erased."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

@@ -1,11 +1,14 @@
 {
-  "version": "0.0.28",
-  "build": 27,
-  "title": "openMail 0.0.28",
-  "releaseURL": "https://github.com/nykadamec/openmail_ios_dev/releases/tag/v0.0.28",
-  "ipaURL": "https://github.com/nykadamec/openmail_ios_dev/releases/download/v0.0.28/openMail-unsigned.ipa",
+  "version": "0.0.29",
+  "build": 28,
+  "title": "openMail 0.0.29",
+  "releaseURL": "https://github.com/nykadamec/openmail_ios_dev/releases/tag/v0.0.29",
+  "ipaURL": "https://github.com/nykadamec/openmail_ios_dev/releases/download/v0.0.29/openMail-unsigned.ipa",
   "minimumSupportedVersion": "0.0.9",
   "changelog": [
+    "Opraveno tlačítko Zrušit v Composeru (zavírá z Inboxu i z tabu)",
+    "Pole Příjemce zarovnáno na stejný řádek s popiskem Komu",
+    "Historie verzí v Nastavení zobrazuje jen posledních 6 verzí",
     "Odesílání emailu bez předmětu — automatický fallback na (bez předmětu)",
     "Pull-to-refresh nyní reálně stahuje nové emaily ze serveru (sync s Resend)",
     "Kompletní redesign Composeru",
@@ -23,6 +26,27 @@
     "Dokončena anglická lokalizace sekce Co je nového"
   ],
   "history": [
+    {
+      "version": "0.0.28",
+      "build": 27,
+      "changelog": [
+        "Odesílání emailu bez předmětu — automatický fallback na (bez předmětu)",
+        "Pull-to-refresh nyní reálně stahuje nové emaily ze serveru (sync s Resend)",
+        "Kompletní redesign Composeru",
+        "Autocomplete příjemců z kontaktů v Composeru",
+        "Opravena diakritika a návrhy slov v těle zprávy",
+        "Kompaktní výběr historie verzí — kliknutím na verzi se otevře sheet s jejím changelogem",
+        "Profilová karta je celá klikatelná a otevře detail profilu",
+        "Opraveno zadávání hvězdičky u kontaktů (odesílalo se na špatný endpoint)",
+        "Opraveno zobrazení Nastavení v tmavém režimu",
+        "Lokalizován titulek changelogu",
+        "Historie verzí v nastavení — přehled novinek starších verzí",
+        "Lokální notifikace při přijetí nového e-mailu, včetně pozadí",
+        "Notifikace lze spravovat přímo v Nastavení aplikace",
+        "Opraven pull-to-refresh, který vracel inbox na starou pozici",
+        "Dokončena anglická lokalizace sekce Co je nového"
+      ]
+    },
     {
       "version": "0.0.27",
       "build": 26,
@@ -76,87 +100,6 @@
         "Kompletní lokalizace aplikace do češtiny a angličtiny",
         "Minimalistický redesign Nastavení — Account v 2 kartách",
         "Všechny hardcoded texty nahrazeny lokalizačními klíči"
-      ]
-    },
-    {
-      "version": "0.0.21",
-      "build": 21,
-      "changelog": [
-        "Historie verzí v nastavení — přehled novinek starších verzí",
-        "Lokální notifikace při přijetí nového e-mailu, včetně pozadí",
-        "Notifikace lze spravovat přímo v Nastavení aplikace",
-        "Opraven pull-to-refresh, který vracel inbox na starou pozici",
-        "Dokončena anglická lokalizace sekce Co je nového"
-      ]
-    },
-    {
-      "version": "0.0.20",
-      "build": 20,
-      "changelog": [
-        "HTML e-mailové tělo se zobrazuje přes celý viewport",
-        "Spolehlivější scrollování dlouhých e-mailů",
-        "Stabilnější načítání e-mailů",
-        "Zachování scroll pozice Inboxu a jemné zaoblení HTML obsahu",
-        "Opraveno přihlášení a předávání session cookie přes redirect",
-        "Robustnější ukládání Remember Me session do Keychainu",
-        "Přidán výběr veřejného a vlastního Tailscale serveru",
-        "Opraven pád při otevření nastavení serverů s Face ID"
-      ]
-    },
-    {
-      "version": "0.0.19",
-      "build": 19,
-      "changelog": [
-        "Přidána podpora pro synchronní načítání více složek najednou",
-        "Vylepšené zobrazení dlouhých předmětů v seznamu",
-        "Opraveny pády při otevření e-mailu s velkou přílohou",
-        "Session cookie se nyní drží i přes redirect po loginu",
-        "Robustnější práce s klíčenkou pro remember-me token",
-        "Úprava layoutu kontaktů pro menší displeje"
-      ]
-    },
-    {
-      "version": "0.0.18",
-      "build": 18,
-      "changelog": [
-        "Přidána možnost hromadně označit e-maily jako přečtené",
-        "Vylepšená odezva při scrollování v Inboxu",
-        "Nové filtrování podle adresy odesílatele",
-        "Opraveno dvojité načítání při rychlém přepínání složek",
-        "Stabilnější chování při ztrátě sítě"
-      ]
-    },
-    {
-      "version": "0.0.17",
-      "build": 17,
-      "changelog": [
-        "Přidán seznam oblíbených adres v kontaktech",
-        "Vylepšená odezva při otevírání detailu e-mailu",
-        "Opraveny drobné chyby v HTML zobrazení",
-        "Přidána podpora pro vlastní složky v sidebaru",
-        "Rychlejší start aplikace díky lazy načítání"
-      ]
-    },
-    {
-      "version": "0.0.16",
-      "build": 16,
-      "changelog": [
-        "Implementován vlastní server profiles editor",
-        "Přidáno zabezpečení přístupu k serverům přes PIN / Face ID",
-        "Vylepšen error handling při ztrátě spojení",
-        "Opraveno zobrazení avatarů pro neznámé odesílatele",
-        "Přidána možnost smazat více e-mailů najednou"
-      ]
-    },
-    {
-      "version": "0.0.15",
-      "build": 15,
-      "changelog": [
-        "První release s podporou Tailscale a vlastních serverů",
-        "Základní implementace kontaktů",
-        "Compose editor s podporou příloh",
-        "Synchronizace přes Resend inbound webhook",
-        "Login s remember-me přes Keychain"
       ]
     }
   ]

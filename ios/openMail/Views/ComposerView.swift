@@ -34,10 +34,21 @@ struct ComposerView: View {
     @State private var alertTitle = ""
     @State private var alertMessage = ""
     @State private var showAlert = false
+    @State private var showClearConfirm = false
 
     private var canSend: Bool {
         let hasRecipient = !recipients.isEmpty || !toInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         return hasRecipient && !isLoading
+    }
+
+    /// True if there is any in-progress content. Used by Cancel to decide
+    /// whether a confirmation alert is necessary before discarding the draft.
+    private var hasContent: Bool {
+        !recipients.isEmpty
+            || !toInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            || !subject.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            || !bodyText.isEmpty
+            || !attachments.isEmpty
     }
 
     private var filteredContacts: [Contact] {
@@ -70,72 +81,84 @@ struct ComposerView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            VStack(spacing: 0) {
-                recipientRow
-                if !filteredContacts.isEmpty { suggestedCard.padding(.horizontal, 16) }
-                Divider()
-                HStack(spacing: 12) {
-                    Text("composer.subject").foregroundStyle(.secondary).font(.subheadline).frame(width: 58, alignment: .leading)
-                    TextField("", text: $subject, prompt: Text("composer.subject").foregroundStyle(.placeholder))
-                        .font(.body).textInputAutocapitalization(.sentences)
-                }
-                .padding(.horizontal, 16).padding(.vertical, 12)
-                Divider()
-                ZStack(alignment: .topLeading) {
-                    if bodyText.isEmpty { Text("composer.body").foregroundStyle(.placeholder).font(.body).padding(.top, 10).padding(.leading, 5).allowsHitTesting(false) }
-                    TextEditor(text: $bodyText).font(.body).scrollContentBackground(.hidden).background(.clear)
-                        .autocorrectionDisabled(false).textInputAutocapitalization(.sentences).keyboardType(.default)
-                }
-                .padding(.horizontal, 11).padding(.vertical, 8).frame(maxHeight: .infinity)
-                if !attachments.isEmpty {
-                    VStack(alignment: .leading, spacing: 6) {
-                        ForEach(attachments) { attachment in
-                            HStack(spacing: 8) {
-                                Image(systemName: "paperclip").foregroundStyle(.secondary)
-                                Text(attachment.filename).lineLimit(1).font(.subheadline)
-                                Spacer()
-                                Button { remove(attachment) } label: { Image(systemName: "xmark.circle.fill").foregroundStyle(.tertiary) }
-                                    .buttonStyle(.plain).accessibilityLabel(Text("action.removeAttachment"))
-                            }
+        VStack(spacing: 0) {
+            recipientRow
+            if !filteredContacts.isEmpty { suggestedCard.padding(.horizontal, 16) }
+            Divider()
+            HStack(spacing: 12) {
+                Text("composer.subject").foregroundStyle(.secondary).font(.subheadline).frame(width: 58, alignment: .leading)
+                TextField("", text: $subject, prompt: Text("composer.subject").foregroundStyle(.placeholder))
+                    .font(.body).textInputAutocapitalization(.sentences)
+            }
+            .padding(.horizontal, 16).padding(.vertical, 12)
+            Divider()
+            ZStack(alignment: .topLeading) {
+                if bodyText.isEmpty { Text("composer.body").foregroundStyle(.placeholder).font(.body).padding(.top, 10).padding(.leading, 5).allowsHitTesting(false) }
+                TextEditor(text: $bodyText).font(.body).scrollContentBackground(.hidden).background(.clear)
+                    .autocorrectionDisabled(false).textInputAutocapitalization(.sentences).keyboardType(.default)
+            }
+            .padding(.horizontal, 11).padding(.vertical, 8).frame(maxHeight: .infinity)
+            if !attachments.isEmpty {
+                VStack(alignment: .leading, spacing: 6) {
+                    ForEach(attachments) { attachment in
+                        HStack(spacing: 8) {
+                            Image(systemName: "paperclip").foregroundStyle(.secondary)
+                            Text(attachment.filename).lineLimit(1).font(.subheadline)
+                            Spacer()
+                            Button { remove(attachment) } label: { Image(systemName: "xmark.circle.fill").foregroundStyle(.tertiary) }
+                                .buttonStyle(.plain).accessibilityLabel(Text("action.removeAttachment"))
                         }
                     }
-                    .padding(.horizontal, 16).padding(.vertical, 10)
-                    .background(Color(.secondarySystemBackground))
+                }
+                .padding(.horizontal, 16).padding(.vertical, 10)
+                .background(Color(.secondarySystemBackground))
+            }
+        }
+        .background(Color(.systemBackground))
+        .scrollDismissesKeyboard(.interactively)
+        .navigationTitle("action.compose").navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button("action.cancel") {
+                    if hasContent {
+                        showClearConfirm = true
+                    } else {
+                        dismiss()
+                    }
                 }
             }
-            .background(Color(.systemBackground))
-            .scrollDismissesKeyboard(.interactively)
-            .navigationTitle("action.compose").navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) { Button("action.cancel") { dismiss() } }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button { Task { await send() } } label: { if isLoading { ProgressView() } else { Image(systemName: "paperplane.fill") } }
-                        .disabled(!canSend).accessibilityLabel(Text("action.send"))
-                }
-                ToolbarItemGroup(placement: .keyboard) {
-                    Button { showFileImporter = true } label: { Image(systemName: "paperclip") }
-                    Button { showPhotosPicker = true } label: { Image(systemName: "photo") }
-                }
+            ToolbarItem(placement: .topBarTrailing) {
+                Button { Task { await send() } } label: { if isLoading { ProgressView() } else { Image(systemName: "paperplane.fill") } }
+                    .disabled(!canSend).accessibilityLabel(Text("action.send"))
             }
-            .task { await loadContacts() }
-            .fileImporter(isPresented: $showFileImporter, allowedContentTypes: [.item], allowsMultipleSelection: true) { result in
-                if case .success(let urls) = result { urls.forEach { addFile(at: $0) } }
+            ToolbarItemGroup(placement: .keyboard) {
+                Button { showFileImporter = true } label: { Image(systemName: "paperclip") }
+                Button { showPhotosPicker = true } label: { Image(systemName: "photo") }
             }
-            .photosPicker(isPresented: $showPhotosPicker, selection: $photosPickerItems, maxSelectionCount: 6, matching: .images)
-            .onChange(of: photosPickerItems) { Task { await loadPhotos() } }
-            .alert(alertTitle, isPresented: $showAlert) { Button("action.ok", role: .cancel) {} } message: { Text(alertMessage) }
+        }
+        .task { await loadContacts() }
+        .fileImporter(isPresented: $showFileImporter, allowedContentTypes: [.item], allowsMultipleSelection: true) { result in
+            if case .success(let urls) = result { urls.forEach { addFile(at: $0) } }
+        }
+        .photosPicker(isPresented: $showPhotosPicker, selection: $photosPickerItems, maxSelectionCount: 6, matching: .images)
+        .onChange(of: photosPickerItems) { Task { await loadPhotos() } }
+        .alert(alertTitle, isPresented: $showAlert) { Button("action.ok", role: .cancel) {} } message: { Text(alertMessage) }
+        .confirmationDialog("composer.discardTitle", isPresented: $showClearConfirm, titleVisibility: .visible) {
+            Button("composer.discard", role: .destructive) { clear(); dismiss() }
+            Button("action.cancel", role: .cancel) {}
+        } message: {
+            Text("composer.discardMessage")
         }
     }
 
     // MARK: - Recipient row
 
     private var recipientRow: some View {
-        HStack(alignment: .top, spacing: 8) {
+        HStack(alignment: .center, spacing: 8) {
             Text("composer.to")
                 .foregroundStyle(Color(.secondaryLabel))
                 .font(.system(size: 15))
-                .padding(.top, 14)
+                .frame(width: 38, alignment: .leading)
 
             // Chips + input wrapping via FlowLayout
             FlowLayout(spacing: 6) {
@@ -150,12 +173,9 @@ struct ComposerView: View {
                     .keyboardType(.emailAddress)
                     .frame(minWidth: 120)
             }
-            .padding(.top, 6)
-
-            Spacer(minLength: 0)
         }
         .padding(.horizontal, 16)
-            .padding(.vertical, 8)
+        .padding(.vertical, 8)
     }
 
     private func chip(for contact: Contact) -> some View {
