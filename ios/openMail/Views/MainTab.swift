@@ -10,10 +10,12 @@ struct MainTab: View {
                     Label("inbox.title", systemImage: "tray.full")
                 }
 
-            ComposerView()
-                .tabItem {
-                    Label("action.compose", systemImage: "square.and.pencil")
-                }
+            NavigationStack {
+                ComposerView(isPresented: false)
+            }
+            .tabItem {
+                Label("action.compose", systemImage: "square.and.pencil")
+            }
 
             SettingsView()
                 .tabItem {

@@ -14,6 +14,11 @@ struct ComposerAttachment: Identifiable {
 /// New-message composer: recipients, subject, body and file/photo
 /// attachments. Minimalist iOS Mail style with chips autocomplete.
 struct ComposerView: View {
+    /// `true` when the composer is shown as a push/sheet and a Cancel action
+    /// should pop it. `false` when it lives inside a tab root – Cancel only
+    /// discards the draft in that case.
+    var isPresented: Bool = true
+
     @Environment(AuthStore.self) private var authStore
     @Environment(\.dismiss) private var dismiss
 
@@ -122,7 +127,7 @@ struct ComposerView: View {
                 Button("action.cancel") {
                     if hasContent {
                         showClearConfirm = true
-                    } else {
+                    } else if isPresented {
                         dismiss()
                     }
                 }
@@ -144,7 +149,10 @@ struct ComposerView: View {
         .onChange(of: photosPickerItems) { Task { await loadPhotos() } }
         .alert(alertTitle, isPresented: $showAlert) { Button("action.ok", role: .cancel) {} } message: { Text(alertMessage) }
         .confirmationDialog("composer.discardTitle", isPresented: $showClearConfirm, titleVisibility: .visible) {
-            Button("composer.discard", role: .destructive) { clear(); dismiss() }
+            Button("composer.discard", role: .destructive) {
+                clear()
+                if isPresented { dismiss() }
+            }
             Button("action.cancel", role: .cancel) {}
         } message: {
             Text("composer.discardMessage")
