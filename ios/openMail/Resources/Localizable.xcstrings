@@ -2017,6 +2017,38 @@
         }
       }
     },
+    "settings.versionHistoryCompact": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nejnovější %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Latest %@"
+          }
+        }
+      }
+    },
+    "settings.profile": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Profil"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Profile"
+          }
+        }
+      }
+    },
     "settings.servers": {
       "localizations": {
         "cs": {

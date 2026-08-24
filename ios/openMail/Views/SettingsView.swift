@@ -20,26 +20,32 @@ struct SettingsView: View {
                 // Profile card — 80px, avatar 40 #007AFF
                 Section {
                     if let user = authStore.user {
-                        HStack(spacing: 12) {
-                            ZStack {
-                                Circle()
-                                    .fill(Color(red: 0, green: 122.0/255.0, blue: 1))
-                                    .frame(width: 40, height: 40)
-                                Text(String(user.username.prefix(1).uppercased()))
-                                    .font(.system(size: 17, weight: .semibold))
-                                    .foregroundStyle(.white)
+                        NavigationLink {
+                            ProfileDetailView(user: user)
+                        } label: {
+                            HStack(spacing: 12) {
+                                ZStack {
+                                    Circle()
+                                        .fill(Color(red: 0, green: 122.0/255.0, blue: 1))
+                                        .frame(width: 40, height: 40)
+                                    Text(String(user.username.prefix(1).uppercased()))
+                                        .font(.system(size: 17, weight: .semibold))
+                                        .foregroundStyle(.white)
+                                }
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(user.username)
+                                        .font(.system(size: 17))
+                                        .foregroundStyle(.primary)
+                                    Text(user.email)
+                                        .font(.system(size: 15))
+                                        .foregroundStyle(.secondary)
+                                }
+                                Spacer()
                             }
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(user.username)
-                                    .font(.system(size: 17))
-                                    .foregroundStyle(.primary)
-                                Text(user.email)
-                                    .font(.system(size: 15))
-                                    .foregroundStyle(.secondary)
-                            }
-                            Spacer()
+                            .frame(minHeight: 56)
+                            .contentShape(Rectangle())
                         }
-                        .frame(minHeight: 56)
+                        .buttonStyle(.plain)
                         .listRowBackground(Color(.systemBackground))
                     }
                 }
@@ -254,35 +260,41 @@ struct SettingsView: View {
         isCheckingForUpdates = false
     }
 
+    @State private var isVersionHistoryExpanded = false
+
     private var changelogHistorySection: some View {
         let history = updateService.mergedHistory()
-        return Section("settings.changelogHistory") {
-            if history.isEmpty {
-                Text("settings.changelogEmpty")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-                    .padding(.vertical, 4)
-            } else {
-                ForEach(history) { entry in
-                    DisclosureGroup {
-                        VStack(alignment: .leading, spacing: 6) {
-                            ForEach(Array(entry.changelog.enumerated()), id: \.offset) { _, line in
-                                HStack(alignment: .firstTextBaseline, spacing: 8) {
-                                    Text("•")
-                                        .foregroundStyle(.secondary)
-                                    Text(LocalizedStringKey(line))
-                                        .font(.footnote)
-                                        .foregroundStyle(.secondary)
-                                }
-                            }
-                        }
+            .filter { $0.version != updateService.currentVersion }
+        let latestVersion = updateService.currentVersion
+        return Section {
+            DisclosureGroup(isExpanded: $isVersionHistoryExpanded) {
+                if history.isEmpty {
+                    Text("settings.changelogEmpty")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
                         .padding(.vertical, 4)
-                        .accessibilityElement(children: .contain)
-                    } label: {
-                        Text(localizedChangelogVersion(entry.version))
-                            .font(.subheadline.weight(.medium))
+                } else {
+                    ForEach(history) { entry in
+                        Text(entry.version)
+                            .font(.subheadline)
+                            .foregroundStyle(.primary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.vertical, 2)
+                            .accessibilityLabel(Text(localizedChangelogVersion(entry.version)))
                     }
                 }
+            } label: {
+                HStack(spacing: 6) {
+                    Text("settings.changelogHistory")
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(.primary)
+                    Text("·")
+                        .foregroundStyle(.secondary)
+                    Text(String(format: String(localized: "settings.versionHistoryCompact"), latestVersion))
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
     }
