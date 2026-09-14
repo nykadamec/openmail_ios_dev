@@ -1,3 +1,4 @@
+import Combine
 import SwiftUI
 
 /// A folder filter for the email list. System folders map to dedicated API
@@ -86,64 +87,91 @@ struct InboxView: View {
     @State private var lastVisibleEmailID: Int?
     @State private var shouldRestoreScroll = false
 
+    /// Poslední úspěšné načtení seznamu – nutriční údaj pro podtitul navbaru
+    /// („sync před X"). Obnovuje se v `loadWithSync` po každém fetchi.
+    @State private var lastSyncAt: Date?
+    /// Tikání pro čerstvý relativní čas v podtitulu („sync před X").
+    @State private var now = Date()
+    /// Rozbalený stav search pillu v glass navbaru.
+    @State private var isSearchExpanded = false
+    @FocusState private var isSearchFocused: Bool
+
     private var allFolders: [FolderFilter] {
         [.inbox, .starred, .sent, .spam, .trash] + customFolders.map { FolderFilter.custom($0) }
     }
 
     var body: some View {
         NavigationStack {
-            ScrollViewReader { proxy in
-                ScrollView {
-                    LazyVStack(spacing: 0) {
-                        statsHeader
+            ZStack(alignment: .top) {
+                Color.craftBackground.ignoresSafeArea()
 
-                        Color.clear.frame(height: 8)
+                VStack(spacing: 0) {
+                    craftNavbar
+                        .padding(.horizontal, 12)
+                        .padding(.top, 8)
 
-                        if emails.isEmpty && isLoading {
-                            ProgressView()
-                                .frame(maxWidth: .infinity)
-                                .padding(.top, 80)
-                        } else if emails.isEmpty && hasLoadedSuccessfully {
-                            emptyState
-                        } else if emails.isEmpty && initialLoadFailed {
-                            Text(LocalizedStringKey(refreshFailureMessageKey ?? "errors.generic"))
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                                .frame(maxWidth: .infinity)
-                                .padding(.top, 90)
-                        } else {
-                            ForEach(Array(emails.enumerated()), id: \.element.id) { index, email in
-                                row(for: email)
-                                    .id(email.id)
-                                    .simultaneousGesture(TapGesture().onEnded {
-                                        // The tapped row is necessarily visible and
-                                        // is a more reliable anchor than LazyVStack's
-                                        // prefetch-driven onAppear callbacks.
-                                        lastVisibleEmailID = email.id
-                                        shouldRestoreScroll = true
-                                    })
-                                if index == emails.count - 1 {
-                                    loadMoreFooter
+                    folderChipsRow
+                        .padding(.top, 10)
+
+                    ScrollViewReader { proxy in
+                        ScrollView {
+                            LazyVStack(spacing: 10) {
+                                if emails.isEmpty && isLoading {
+                                    ProgressView()
+                                        .frame(maxWidth: .infinity)
+                                        .padding(.top, 80)
+                                } else if emails.isEmpty && hasLoadedSuccessfully {
+                                    emptyState
+                                } else if emails.isEmpty && initialLoadFailed {
+                                    Text(LocalizedStringKey(refreshFailureMessageKey ?? "errors.generic"))
+                                        .font(.craft(size: 15))
+                                        .foregroundStyle(Color.craftSecondary)
+                                        .frame(maxWidth: .infinity)
+                                        .padding(.top, 90)
+                                } else {
+                                    ForEach(Array(emails.enumerated()), id: \.element.id) { index, email in
+                                        row(for: email)
+                                            .id(email.id)
+                                            .simultaneousGesture(TapGesture().onEnded {
+                                                // The tapped row is necessarily visible and
+                                                // is a more reliable anchor than LazyVStack's
+                                                // prefetch-driven onAppear callbacks.
+                                                lastVisibleEmailID = email.id
+                                                shouldRestoreScroll = true
+                                            })
+                                        if index == emails.count - 1 {
+                                            loadMoreFooter
+                                        }
+                                    }
                                 }
+
+                                // Volný prostor pod posledním mailem, aby ho
+                                // nepřekrýval plovoucí tab bar z MainTab.
+                                Color.clear.frame(height: 100)
+                            }
+                            .padding(.horizontal, 14)
+                            .padding(.top, 4)
+                        }
+                        .scrollContentBackground(.hidden)
+                        .background(Color.clear)
+                        .refreshable {
+                            await reload()
+                        }
+                        .onAppear {
+                            guard shouldRestoreScroll, let id = lastVisibleEmailID,
+                                  !emails.isEmpty else { return }
+                            // Wait for LazyVStack to materialize the anchor. A single
+                            // deferred, non-animated scroll avoids a layout feedback loop.
+                            DispatchQueue.main.async {
+                                guard shouldRestoreScroll, emails.contains(where: { $0.id == id }) else { return }
+                                var transaction = Transaction()
+                                transaction.animation = nil
+                                withTransaction(transaction) {
+                                    proxy.scrollTo(id, anchor: .center)
+                                }
+                                shouldRestoreScroll = false
                             }
                         }
-                    }
-                    .padding(.bottom, 24)
-                }
-                .background(Color(.systemBackground))
-                .onAppear {
-                    guard shouldRestoreScroll, let id = lastVisibleEmailID,
-                          !emails.isEmpty else { return }
-                    // Wait for LazyVStack to materialize the anchor. A single
-                    // deferred, non-animated scroll avoids a layout feedback loop.
-                    DispatchQueue.main.async {
-                        guard shouldRestoreScroll, emails.contains(where: { $0.id == id }) else { return }
-                        var transaction = Transaction()
-                        transaction.animation = nil
-                        withTransaction(transaction) {
-                            proxy.scrollTo(id, anchor: .center)
-                        }
-                        shouldRestoreScroll = false
                     }
                 }
             }
@@ -178,27 +206,16 @@ struct InboxView: View {
                     .transition(.move(edge: .top).combined(with: .opacity))
                 }
             }
-            .navigationTitle(Text(currentFolder.title))
-            .navigationBarTitleDisplayMode(.large)
-            .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "action.search")
-            .refreshable {
-                await reload()
-            }
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    NavigationLink {
-                        ComposerView()
-                    } label: {
-                        Image(systemName: "square.and.pencil")
-                            .accessibilityLabel(Text("action.compose"))
-                    }
-                }
-            }
+            .toolbar(.hidden, for: .navigationBar)
             .task {
                 await loadWithSync(isRefresh: false)
             }
             .onReceive(NotificationCenter.default.publisher(for: .newEmailReceived)) { _ in
                 Task { await reload() }
+            }
+            .onReceive(Timer.publish(every: 30, on: .main, in: .common).autoconnect()) { date in
+                // Udržuje čerstvý relativní čas v podtitulu („sync před X").
+                now = date
             }
             .onChange(of: currentFolder) {
                 lastVisibleEmailID = nil
@@ -206,7 +223,7 @@ struct InboxView: View {
                 searchTask?.cancel()
                 Task { await fetch(reset: true, isRefresh: false) }
             }
-            .onChange(of: searchText) {
+            .onChange(of: searchText) { _, _ in
                 lastVisibleEmailID = nil
                 shouldRestoreScroll = false
                 searchTask?.cancel()
@@ -219,54 +236,221 @@ struct InboxView: View {
         }
     }
 
-    // MARK: - Sections
+    // MARK: - Craft navbar (směr C)
 
-    private var statsHeader: some View {
-        HStack(alignment: .center) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text("\(stats?.unread ?? 0)")
-                    .font(.system(size: 34, weight: .bold, design: .rounded))
-                    .contentTransition(.numericText())
-                Text("inbox.unread")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-            }
-
-            Spacer()
-
-            // Folder picker pills
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
-                    ForEach(allFolders, id: \.self) { folder in
-                        chip(for: folder)
-                    }
+    /// Plovoucí glass kapsle: pozdrav + titulek + podtitul, akce hledat +
+    /// napsat a funkční search pill napojený na `searchText`.
+    private var craftNavbar: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(alignment: .top, spacing: 8) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(greetingText)
+                        .font(.craft(size: 13, weight: .bold))
+                        .foregroundStyle(Color.craftAccent)
+                        .lineLimit(1)
+                    Text(navTitleText)
+                        .font(.craft(size: 22, weight: .heavy))
+                        .foregroundStyle(Color.craftInk)
+                        .lineLimit(1)
+                    Text(navSubtitleText)
+                        .font(.craft(size: 12))
+                        .foregroundStyle(Color.craftSecondary)
+                        .lineLimit(1)
                 }
-                .padding(.vertical, 4)
+
+                Spacer(minLength: 4)
+
+                HStack(spacing: 8) {
+                    Button {
+                        withAnimation(.snappy) {
+                            isSearchExpanded.toggle()
+                            if isSearchExpanded {
+                                isSearchFocused = true
+                            } else {
+                                isSearchFocused = false
+                                searchText = ""
+                            }
+                        }
+                    } label: {
+                        Image(systemName: "magnifyingglass")
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundStyle(Color.craftInk)
+                            .frame(width: 36, height: 36)
+                            .background(Color.craftPill, in: Circle())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(Text("action.search"))
+
+                    NavigationLink {
+                        ComposerView()
+                    } label: {
+                        Image(systemName: "square.and.pencil")
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundStyle(.white)
+                            .frame(width: 36, height: 36)
+                            .background(Color.craftInk, in: Circle())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(Text("action.compose"))
+                }
+                .padding(.top, 2)
             }
-            .frame(maxWidth: 300)
+
+            searchPill
         }
-        .padding(.horizontal)
-        .padding(.top, 8)
+        .padding(14)
+        .craftGlass()
     }
 
-    private func chip(for folder: FolderFilter) -> some View {
+    /// Search pill: ve sbaleném stavu hint, po rozbalení funkční TextField
+    /// svázaný s existujícím `searchText` (debounce 350 ms zůstává).
+    private var searchPill: some View {
+        Group {
+            if isSearchExpanded {
+                HStack(spacing: 8) {
+                    Image(systemName: "magnifyingglass")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(Color.craftSecondary)
+                    TextField(
+                        LocalizedStringKey("inbox.searchHint"),
+                        text: $searchText
+                    )
+                    .font(.craft(size: 14))
+                    .foregroundStyle(Color.craftInk)
+                    .focused($isSearchFocused)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                    if !searchText.isEmpty {
+                        Button {
+                            searchText = ""
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .font(.system(size: 14))
+                                .foregroundStyle(Color.craftSecondary)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(Text("action.cancel"))
+                    }
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 10)
+            } else {
+                Button {
+                    withAnimation(.snappy) {
+                        isSearchExpanded = true
+                        isSearchFocused = true
+                    }
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "magnifyingglass")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(Color.craftSecondary)
+                        Text("inbox.searchHint")
+                            .font(.craft(size: 14))
+                            .foregroundStyle(Color.craftSecondary)
+                        Spacer(minLength: 0)
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 10)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(Text("action.search"))
+            }
+        }
+        .background(Color.craftPill, in: RoundedRectangle(cornerRadius: 12))
+    }
+
+    /// Titulek navbaru: ve složce Inbox „Doručená", jinde název složky.
+    private var navTitleText: String {
+        if currentFolder == .inbox {
+            return String(localized: "inbox.heading")
+        }
+        return currentFolder.title
+    }
+
+    /// Podtitul: „N nepřečtených · sync před X" (sync část jen když je známá).
+    private var navSubtitleText: String {
+        let unread = stats?.unread ?? 0
+        let unreadWord = String(localized: "inbox.unread")
+        guard let sync = syncRelativeText, !sync.isEmpty else {
+            return "\(unread) \(unreadWord)"
+        }
+        return "\(unread) \(unreadWord) · sync \(sync)"
+    }
+
+    /// Relativní čas posledního syncu („před 1 min"), locale-aware.
+    private var syncRelativeText: String? {
+        guard let last = lastSyncAt else { return nil }
+        let formatter = RelativeDateTimeFormatter()
+        formatter.unitsStyle = .short
+        return formatter.localizedString(for: last, relativeTo: now)
+    }
+
+    /// Pozdrav podle denní doby + křestní jméno z AuthStore.
+    private var greetingText: String {
+        let hour = Calendar.current.component(.hour, from: Date())
+        let key: String
+        if hour >= 5 && hour < 10 {
+            key = "inbox.greeting.morning"
+        } else if hour >= 10 && hour < 18 {
+            key = "inbox.greeting.afternoon"
+        } else {
+            key = "inbox.greeting.evening"
+        }
+        return String(format: NSLocalizedString(key, comment: ""), greetingName)
+    }
+
+    private var greetingName: String {
+        if let first = authStore.user?.first_name?
+            .trimmingCharacters(in: .whitespacesAndNewlines), !first.isEmpty {
+            return first
+        }
+        if let full = authStore.user?.fullName, !full.isEmpty {
+            return full
+        }
+        return authStore.user?.username ?? ""
+    }
+
+    // MARK: - Folder chips (teplé, horizontální scroll pod navbar kapslí)
+
+    private var folderChipsRow: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                ForEach(allFolders, id: \.self) { folder in
+                    craftChip(for: folder)
+                }
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 2)
+        }
+    }
+
+    private func craftChip(for folder: FolderFilter) -> some View {
         let selected = folder == currentFolder
         return Button {
             withAnimation(.snappy) { currentFolder = folder }
         } label: {
             HStack(spacing: 6) {
                 Image(systemName: folder.icon)
-                    .font(.caption)
+                    .font(.craft(size: 12, weight: .semibold))
                 Text(folder.title)
-                    .font(.subheadline.weight(selected ? .semibold : .regular))
+                    .font(.craft(size: 13, weight: selected ? .bold : .regular))
+                    .lineLimit(1)
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
             .background(
                 Capsule()
-                    .fill(selected ? AnyShapeStyle(Color.accentColor) : AnyShapeStyle(Color(.secondarySystemBackground)))
+                    .fill(selected ? AnyShapeStyle(Color.craftInk) : AnyShapeStyle(Color.white))
             )
-            .foregroundStyle(selected ? Color.white : Color.primary)
+            .overlay(
+                Capsule()
+                    .stroke(
+                        selected ? Color.craftInk : Color.craftInk.opacity(0.12),
+                        lineWidth: 1
+                    )
+            )
+            .foregroundStyle(selected ? Color.white : Color.craftInk)
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(selected ? .isSelected : [])
@@ -276,10 +460,10 @@ struct InboxView: View {
         VStack(spacing: 12) {
             Image(systemName: "tray")
                 .font(.system(size: 44))
-                .foregroundStyle(Color(.tertiaryLabel))
+                .foregroundStyle(Color.craftSecondary)
             Text("refresh.emptyInbox")
-                .font(.headline)
-                .foregroundStyle(.secondary)
+                .font(.craft(size: 17, weight: .semibold))
+                .foregroundStyle(Color.craftSecondary)
         }
         .frame(maxWidth: .infinity)
         .padding(.top, 90)
@@ -301,55 +485,61 @@ struct InboxView: View {
         }
     }
 
-    // MARK: - Row
+    // MARK: - Row (Craft karta: bílá, radius 20, bez stínu)
 
     private func row(for email: EmailSummary) -> some View {
         let sender = email.sender_name ?? email.sender_email ?? "?"
+        let time = smartTimeLabel(from: email.received_at ?? email.created_at)
 
         return NavigationLink {
             EmailDetailView(emailID: email.id)
         } label: {
-            HStack(alignment: .top, spacing: 12) {
-                // Unread dot
+            HStack(alignment: .center, spacing: 10) {
+                // Unread tečka 8×8 – místo se zachovává i u přečtených.
                 Circle()
-                    .fill(Color.accentColor)
-                    .frame(width: 9, height: 9)
-                    .padding(.top, 19)
+                    .fill(Color.craftUnread)
+                    .frame(width: 8, height: 8)
                     .opacity(email.isRead ? 0 : 1)
 
-                AvatarView(name: sender)
+                CraftAvatar(sender: sender)
 
-                VStack(alignment: .leading, spacing: 3) {
-                    HStack(alignment: .firstTextBaseline) {
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack(spacing: 4) {
                         Text(sender)
-                            .font(.subheadline.weight(email.isRead ? .regular : .semibold))
+                            .font(.craft(size: 13, weight: .bold))
+                            .foregroundStyle(Color.craftInk)
                             .lineLimit(1)
-                        Spacer()
-                        Text(smartTimeLabel(from: email.received_at ?? email.created_at))
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
+                        if !time.isEmpty {
+                            Text("· \(time)")
+                                .font(.craft(size: 13))
+                                .foregroundStyle(Color.craftInk)
+                                .lineLimit(1)
+                                .layoutPriority(1)
+                        }
+                        Spacer(minLength: 0)
                     }
 
                     if let subject = email.subject, !subject.isEmpty {
                         Text(subject)
-                            .font(.callout.weight(email.isRead ? .regular : .semibold))
+                            .font(.craft(size: 14))
+                            .foregroundStyle(Color.craftSubject)
                             .lineLimit(1)
-                            .foregroundStyle(.primary)
                     }
 
                     if let preview = email.preview, !preview.isEmpty {
                         Text(preview)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                            .font(.craft(size: 13))
+                            .foregroundStyle(Color.craftSecondary)
                             .lineLimit(2)
                     }
                 }
 
                 starButton(for: email)
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 10)
-            .contentShape(Rectangle())
+            .padding(12)
+            .frame(minHeight: 68)
+            .background(Color.white, in: RoundedRectangle(cornerRadius: 20))
+            .contentShape(RoundedRectangle(cornerRadius: 20))
         }
         .buttonStyle(.plain)
     }
@@ -360,9 +550,9 @@ struct InboxView: View {
             Task { await toggleStar(email) }
         } label: {
             Image(systemName: starred ? "star.fill" : "star")
-                .font(.system(size: 17))
-                .foregroundStyle(starred ? Color.yellow : Color(.tertiaryLabel))
-                .frame(width: 44, height: 44)
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(starred ? Color.craftAccent : Color.craftSecondary)
+                .frame(width: 32, height: 44)
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
@@ -411,6 +601,8 @@ struct InboxView: View {
             #endif
         }
         await fetch(reset: true, isRefresh: isRefresh)
+        lastSyncAt = Date()
+        now = Date()
     }
 
     private func fetch(reset: Bool, isRefresh: Bool) async {

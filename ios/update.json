@@ -1,17 +1,24 @@
 {
-  "version": "0.0.31",
-  "build": 30,
-  "title": "openMail 0.0.31",
-  "releaseURL": "https://github.com/nykadamec/openmail_ios_dev/releases/tag/v0.0.31",
-  "ipaURL": "https://github.com/nykadamec/openmail_ios_dev/releases/download/v0.0.31/openMail-unsigned.ipa",
+  "version": "0.0.32",
+  "build": 31,
+  "title": "openMail 0.0.32",
+  "releaseURL": "https://github.com/nykadamec/openmail_ios_dev/releases/tag/v0.0.32",
+  "ipaURL": "https://github.com/nykadamec/openmail_ios_dev/releases/download/v0.0.32/openMail-unsigned.ipa",
   "minimumSupportedVersion": "0.0.9",
   "changelog": [
-    "Opraveno zobrazení odeslaných e-mailů ve složce Sent",
-    "Synchronizace nových e-mailů při startu aplikace a po obnovení (bez zpoždění)",
-    "Nové e-maily se zobrazí okamžitě i bez obnovení (live notifikace ze serveru)",
-    "Profil: nastavení Jména, Příjmení a telefonního čísla"
+    "Inbox Craft redesign: teplý craft styl, glass navbar, floating tab bar"
   ],
   "history": [
+    {
+      "version": "0.0.31",
+      "build": 30,
+      "changelog": [
+        "Opraveno zobrazení odeslaných e-mailů ve složce Sent",
+        "Synchronizace nových e-mailů při startu aplikace a po obnovení (bez zpoždění)",
+        "Nové e-maily se zobrazí okamžitě i bez obnovení (live notifikace ze serveru)",
+        "Profil: nastavení Jména, Příjmení a telefonního čísla"
+      ]
+    },
     {
       "version": "0.0.30",
       "build": 29,
@@ -112,14 +119,6 @@
         "Opraveno zadávání hvězdičky u kontaktů (odesílalo se na špatný endpoint)",
         "Opraveno zobrazení Nastavení v tmavém režimu",
         "Lokalizován titulek changelogu"
-      ]
-    },
-    {
-      "version": "0.0.24",
-      "build": 23,
-      "changelog": [
-        "Kompaktní výběr historie verzí — jeden řádek s rozbalením",
-        "Profilová karta je nyní klikatelná a otevírá detail profilu"
       ]
     }
   ]
