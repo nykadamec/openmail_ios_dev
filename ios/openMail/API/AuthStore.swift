@@ -141,6 +141,12 @@ final class AuthStore {
         }
     }
 
+    /// Replaces the cached user after a successful profile update, without
+    /// touching the session or authentication state.
+    func updateStoredUser(_ updated: User) {
+        user = updated
+    }
+
     /// Calls `/api/logout` (best effort) and resets the local state so the UI
     /// returns to the login screen.
     func logout() async {

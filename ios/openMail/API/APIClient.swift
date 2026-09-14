@@ -407,6 +407,7 @@ final class APIClient {
         isSpam: Bool? = nil,
         isTrash: Bool? = nil,
         customFolderId: Int? = nil,
+        direction: String? = nil,
         limit: Int = 50,
         offset: Int = 0
     ) async throws -> EmailPage {
@@ -417,6 +418,7 @@ final class APIClient {
         if let isSpam { items.append(URLQueryItem(name: "is_spam", value: isSpam ? "1" : "0")) }
         if let isTrash { items.append(URLQueryItem(name: "is_trash", value: isTrash ? "1" : "0")) }
         if let customFolderId { items.append(URLQueryItem(name: "custom_folder_id", value: String(customFolderId))) }
+        if let direction { items.append(URLQueryItem(name: "direction", value: direction)) }
         items.append(URLQueryItem(name: "limit", value: String(limit)))
         items.append(URLQueryItem(name: "offset", value: String(offset)))
         let (data, response) = try await perform(URLRequest(url: url("api/emails", query: items)))
@@ -596,6 +598,40 @@ final class APIClient {
         let (data, response) = try await perform(request)
         try validate(response)
         return try decode(SyncResult.self, from: data)
+    }
+
+    // MARK: Profile
+
+    /// PATCH /api/profile with `{first_name, last_name, phone}` (trimmed).
+    /// An empty string clears the value on the server. Returns the updated user.
+    func updateProfile(firstName: String?, lastName: String?, phone: String?) async throws -> User {
+        let fields: [String: Any] = [
+            "first_name": firstName?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "",
+            "last_name": lastName?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "",
+            "phone": phone?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "",
+        ]
+        var request = URLRequest(url: url("api/profile"))
+        request.httpMethod = "PATCH"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONSerialization.data(withJSONObject: fields)
+        let (data, response) = try await perform(request)
+        try validate(response)
+        return try decode(User.self, from: data)
+    }
+
+    /// Builds an authenticated `GET /api/events` request for `SSEClient`.
+    /// The session cookie is attached explicitly because this client's session
+    /// disables automatic cookie handling.
+    func sseEventsRequest() -> URLRequest {
+        var request = URLRequest(url: url("api/events"))
+        request.httpMethod = "GET"
+        request.setValue("text/event-stream", forHTTPHeaderField: "Accept")
+        request.setValue("no-cache", forHTTPHeaderField: "Cache-Control")
+        if let cookie = sessionCookie(),
+           let cookieHeader = HTTPCookie.requestHeaderFields(with: [cookie])["Cookie"] {
+            request.setValue(cookieHeader, forHTTPHeaderField: "Cookie")
+        }
+        return request
     }
 
     // MARK: Attachments / logout

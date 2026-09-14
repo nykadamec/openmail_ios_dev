@@ -34,7 +34,7 @@ struct SettingsView: View {
                                         .foregroundStyle(.white)
                                 }
                                 VStack(alignment: .leading, spacing: 2) {
-                                    Text(user.username)
+                                    Text(user.fullName ?? user.username)
                                         .font(.system(size: 17))
                                         .foregroundStyle(.primary)
                                     Text(user.email)

@@ -1,34 +1,44 @@
 {
-  "version": "0.0.30",
-  "build": 29,
-  "title": "openMail 0.0.30",
-  "releaseURL": "https://github.com/nykadamec/openmail_ios_dev/releases/tag/v0.0.30",
-  "ipaURL": "https://github.com/nykadamec/openmail_ios_dev/releases/download/v0.0.30/openMail-unsigned.ipa",
+  "version": "0.0.31",
+  "build": 30,
+  "title": "openMail 0.0.31",
+  "releaseURL": "https://github.com/nykadamec/openmail_ios_dev/releases/tag/v0.0.31",
+  "ipaURL": "https://github.com/nykadamec/openmail_ios_dev/releases/download/v0.0.31/openMail-unsigned.ipa",
   "minimumSupportedVersion": "0.0.9",
   "changelog": [
-    "Composer má v záložce Nová zpráva vlastní navigační lištu s tlačítkem Odeslat",
-    "Cancel v záložce Nová zpráva pouze vyčistí rozepsanou zprávu (bez zavírání)",
-    "Opraveno nezobrazení toolbaru v záložce Nová zpráva (chyběl header a tlačítko Odeslat)",
-    "Opraveno tlačítko Zrušit v Composeru (zavírá z Inboxu i z tabu)",
-    "Pole Příjemce zarovnáno na stejný řádek s popiskem Komu",
-    "Historie verzí v Nastavení zobrazuje jen posledních 6 verzí",
-    "Odesílání emailu bez předmětu — automatický fallback na (bez předmětu)",
-    "Pull-to-refresh nyní reálně stahuje nové emaily ze serveru (sync s Resend)",
-    "Kompletní redesign Composeru",
-    "Autocomplete příjemců z kontaktů v Composeru",
-    "Opravena diakritika a návrhy slov v těle zprávy",
-    "Kompaktní výběr historie verzí — kliknutím na verzi se otevře sheet s jejím changelogem",
-    "Profilová karta je celá klikatelná a otevře detail profilu",
-    "Opraveno zadávání hvězdičky u kontaktů (odesílalo se na špatný endpoint)",
-    "Opraveno zobrazení Nastavení v tmavém režimu",
-    "Lokalizován titulek changelogu",
-    "Historie verzí v nastavení — přehled novinek starších verzí",
-    "Lokální notifikace při přijetí nového e-mailu, včetně pozadí",
-    "Notifikace lze spravovat přímo v Nastavení aplikace",
-    "Opraven pull-to-refresh, který vracel inbox na starou pozici",
-    "Dokončena anglická lokalizace sekce Co je nového"
+    "Opraveno zobrazení odeslaných e-mailů ve složce Sent",
+    "Synchronizace nových e-mailů při startu aplikace a po obnovení (bez zpoždění)",
+    "Nové e-maily se zobrazí okamžitě i bez obnovení (live notifikace ze serveru)",
+    "Profil: nastavení Jména, Příjmení a telefonního čísla"
   ],
   "history": [
+    {
+      "version": "0.0.30",
+      "build": 29,
+      "changelog": [
+        "Composer má v záložce Nová zpráva vlastní navigační lištu s tlačítkem Odeslat",
+        "Cancel v záložce Nová zpráva pouze vyčistí rozepsanou zprávu (bez zavírání)",
+        "Opraveno nezobrazení toolbaru v záložce Nová zpráva (chyběl header a tlačítko Odeslat)",
+        "Opraveno tlačítko Zrušit v Composeru (zavírá z Inboxu i z tabu)",
+        "Pole Příjemce zarovnáno na stejný řádek s popiskem Komu",
+        "Historie verzí v Nastavení zobrazuje jen posledních 6 verzí",
+        "Odesílání emailu bez předmětu — automatický fallback na (bez předmětu)",
+        "Pull-to-refresh nyní reálně stahuje nové emaily ze serveru (sync s Resend)",
+        "Kompletní redesign Composeru",
+        "Autocomplete příjemců z kontaktů v Composeru",
+        "Opravena diakritika a návrhy slov v těle zprávy",
+        "Kompaktní výběr historie verzí — kliknutím na verzi se otevře sheet s jejím changelogem",
+        "Profilová karta je celá klikatelná a otevře detail profilu",
+        "Opraveno zadávání hvězdičky u kontaktů (odesílalo se na špatný endpoint)",
+        "Opraveno zobrazení Nastavení v tmavém režimu",
+        "Lokalizován titulek changelogu",
+        "Historie verzí v nastavení — přehled novinek starších verzí",
+        "Lokální notifikace při přijetí nového e-mailu, včetně pozadí",
+        "Notifikace lze spravovat přímo v Nastavení aplikace",
+        "Opraven pull-to-refresh, který vracel inbox na starou pozici",
+        "Dokončena anglická lokalizace sekce Co je nového"
+      ]
+    },
     {
       "version": "0.0.29",
       "build": 28,
@@ -110,14 +120,6 @@
       "changelog": [
         "Kompaktní výběr historie verzí — jeden řádek s rozbalením",
         "Profilová karta je nyní klikatelná a otevírá detail profilu"
-      ]
-    },
-    {
-      "version": "0.0.23",
-      "build": 23,
-      "changelog": [
-        "Opraveno zobrazení Nastavení v tmavém režimu",
-        "Lokalizován titulek changelogu"
       ]
     }
   ]

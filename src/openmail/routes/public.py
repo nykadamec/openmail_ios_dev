@@ -138,6 +138,9 @@ def me():
         "username": full['username'],
         "email": full['email'],
         "from_name": full['from_name'],
+        "first_name": full.get('first_name'),
+        "last_name": full.get('last_name'),
+        "phone": full.get('phone'),
     })
 
 

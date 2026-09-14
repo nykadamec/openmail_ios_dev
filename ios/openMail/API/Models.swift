@@ -57,9 +57,22 @@ struct User: Decodable, Identifiable {
     let username: String
     let email: String
     let from_name: String?
+    let first_name: String?
+    let last_name: String?
+    let phone: String?
+
+    /// Full name when the profile has one, otherwise `nil` so callers can
+    /// fall back to the username.
+    var fullName: String? {
+        let parts = [first_name, last_name]
+            .compactMap { $0?.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+        return parts.isEmpty ? nil : parts.joined(separator: " ")
+    }
 
     private enum CodingKeys: String, CodingKey {
         case id, username, email, from_name
+        case first_name, last_name, phone
     }
 
     init(from decoder: Decoder) throws {
@@ -68,6 +81,9 @@ struct User: Decodable, Identifiable {
         username = try c.decodeIfPresent(String.self, forKey: .username) ?? ""
         email = try c.decodeIfPresent(String.self, forKey: .email) ?? ""
         from_name = try c.decodeIfPresent(String.self, forKey: .from_name)
+        first_name = try c.decodeIfPresent(String.self, forKey: .first_name)
+        last_name = try c.decodeIfPresent(String.self, forKey: .last_name)
+        phone = try c.decodeIfPresent(String.self, forKey: .phone)
     }
 }
 

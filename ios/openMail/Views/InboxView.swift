@@ -195,8 +195,10 @@ struct InboxView: View {
                 }
             }
             .task {
-                await loadMeta()
-            await fetch(reset: true, isRefresh: false)
+                await loadWithSync(isRefresh: false)
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .newEmailReceived)) { _ in
+                Task { await reload() }
             }
             .onChange(of: currentFolder) {
                 lastVisibleEmailID = nil
@@ -393,15 +395,22 @@ struct InboxView: View {
         lastVisibleEmailID = nil
         shouldRestoreScroll = false
         searchTask?.cancel()
+        await loadWithSync(isRefresh: true)
+    }
+
+    /// Shared sequential flow: sync with Resend first, then fetch the list.
+    /// A sync failure must never block the list – it is only logged and the
+    /// fetch always runs.
+    private func loadWithSync(isRefresh: Bool) async {
         await loadMeta()
-        // Kick off a Resend sync in the background so new mail actually
-        // reaches the local DB. The call is synchronous on the server and may
-        // take up to ~30 s, so it must not block the refresh feedback.
-        let syncClient = authStore.activeClient
-        Task.detached(priority: .utility) {
-            _ = try? await syncClient.syncEmails()
+        do {
+            _ = try await authStore.activeClient.syncEmails()
+        } catch {
+            #if DEBUG
+            print("[Inbox] sync failed: \(String(describing: error))")
+            #endif
         }
-        await fetch(reset: true, isRefresh: true)
+        await fetch(reset: true, isRefresh: isRefresh)
     }
 
     private func fetch(reset: Bool, isRefresh: Bool) async {
@@ -439,6 +448,7 @@ struct InboxView: View {
                 isSpam: folder.isSpam,
                 isTrash: folder.isTrash,
                 customFolderId: folder.customFolderId,
+                direction: folder.folderParam == "sent" ? "outbound" : "inbound",
                 limit: pageSize,
                 offset: offset
             )

@@ -46,7 +46,7 @@ def get_user_by_id(user_id: int) -> dict | None:
     """Return user dict by id, or None."""
     conn = get_db()
     row = conn.execute(
-        "SELECT id, username, email, from_name FROM users WHERE id = ?",
+        "SELECT id, username, email, from_name, first_name, last_name, phone FROM users WHERE id = ?",
         (user_id,)
     ).fetchone()
     return dict(row) if row else None
@@ -56,10 +56,55 @@ def get_user_by_email(email: str) -> dict | None:
     """Return user dict by email address, or None."""
     conn = get_db()
     row = conn.execute(
-        "SELECT id, username, email, from_name FROM users WHERE LOWER(email) = LOWER(?)",
+        "SELECT id, username, email, from_name, first_name, last_name, phone FROM users WHERE LOWER(email) = LOWER(?)",
         (email,)
     ).fetchone()
     return dict(row) if row else None
+
+
+def update_user_profile(
+    user_id: int,
+    first_name: str | None = None,
+    last_name: str | None = None,
+    phone: str | None = None,
+) -> dict | None:
+    """Update profile fields. None = keep existing, empty string = NULL.
+
+    Trims values, validates lengths (names max 100, phone max 32).
+    Raises ValueError on validation failure. Returns updated user dict.
+    """
+    _KEEP: object = object()
+
+    def _normalize(value: str | None, max_len: int, field: str) -> str | None | object:
+        if value is None:
+            return _KEEP
+        v = value.strip() if isinstance(value, str) else value
+        if not v:
+            return None
+        if len(v) > max_len:
+            raise ValueError(f"{field} too long (max {max_len} chars)")
+        return v
+
+    new_first = _normalize(first_name, 100, "first_name")
+    new_last = _normalize(last_name, 100, "last_name")
+    new_phone = _normalize(phone, 32, "phone")
+
+    conn = get_db()
+    row = conn.execute(
+        "SELECT first_name, last_name, phone FROM users WHERE id = ?",
+        (user_id,)
+    ).fetchone()
+    if not row:
+        return None
+    final_first = row['first_name'] if new_first is _KEEP else new_first
+    final_last = row['last_name'] if new_last is _KEEP else new_last
+    final_phone = row['phone'] if new_phone is _KEEP else new_phone
+    conn.execute(
+        "UPDATE users SET first_name = ?, last_name = ?, phone = ? WHERE id = ?",
+        (final_first, final_last, final_phone, user_id)
+    )
+    conn.commit()
+    return get_user_by_id(user_id)
 
 
 def get_user_from_address(user_id: int) -> tuple[str, str]:
@@ -67,7 +112,15 @@ def get_user_from_address(user_id: int) -> tuple[str, str]:
     from openmail.config import FROM_EMAIL, FROM_NAME
     user = get_user_by_id(user_id)
     email = (user.get('email') or FROM_EMAIL) if user else FROM_EMAIL
-    name = (user.get('from_name') or FROM_NAME) if user else FROM_NAME
+    if user:
+        first = (user.get('first_name') or '').strip()
+        last = (user.get('last_name') or '').strip()
+        if first or last:
+            composed = f"{first} {last}".strip() if (first and last) else (first or last)
+            return email, composed
+        name = user.get('from_name') or FROM_NAME
+    else:
+        name = FROM_NAME
     return email, name
 
 
