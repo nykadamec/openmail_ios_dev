@@ -1,0 +1,9 @@
+{
+  "template": "orca",
+  "repoUrl": "https://github.com/nykadamec/openmail_ios_dev.git",
+  "repoRef": "",
+  "projectRoot": "/data/home/openmail",
+  "sshHost": "ssh.instabox.sh",
+  "sshPort": 2222,
+  "secrets": ["GH_TOKEN"]
+}
