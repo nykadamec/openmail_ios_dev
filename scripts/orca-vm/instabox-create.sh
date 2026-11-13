@@ -79,8 +79,9 @@ if ! instabox secrets ls --json 2>/dev/null | node -e '
   (the token is piped straight in; it is never printed or stored in a file)"
 fi
 
-existing="$(instabox get "$name" --json 2>/dev/null || true)"
-if [ -n "$existing" ]; then
+# `instabox get --json` prints its error object on stdout even when the machine
+# does not exist, so branch on the exit code, not on output.
+if instabox get "$name" --json >/dev/null 2>&1; then
   log "machine $name already exists; reusing it (idempotent re-run)"
   created=0
 else
@@ -97,8 +98,8 @@ trap cleanup EXIT
 
 if [ "$created" = 1 ]; then
   log "creating machine from template '$template' (this waits until it runs)"
-  if ! instabox create --name "$name" --template "$template" --secrets GH_TOKEN --meta "orca-vm=true" --json >/dev/null 2>&1; then
-    create_err="$(instabox create --name "$name" --template "$template" --secrets GH_TOKEN --meta "orca-vm=true" --json 2>&1 | tail -1 || true)"
+  if ! create_out="$(instabox create --name "$name" --template "$template" --secrets GH_TOKEN --meta "orca-vm=true" --json 2>&1)"; then
+    create_err="$(printf '%s\n' "$create_out" | tail -20)"
     case "$create_err" in
       *quota_exceeded*|*template_not_allowed*)
         die "instabox refused the create: $create_err

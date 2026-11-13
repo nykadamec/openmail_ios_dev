@@ -1,5 +1,5 @@
 {
-  "template": "orca",
+  "template": "agent-browser",
   "repoUrl": "https://github.com/nykadamec/openmail_ios_dev.git",
   "repoRef": "",
   "projectRoot": "/data/home/openmail",
