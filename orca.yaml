@@ -1,0 +1,26 @@
+# Orca per-workspace environment for openmail.
+#
+# environmentRecipes.instabox: each Orca workspace runs on its own ephemeral
+# instabox machine (SSH connection mode — Orca installs its runtime over SSH
+# after connecting; no `orca serve` is started by the recipe).
+#
+# scripts.setup: runs INSIDE the environment; installs the Python deps for
+# the openmail Flask app. Verified with `orca vm env doctor --run-setup`.
+scripts:
+  setup: ./scripts/orca-vm/setup.sh
+
+environmentRecipes:
+  - id: instabox
+    name: instabox
+    create: ./scripts/orca-vm/instabox-create.sh
+    suspend: ./scripts/orca-vm/instabox-suspend.sh
+    resume: ./scripts/orca-vm/instabox-resume.sh
+    destroy: ./scripts/orca-vm/instabox-destroy.sh
+    timeoutSeconds:
+      create: 1200
+      suspend: 300
+      resume: 600
+      destroy: 180
+    # Only the variables the recipe scripts need. The instabox CLI uses its
+    # own signed-in session; INSTABOX_API_KEY/URL are passed for headless runs.
+    passEnv: ['INSTABOX_*']
